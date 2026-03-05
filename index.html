@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Context Universe — Explorer</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,300&family=JetBrains+Mono:wght@300;400&display=swap');
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg-deep: #06080f;
+    --bg-panel: rgba(12, 16, 28, 0.88);
+    --bg-card: rgba(18, 24, 42, 0.75);
+    --border: rgba(80, 120, 200, 0.12);
+    --border-active: rgba(100, 160, 255, 0.3);
+    --text-primary: #e2e8f4;
+    --text-secondary: #8090b0;
+    --text-dim: #4a5670;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    background: var(--bg-deep);
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text-primary);
+  }
+
+  #canvas-container { position: fixed; inset: 0; z-index: 0; }
+  canvas { display: block; }
+
+  #starfield {
+    position: fixed; inset: 0; z-index: -1;
+    background: radial-gradient(ellipse at 30% 20%, rgba(20, 40, 80, 0.4) 0%, transparent 60%),
+                radial-gradient(ellipse at 70% 80%, rgba(40, 20, 60, 0.3) 0%, transparent 50%),
+                var(--bg-deep);
+  }
+
+  /* ─── Top bar ─── */
+  .top-bar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 20px;
+    background: linear-gradient(180deg, rgba(6,8,15,0.96) 0%, rgba(6,8,15,0.0) 100%);
+    pointer-events: none;
+  }
+  .top-bar > * { pointer-events: auto; }
+
+  .logo {
+    display: flex; align-items: center; gap: 10px;
+    font-weight: 700; font-size: 15px; letter-spacing: 0.5px;
+    color: var(--text-primary); white-space: nowrap; flex-shrink: 0;
+  }
+  .logo-icon {
+    width: 28px; height: 28px; border-radius: 8px;
+    background: linear-gradient(135deg, #3b82f6, #10b981);
+    display: grid; place-items: center;
+    font-size: 14px; font-weight: 700; color: white;
+  }
+  .logo span { color: var(--text-secondary); font-weight: 300; margin-left: 2px; }
+
+  /* ─── Universe Switcher ─── */
+  .universe-switcher { position: relative; flex-shrink: 0; }
+  .universe-btn {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 14px; border-radius: 10px;
+    border: 1px solid var(--border-active);
+    background: rgba(59, 130, 246, 0.08);
+    color: var(--text-primary);
+    font-family: inherit; font-size: 12.5px; font-weight: 500;
+    cursor: pointer; transition: all 0.2s; white-space: nowrap;
+  }
+  .universe-btn:hover { background: rgba(59, 130, 246, 0.15); }
+  .universe-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
+  .universe-btn .chevron { transition: transform 0.2s; }
+  .universe-btn.open .chevron { transform: rotate(180deg); }
+
+  .universe-dropdown {
+    position: absolute; top: calc(100% + 8px); left: 0;
+    min-width: 340px; background: var(--bg-panel);
+    border: 1px solid var(--border); border-radius: 14px;
+    backdrop-filter: blur(24px); padding: 8px;
+    opacity: 0; transform: translateY(-8px);
+    pointer-events: none;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1); z-index: 200;
+  }
+  .universe-dropdown.open { opacity: 1; transform: translateY(0); pointer-events: auto; }
+  .universe-option {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 12px 14px; border-radius: 10px;
+    cursor: pointer; transition: background 0.15s; border: 1px solid transparent;
+  }
+  .universe-option:hover { background: rgba(255,255,255,0.04); }
+  .universe-option.active { background: rgba(59,130,246,0.08); border-color: rgba(59,130,246,0.2); }
+  .universe-option-icon {
+    width: 36px; height: 36px; border-radius: 10px;
+    display: grid; place-items: center; font-size: 16px; flex-shrink: 0; margin-top: 2px;
+  }
+  .universe-option-text { flex: 1; min-width: 0; }
+  .universe-option-name { font-size: 13.5px; font-weight: 600; margin-bottom: 3px; }
+  .universe-option-desc { font-size: 11.5px; color: var(--text-secondary); line-height: 1.45; }
+  .universe-option-meta { font-size: 10.5px; color: var(--text-dim); margin-top: 4px; font-family: 'JetBrains Mono', monospace; }
+
+  /* ─── Search ─── */
+  .search-wrap { position: relative; flex: 1; max-width: 380px; }
+  .search-wrap svg {
+    position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+    width: 16px; height: 16px; color: var(--text-dim); pointer-events: none;
+  }
+  .search-input {
+    width: 100%; padding: 9px 16px 9px 40px;
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 12px; color: var(--text-primary);
+    font-family: inherit; font-size: 13px; outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s; backdrop-filter: blur(12px);
+  }
+  .search-input::placeholder { color: var(--text-dim); }
+  .search-input:focus { border-color: var(--border-active); box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+
+  /* ─── Domain filters ─── */
+  .filters { display: flex; gap: 5px; flex-wrap: wrap; margin-left: auto; }
+  .filter-btn {
+    padding: 5px 12px; border-radius: 20px;
+    border: 1px solid var(--border); background: var(--bg-card);
+    color: var(--text-secondary); font-family: inherit; font-size: 11.5px; font-weight: 500;
+    cursor: pointer; transition: all 0.25s ease; backdrop-filter: blur(8px); white-space: nowrap;
+  }
+  .filter-btn:hover { border-color: var(--border-active); color: var(--text-primary); }
+  .filter-btn.active { color: white; border-color: transparent; }
+
+  /* ─── Detail panel ─── */
+  .detail-panel {
+    position: fixed; right: 20px; top: 72px; z-index: 100;
+    width: 400px;
+    background: var(--bg-panel); border: 1px solid var(--border);
+    border-radius: 16px; padding: 24px;
+    backdrop-filter: blur(20px);
+    transform: translateX(calc(100% + 40px)); opacity: 0;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+    max-height: calc(100vh - 110px); overflow-y: auto;
+  }
+  .detail-panel.visible { transform: translateX(0); opacity: 1; }
+  .detail-panel::-webkit-scrollbar { width: 4px; }
+  .detail-panel::-webkit-scrollbar-track { background: transparent; }
+  .detail-panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  .detail-close {
+    position: absolute; top: 14px; right: 14px;
+    width: 28px; height: 28px; border-radius: 8px;
+    border: 1px solid var(--border); background: var(--bg-card);
+    color: var(--text-secondary); display: grid; place-items: center;
+    cursor: pointer; font-size: 14px; transition: all 0.2s;
+  }
+  .detail-close:hover { background: rgba(255,255,255,0.05); color: var(--text-primary); }
+
+  .detail-domain {
+    display: inline-block; padding: 4px 10px; border-radius: 6px;
+    font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;
+    margin-bottom: 12px;
+  }
+  .detail-title { font-size: 19px; font-weight: 700; line-height: 1.3; margin-bottom: 6px; }
+  .detail-type { font-size: 12px; color: var(--text-dim); margin-bottom: 14px; font-family: 'JetBrains Mono', monospace; }
+  .detail-desc { font-size: 13px; line-height: 1.65; color: var(--text-secondary); margin-bottom: 18px; }
+
+  .detail-section-title {
+    font-size: 10.5px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 1.2px; color: var(--text-dim); margin-bottom: 8px; margin-top: 18px;
+  }
+
+  /* ─── Work Unit Sections ─── */
+  .work-unit-sections { display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; }
+  .wu-section {
+    border: 1px solid var(--border); border-radius: 10px;
+    overflow: hidden; transition: border-color 0.2s;
+  }
+  .wu-section:hover { border-color: var(--border-active); }
+  .wu-section-header {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 14px;
+    background: rgba(255,255,255,0.02);
+    cursor: pointer; user-select: none;
+  }
+  .wu-section-icon {
+    width: 24px; height: 24px; border-radius: 6px;
+    display: grid; place-items: center;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.3px;
+    flex-shrink: 0; color: white;
+  }
+  .wu-section-icon.sensing { background: rgba(6, 182, 212, 0.25); color: #67e8f9; }
+  .wu-section-icon.memory { background: rgba(59, 130, 246, 0.25); color: #93c5fd; }
+  .wu-section-icon.reasoning { background: rgba(192, 132, 252, 0.25); color: #d8b4fe; }
+  .wu-section-icon.creation { background: rgba(16, 185, 129, 0.25); color: #6ee7b7; }
+
+  .wu-section-label {
+    font-size: 11.5px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+  .wu-section-label.sensing { color: #67e8f9; }
+  .wu-section-label.memory { color: #93c5fd; }
+  .wu-section-label.reasoning { color: #d8b4fe; }
+  .wu-section-label.creation { color: #6ee7b7; }
+
+  .wu-section-chevron {
+    margin-left: auto; width: 14px; height: 14px; color: var(--text-dim);
+    transition: transform 0.2s;
+  }
+  .wu-section.open .wu-section-chevron { transform: rotate(180deg); }
+
+  .wu-section-body {
+    padding: 0 14px; max-height: 0; overflow: hidden;
+    transition: max-height 0.35s cubic-bezier(0.16, 1, 0.3, 1), padding 0.2s;
+  }
+  .wu-section.open .wu-section-body {
+    padding: 0 14px 14px 14px; max-height: 600px;
+  }
+  .wu-section-text {
+    font-size: 12.5px; line-height: 1.65; color: var(--text-secondary);
+  }
+
+  /* ─── Signal sources ─── */
+  .signal-sources { display: flex; flex-direction: column; gap: 4px; }
+  .signal-item {
+    display: flex; align-items: flex-start; gap: 8px;
+    padding: 6px 10px; border-radius: 7px;
+    background: rgba(255,255,255,0.02);
+    font-size: 11.5px; line-height: 1.4; color: var(--text-secondary);
+  }
+  .signal-badge {
+    flex-shrink: 0; padding: 2px 6px; border-radius: 4px;
+    font-size: 9px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.5px; margin-top: 1px;
+  }
+  .signal-high { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+  .signal-medium { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+  .signal-low { background: rgba(100, 116, 139, 0.15); color: #94a3b8; }
+
+  /* ─── Connections ─── */
+  .detail-connections { display: flex; flex-direction: column; gap: 5px; }
+  .connection-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 7px 10px; border-radius: 8px;
+    background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+    font-size: 12px; cursor: pointer; transition: all 0.2s;
+  }
+  .connection-item:hover { background: rgba(255,255,255,0.06); border-color: var(--border-active); }
+  .connection-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .connection-label { color: var(--text-dim); font-size: 10.5px; margin-left: auto; font-family: 'JetBrains Mono', monospace; }
+
+  /* ─── Stats bar ─── */
+  .stats-bar {
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 100;
+    display: flex; gap: 20px; align-items: center;
+    padding: 10px 24px; background: var(--bg-panel);
+    border: 1px solid var(--border); border-radius: 14px;
+    backdrop-filter: blur(20px);
+    font-size: 11.5px; color: var(--text-secondary);
+  }
+  .stat-value { color: var(--text-primary); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .stat-sep { width: 1px; height: 14px; background: var(--border); }
+
+  /* ─── Tooltip ─── */
+  .tooltip {
+    position: fixed; z-index: 200;
+    padding: 8px 14px; background: rgba(12, 16, 28, 0.95);
+    border: 1px solid var(--border-active); border-radius: 10px;
+    backdrop-filter: blur(12px); pointer-events: none;
+    opacity: 0; transition: opacity 0.15s;
+    font-size: 13px; font-weight: 500; white-space: nowrap;
+  }
+  .tooltip.visible { opacity: 1; }
+  .tooltip-domain { font-size: 10px; color: var(--text-dim); font-family: 'JetBrains Mono', monospace; margin-top: 2px; }
+
+  /* ─── Domain legend ─── */
+  .domain-legend {
+    position: fixed; bottom: 20px; left: 20px; z-index: 100;
+    padding: 10px 14px; background: var(--bg-panel);
+    border: 1px solid var(--border); border-radius: 12px;
+    backdrop-filter: blur(20px);
+    font-size: 10.5px; color: var(--text-secondary);
+    max-height: 200px; overflow-y: auto;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .domain-legend-title { font-weight: 600; color: var(--text-primary); margin-bottom: 4px; font-size: 11px; }
+  .domain-legend-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 3px 0;
+  }
+  .domain-legend-swatch {
+    width: 10px; height: 10px; border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* ─── Instructions ─── */
+  .instructions {
+    position: fixed; bottom: 64px; left: 50%; transform: translateX(-50%);
+    z-index: 90; font-size: 11.5px; color: var(--text-dim);
+    text-align: center; transition: opacity 1s ease; pointer-events: none;
+  }
+  .instructions.hidden { opacity: 0; }
+  .instructions kbd {
+    display: inline-block; padding: 2px 6px;
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 4px; font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; margin: 0 2px;
+  }
+
+  /* ─── Transition ─── */
+  .transition-overlay {
+    position: fixed; inset: 0; z-index: 300;
+    background: var(--bg-deep); opacity: 0; pointer-events: none;
+    transition: opacity 0.5s ease;
+  }
+  .transition-overlay.active { opacity: 1; pointer-events: auto; }
+
+  /* ─── Loading ─── */
+  .loading-indicator {
+    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    z-index: 400; font-size: 14px; color: var(--text-secondary);
+    display: none;
+  }
+  .loading-indicator.visible { display: block; }
+
+  @media (max-width: 1000px) {
+    .filters { display: none; }
+    .detail-panel { width: calc(100vw - 32px); right: 16px; }
+  }
+  @media (max-width: 600px) {
+    .top-bar { padding: 10px 12px; gap: 8px; flex-wrap: wrap; }
+    .logo span { display: none; }
+    .universe-btn .btn-label { display: none; }
+    .search-wrap { max-width: 100%; order: 10; flex-basis: 100%; }
+    .stats-bar { bottom: 10px; gap: 12px; padding: 8px 16px; font-size: 10.5px; }
+    .domain-legend { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div id="starfield"></div>
+<div id="canvas-container"></div>
+<div class="transition-overlay" id="transition-overlay"></div>
+<div class="loading-indicator" id="loading">Loading universe…</div>
+
+<div class="top-bar">
+  <div class="logo">
+    <div class="logo-icon">◈</div>
+    Context Universe <span>Explorer</span>
+  </div>
+  <div class="universe-switcher" id="universe-switcher">
+    <button class="universe-btn" id="universe-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2a10 10 0 0 1 0 20M12 2a10 10 0 0 0 0 20M2 12h20"/></svg>
+      <span class="btn-label" id="universe-btn-label">Loading…</span>
+      <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+    </button>
+    <div class="universe-dropdown" id="universe-dropdown"></div>
+  </div>
+  <div class="search-wrap">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+    <input class="search-input" id="search" placeholder="Search context nodes, domains…" autocomplete="off" />
+  </div>
+  <div class="filters" id="filters"></div>
+</div>
+
+<div class="detail-panel" id="detail-panel">
+  <button class="detail-close" id="detail-close">✕</button>
+  <div class="detail-domain" id="detail-domain"></div>
+  <div class="detail-title" id="detail-title"></div>
+  <div class="detail-type" id="detail-type"></div>
+  <div class="detail-desc" id="detail-desc"></div>
+  <div id="detail-work-unit"></div>
+  <div id="detail-signals-section" style="display:none;">
+    <div class="detail-section-title">Signal Sources</div>
+    <div class="signal-sources" id="detail-signals"></div>
+  </div>
+  <div class="detail-section-title">Connections</div>
+  <div class="detail-connections" id="detail-connections"></div>
+</div>
+
+<div class="tooltip" id="tooltip">
+  <div id="tooltip-name"></div>
+  <div class="tooltip-domain" id="tooltip-domain"></div>
+</div>
+
+<div class="stats-bar" id="stats-bar">
+  <div><span class="stat-value" id="stat-nodes">0</span> context nodes</div>
+  <div class="stat-sep"></div>
+  <div><span class="stat-value" id="stat-edges">0</span> edges</div>
+  <div class="stat-sep"></div>
+  <div><span class="stat-value" id="stat-domains">0</span> domains</div>
+  <div class="stat-sep"></div>
+  <div id="stat-filter">Showing: <span class="stat-value">All</span></div>
+</div>
+
+<div class="domain-legend" id="domain-legend" aria-label="Node colours by domain">
+  <div class="domain-legend-title">Domains</div>
+  <div id="domain-legend-list"></div>
+</div>
+
+<div class="instructions" id="instructions">
+  Drag to rotate · Click a node for detail
+</div>
+
+<script type="application/json" id="fallback-universe-json">{"id":"ai-company","name":"AI Company — Product & Market","desc":"Product strategy, competitive landscape, and go-to-market context for a frontier AI company.","icon":"🤖","iconBg":"linear-gradient(135deg, #3b82f6, #8b5cf6)","domainColors":{"Strategy":"0xf59e0b","Products":"0x3b82f6","Projects":"0x8b5cf6","Marketing":"0xec4899","Ethos":"0x10b981","Customers":"0x06b6d4","Competitors":"0xef4444","Context":"0xf97316"},"nodes":[{"id":"strat-1","label":"AI Safety Leadership","domain":"Strategy","type":"Strategic Pillar","desc":"Position as the responsible AI leader. Build trust through transparency, research publication, and safety-first development practices.","weight":5},{"id":"strat-2","label":"Enterprise Adoption","domain":"Strategy","type":"Growth Vector","desc":"Drive enterprise revenue through API platform, reliability guarantees, and compliance-ready deployments.","weight":4},{"id":"prod-1","label":"Claude API","domain":"Products","type":"Core Product","desc":"Primary revenue driver. REST API with streaming, function calling, vision, and 200K context window.","weight":5},{"id":"cust-1","label":"Enterprise CTOs","domain":"Customers","type":"Primary Persona","desc":"Risk-averse technology leaders at Fortune 500 companies evaluating AI deployment.","weight":5},{"id":"comp-1","label":"OpenAI / GPT","domain":"Competitors","type":"Primary Competitor","desc":"Market leader by brand recognition. Strong consumer product, broad enterprise adoption.","weight":5}],"edges":[{"source":"strat-1","target":"prod-1","label":"governs"},{"source":"strat-2","target":"prod-1","label":"drives"},{"source":"prod-1","target":"cust-1","label":"targets"}]}</script>
+
+<script type="importmap">
+{ "imports": { "three": "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.js" } }
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  UNIVERSE REGISTRY — loaded from JSON files                  ║
+// ╚══════════════════════════════════════════════════════════════╝
+
+// List your universe JSON files here. Add new ones by dropping a .json
+// into /universes/ and adding the filename to this array.
+const UNIVERSE_FILES = [
+  'universes/ai-company.json',
+  'universes/portfolio-analysis.json',
+  'universes/wealth-advisory-context.json',
+  'universes/viridian-intelligence-layer.json',
+];
+
+const UNIVERSES = {};
+
+function applyUniverse(data) {
+  const colors = {};
+  Object.entries(data.domainColors || {}).forEach(([k, v]) => {
+    colors[k] = typeof v === 'string' ? parseInt(v, 16) : v;
+  });
+  data.domainColors = colors;
+  UNIVERSES[data.id] = data;
+}
+
+async function loadUniverseFiles() {
+  document.getElementById('loading').classList.add('visible');
+  const results = await Promise.allSettled(
+    UNIVERSE_FILES.map(f => fetch(f).then(r => {
+      if (!r.ok) throw new Error(`Failed to load ${f}: ${r.status}`);
+      return r.json();
+    }))
+  );
+  results.forEach((result, i) => {
+    if (result.status === 'fulfilled') {
+      applyUniverse(result.value);
+    } else {
+      console.warn('Universe file failed (use a local server if opening via file://):', UNIVERSE_FILES[i], result.reason);
+    }
+  });
+  if (Object.keys(UNIVERSES).length === 0) {
+    const fallbackEl = document.getElementById('fallback-universe-json');
+    if (fallbackEl) {
+      try {
+        const data = JSON.parse(fallbackEl.textContent);
+        applyUniverse(data);
+      } catch (e) { console.warn('Fallback universe parse failed', e); }
+    }
+  }
+  document.getElementById('loading').classList.remove('visible');
+}
+
+
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  THREE.JS ENGINE                                             ║
+// ╚══════════════════════════════════════════════════════════════╝
+
+const container = document.getElementById('canvas-container');
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 2000);
+camera.position.set(0, 0, 280);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+container.appendChild(renderer.domElement);
+
+scene.add(new THREE.AmbientLight(0x334466, 0.4));
+const dirLight = new THREE.DirectionalLight(0x6688cc, 0.3);
+dirLight.position.set(100, 200, 100);
+scene.add(dirLight);
+
+// Stars
+const starCount = 3000;
+const starGeo = new THREE.BufferGeometry();
+const sp = new Float32Array(starCount * 3);
+for (let i = 0; i < starCount; i++) { sp[i*3]=(Math.random()-0.5)*1600; sp[i*3+1]=(Math.random()-0.5)*1600; sp[i*3+2]=(Math.random()-0.5)*1600; }
+starGeo.setAttribute('position', new THREE.BufferAttribute(sp, 3));
+const stars = new THREE.Points(starGeo, new THREE.PointsMaterial({ color: 0x556688, size: 0.8, transparent: true, opacity: 0.5, sizeAttenuation: true, depthWrite: false }));
+scene.add(stars);
+
+// Mutable state
+let currentUniverseId = null;
+let nodeMap = {};
+let positions = {};
+let nodeMeshes = {};
+let nodeGroup = new THREE.Group();
+let glowGroup = new THREE.Group();
+let edgeGroup = new THREE.Group();
+let currentData = null;
+let hoveredNode = null;
+let selectedNode = null;
+scene.add(nodeGroup); scene.add(glowGroup); scene.add(edgeGroup);
+
+
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  UNIVERSE LOADING                                            ║
+// ╚══════════════════════════════════════════════════════════════╝
+
+function loadUniverse(id, animate = true) {
+  const u = UNIVERSES[id];
+  if (!u) return;
+  const overlay = document.getElementById('transition-overlay');
+  if (animate && currentUniverseId) {
+    overlay.classList.add('active');
+    setTimeout(() => { _buildUniverse(id, u); setTimeout(() => overlay.classList.remove('active'), 100); }, 450);
+  } else {
+    _buildUniverse(id, u);
+  }
+}
+
+function _buildUniverse(id, u) {
+  currentUniverseId = id; currentData = u;
+
+  // Clear
+  nodeGroup.children.forEach(c => { c.geometry?.dispose(); c.material?.dispose(); });
+  glowGroup.children.forEach(c => { c.material?.map?.dispose(); c.material?.dispose(); });
+  edgeGroup.children.forEach(c => { c.geometry?.dispose(); c.material?.dispose(); });
+  nodeGroup.clear(); glowGroup.clear(); edgeGroup.clear();
+  nodeMap = {}; positions = {}; nodeMeshes = {};
+  selectedNode = null;
+  document.getElementById('detail-panel').classList.remove('visible');
+
+  u.nodes.forEach(n => { nodeMap[n.id] = n; });
+
+  // Compute positions via force layout
+  const SPREAD = 160;
+  const domainKeys = Object.keys(u.domainColors);
+  const domainCenters = {};
+  domainKeys.forEach((d, i) => {
+    const angle = (i / domainKeys.length) * Math.PI * 2;
+    const r = SPREAD * 0.5;
+    domainCenters[d] = new THREE.Vector3(Math.cos(angle)*r, (Math.random()-0.5)*r*0.6, Math.sin(angle)*r);
+  });
+
+  const velocities = {};
+  u.nodes.forEach(n => {
+    const c = domainCenters[n.domain] || new THREE.Vector3();
+    positions[n.id] = new THREE.Vector3(c.x+(Math.random()-0.5)*80, c.y+(Math.random()-0.5)*80, c.z+(Math.random()-0.5)*80);
+    velocities[n.id] = new THREE.Vector3();
+  });
+
+  for (let iter = 0; iter < 300; iter++) {
+    for (let i = 0; i < u.nodes.length; i++) {
+      for (let j = i+1; j < u.nodes.length; j++) {
+        const pi = positions[u.nodes[i].id], pj = positions[u.nodes[j].id];
+        const diff = new THREE.Vector3().subVectors(pi, pj);
+        const dist = Math.max(diff.length(), 1);
+        diff.normalize().multiplyScalar(2800 / (dist*dist));
+        velocities[u.nodes[i].id].add(diff); velocities[u.nodes[j].id].sub(diff);
+      }
+    }
+    u.edges.forEach(e => {
+      const ps = positions[e.source], pt = positions[e.target];
+      if (!ps || !pt) return;
+      const diff = new THREE.Vector3().subVectors(pt, ps);
+      diff.normalize().multiplyScalar(diff.length() * 0.008);
+      velocities[e.source].add(diff); velocities[e.target].sub(diff);
+    });
+    u.nodes.forEach(n => {
+      velocities[n.id].add(new THREE.Vector3().copy(positions[n.id]).negate().multiplyScalar(0.002));
+      velocities[n.id].multiplyScalar(0.85);
+      positions[n.id].add(velocities[n.id]);
+    });
+  }
+
+  // Create meshes
+  u.nodes.forEach(n => {
+    const color = new THREE.Color(u.domainColors[n.domain] || 0x888888);
+    const baseSize = 1.5 + n.weight * 0.8;
+    const geo = new THREE.SphereGeometry(baseSize, 24, 24);
+    const mat = new THREE.MeshPhongMaterial({ color, emissive: color, emissiveIntensity: 0.5, shininess: 60, transparent: true, opacity: 0.95 });
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.position.copy(positions[n.id]); mesh.userData = n;
+    nodeGroup.add(mesh); nodeMeshes[n.id] = mesh;
+
+    const canvas = document.createElement('canvas'); canvas.width=128; canvas.height=128;
+    const ctx = canvas.getContext('2d');
+    const grad = ctx.createRadialGradient(64,64,0,64,64,64);
+    grad.addColorStop(0, `rgba(${Math.round(color.r*255)},${Math.round(color.g*255)},${Math.round(color.b*255)},0.5)`);
+    grad.addColorStop(0.4, `rgba(${Math.round(color.r*255)},${Math.round(color.g*255)},${Math.round(color.b*255)},0.15)`);
+    grad.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = grad; ctx.fillRect(0,0,128,128);
+    const spriteMat = new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(canvas), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending });
+    const sprite = new THREE.Sprite(spriteMat);
+    sprite.position.copy(positions[n.id]); sprite.scale.set(baseSize*7, baseSize*7, 1);
+    sprite.userData = { isGlow: true, nodeId: n.id };
+    glowGroup.add(sprite);
+  });
+
+  // Create edges
+  u.edges.forEach(e => {
+    const ps = positions[e.source], pt = positions[e.target];
+    if (!ps || !pt) return;
+    const geo = new THREE.BufferGeometry().setFromPoints([ps, pt]);
+    const mat = new THREE.LineBasicMaterial({ color: 0x3a4a6a, transparent: true, opacity: 0.15, depthWrite: false });
+    const line = new THREE.Line(geo, mat); line.userData = e;
+    edgeGroup.add(line);
+  });
+
+  // UI
+  buildFilters(u.domainColors);
+  buildDomainLegend(u.domainColors);
+  document.getElementById('stat-nodes').textContent = u.nodes.length;
+  document.getElementById('stat-edges').textContent = u.edges.length;
+  document.getElementById('stat-domains').textContent = domainKeys.length;
+  updateStats('All', u.nodes.length);
+  document.getElementById('universe-btn-label').textContent = u.name;
+  document.getElementById('search').value = '';
+  document.querySelectorAll('.universe-option').forEach(opt => opt.classList.toggle('active', opt.dataset.id === id));
+
+  orbit.target.set(0,0,0); orbit.spherical = { radius: 280, phi: Math.PI/2, theta: 0 }; orbit.autoRotate = true;
+}
+
+
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  UNIVERSE SWITCHER UI                                        ║
+// ╚══════════════════════════════════════════════════════════════╝
+
+function buildUniverseDropdown() {
+  const dropdown = document.getElementById('universe-dropdown');
+  dropdown.innerHTML = '';
+  Object.entries(UNIVERSES).forEach(([id, u]) => {
+    const opt = document.createElement('div');
+    opt.className = 'universe-option'; opt.dataset.id = id;
+    opt.innerHTML = `
+      <div class="universe-option-icon" style="background:${u.iconBg}">${u.icon}</div>
+      <div class="universe-option-text">
+        <div class="universe-option-name">${u.name}</div>
+        <div class="universe-option-desc">${u.desc}</div>
+        <div class="universe-option-meta">${u.nodes.length} nodes · ${u.edges.length} edges · ${Object.keys(u.domainColors).length} domains</div>
+      </div>`;
+    opt.addEventListener('click', () => { if (id !== currentUniverseId) loadUniverse(id); toggleDropdown(false); });
+    dropdown.appendChild(opt);
+  });
+}
+
+let dropdownOpen = false;
+function toggleDropdown(force) {
+  dropdownOpen = force !== undefined ? force : !dropdownOpen;
+  document.getElementById('universe-btn').classList.toggle('open', dropdownOpen);
+  document.getElementById('universe-dropdown').classList.toggle('open', dropdownOpen);
+}
+document.getElementById('universe-btn').addEventListener('click', e => { e.stopPropagation(); toggleDropdown(); });
+document.addEventListener('click', () => toggleDropdown(false));
+document.getElementById('universe-dropdown').addEventListener('click', e => e.stopPropagation());
+
+
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  DOMAIN FILTERS                                              ║
+// ╚══════════════════════════════════════════════════════════════╝
+
+function buildFilters(domainColors) {
+  const el = document.getElementById('filters');
+  el.innerHTML = '';
+  const allBtn = document.createElement('button');
+  allBtn.className = 'filter-btn active'; allBtn.dataset.domain = 'All'; allBtn.textContent = 'All';
+  el.appendChild(allBtn);
+  Object.keys(domainColors).forEach(d => {
+    const btn = document.createElement('button');
+    btn.className = 'filter-btn'; btn.dataset.domain = d; btn.textContent = d;
+    el.appendChild(btn);
+  });
+  let styleEl = document.getElementById('dynamic-filter-styles');
+  if (!styleEl) { styleEl = document.createElement('style'); styleEl.id = 'dynamic-filter-styles'; document.head.appendChild(styleEl); }
+  let css = '.filter-btn[data-domain="All"].active { background: rgba(100,160,255,0.25); border-color: rgba(100,160,255,0.3); }\n';
+  Object.entries(domainColors).forEach(([d, hex]) => { css += `.filter-btn[data-domain="${d}"].active { background: #${hex.toString(16).padStart(6,'0')}; }\n`; });
+  styleEl.textContent = css;
+}
+
+function buildDomainLegend(domainColors) {
+  const list = document.getElementById('domain-legend-list');
+  if (!list) return;
+  list.innerHTML = '';
+  Object.entries(domainColors).forEach(([domain, hex]) => {
+    const hexStr = typeof hex === 'number' ? '#' + hex.toString(16).padStart(6, '0') : hex;
+    const item = document.createElement('div');
+    item.className = 'domain-legend-item';
+    item.innerHTML = `<span class="domain-legend-swatch" style="background:${hexStr}"></span><span>${domain}</span>`;
+    list.appendChild(item);
+  });
+}
+
+document.getElementById('filters').addEventListener('click', e => {
+  const btn = e.target.closest('.filter-btn');
+  if (!btn || !currentData) return;
+  const domain = btn.dataset.domain;
+  hideInstructions();
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if (domain === 'All') { resetHighlights(); if (selectedNode) highlightNode(selectedNode); updateStats('All', currentData.nodes.length); return; }
+  let count = 0;
+  nodeGroup.children.forEach(mesh => { const m = mesh.userData.domain===domain; mesh.material.opacity=m?1:0.08; mesh.material.emissiveIntensity=m?0.7:0.05; if(m)count++; });
+  glowGroup.children.forEach(s => { if(!s.userData.isGlow)return; const n=nodeMap[s.userData.nodeId]; s.material.opacity=n&&n.domain===domain?1:0.02; });
+  edgeGroup.children.forEach(line => { const ed=line.userData; const sn=nodeMap[ed.source],tn=nodeMap[ed.target]; const conn=(sn&&sn.domain===domain)||(tn&&tn.domain===domain); line.material.opacity=conn?0.35:0.03; line.material.color.setHex(conn?(currentData.domainColors[domain]||0x3a4a6a):0x3a4a6a); });
+  updateStats(domain, count);
+});
+
+
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  ORBIT CONTROLS                                              ║
+// ╚══════════════════════════════════════════════════════════════╝
+
+const orbit = {
+  target: new THREE.Vector3(), spherical: { radius: 280, phi: Math.PI/2, theta: 0 },
+  isDragging: false, lastMouse: {x:0,y:0}, autoRotate: true, autoRotateSpeed: 0.0008,
+  dampingTheta: 0, dampingPhi: 0,
+};
+
+function updateCamera() {
+  const s = orbit.spherical;
+  s.phi = Math.max(0.2, Math.min(Math.PI-0.2, s.phi));
+  s.radius = Math.max(50, Math.min(600, s.radius));
+  camera.position.set(
+    orbit.target.x + s.radius*Math.sin(s.phi)*Math.cos(s.theta),
+    orbit.target.y + s.radius*Math.cos(s.phi),
+    orbit.target.z + s.radius*Math.sin(s.phi)*Math.sin(s.theta));
+  camera.lookAt(orbit.target);
+}
+
+renderer.domElement.addEventListener('pointerdown', e => { if(e.button===0){orbit.isDragging=true;orbit.lastMouse={x:e.clientX,y:e.clientY};orbit.autoRotate=false;} });
+window.addEventListener('pointermove', e => {
+  if(orbit.isDragging){const dx=e.clientX-orbit.lastMouse.x,dy=e.clientY-orbit.lastMouse.y;orbit.spherical.theta-=dx*0.005;orbit.spherical.phi-=dy*0.005;orbit.dampingTheta=-dx*0.002;orbit.dampingPhi=-dy*0.002;orbit.lastMouse={x:e.clientX,y:e.clientY};}
+  handleHover(e);
+});
+window.addEventListener('pointerup', ()=>{orbit.isDragging=false;});
+renderer.domElement.addEventListener('wheel', e=>{e.preventDefault();orbit.spherical.radius+=e.deltaY*0.3;orbit.autoRotate=false;},{passive:false});
+
+
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  RAYCASTING                                                  ║
+// ╚══════════════════════════════════════════════════════════════╝
+
+const raycaster = new THREE.Raycaster();
+const pointer = new THREE.Vector2();
+const tooltip = document.getElementById('tooltip');
+
+function handleHover(e) {
+  pointer.x=(e.clientX/window.innerWidth)*2-1; pointer.y=-(e.clientY/window.innerHeight)*2+1;
+  raycaster.setFromCamera(pointer, camera);
+  const hits = raycaster.intersectObjects(nodeGroup.children, false);
+  if (hits.length>0) {
+    const n=hits[0].object.userData;
+    if(hoveredNode!==n.id){hoveredNode=n.id;document.getElementById('tooltip-name').textContent=n.label;document.getElementById('tooltip-domain').textContent=`${n.domain} · ${n.type}`;tooltip.classList.add('visible');document.body.style.cursor='pointer';}
+    tooltip.style.left=e.clientX+16+'px';tooltip.style.top=e.clientY-10+'px';
+  } else if(hoveredNode){hoveredNode=null;tooltip.classList.remove('visible');document.body.style.cursor='default';}
+}
+
+renderer.domElement.addEventListener('click', e => {
+  pointer.x=(e.clientX/window.innerWidth)*2-1;pointer.y=-(e.clientY/window.innerHeight)*2+1;
+  raycaster.setFromCamera(pointer, camera);
+  const hits=raycaster.intersectObjects(nodeGroup.children,false);
+  if(hits.length>0){selectNode(hits[0].object.userData);hideInstructions();}
+  else deselectNode();
+});
+
+
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  SELECTION & DETAIL PANEL                                    ║
+// ╚══════════════════════════════════════════════════════════════╝
+
+const WU_SECTIONS = [
+  { key: 'sensing',   label: 'Sensing',   icon: '◉' },
+  { key: 'memory',    label: 'Memory',    icon: '◈' },
+  { key: 'reasoning', label: 'Reasoning', icon: '◇' },
+  { key: 'creation',  label: 'Creation',  icon: '◆' },
+];
+
+function selectNode(node) {
+  if (!currentData) return;
+  selectedNode = node.id;
+  const hexStr = '#' + (currentData.domainColors[node.domain]||0x888888).toString(16).padStart(6,'0');
+
+  document.getElementById('detail-domain').textContent = node.domain;
+  document.getElementById('detail-domain').style.background = hexStr + '22';
+  document.getElementById('detail-domain').style.color = hexStr;
+  document.getElementById('detail-title').textContent = node.label;
+  document.getElementById('detail-type').textContent = (node.type === 'Micro Skill' ? 'Micro-skill' : node.type);
+  document.getElementById('detail-desc').textContent = node.desc;
+
+  // Work Unit sections
+  const wuEl = document.getElementById('detail-work-unit');
+  wuEl.innerHTML = '';
+  if (node.work_unit) {
+    const title = document.createElement('div');
+    title.className = 'detail-section-title'; title.textContent = 'Work Unit Breakdown';
+    title.style.marginTop = '0';
+    wuEl.appendChild(title);
+
+    const sections = document.createElement('div');
+    sections.className = 'work-unit-sections';
+
+    WU_SECTIONS.forEach((s, i) => {
+      const text = node.work_unit[s.key];
+      if (!text) return;
+      const sec = document.createElement('div');
+      sec.className = 'wu-section' + (i === 0 ? ' open' : '');
+      sec.innerHTML = `
+        <div class="wu-section-header">
+          <div class="wu-section-icon ${s.key}">${s.icon}</div>
+          <div class="wu-section-label ${s.key}">${s.label}</div>
+          <svg class="wu-section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+        </div>
+        <div class="wu-section-body">
+          <div class="wu-section-text">${text}</div>
+        </div>`;
+      sec.querySelector('.wu-section-header').addEventListener('click', () => sec.classList.toggle('open'));
+      sections.appendChild(sec);
+    });
+    wuEl.appendChild(sections);
+  }
+
+  // Signals
+  const sigSection = document.getElementById('detail-signals-section');
+  const sigEl = document.getElementById('detail-signals');
+  if (node.signals && node.signals.length > 0) {
+    sigSection.style.display = 'block';
+    sigEl.innerHTML = '';
+    node.signals.forEach(s => {
+      const item = document.createElement('div'); item.className = 'signal-item';
+      item.innerHTML = `<span class="signal-badge signal-${s.level}">${s.level}</span> <span>${s.source}</span>`;
+      sigEl.appendChild(item);
+    });
+  } else {
+    sigSection.style.display = 'none';
+  }
+
+  // Connections
+  const connections = [];
+  currentData.edges.forEach(e => {
+    if (e.source===node.id && nodeMap[e.target]) connections.push({node:nodeMap[e.target], label:e.label});
+    if (e.target===node.id && nodeMap[e.source]) connections.push({node:nodeMap[e.source], label:e.label});
+  });
+  const connEl = document.getElementById('detail-connections');
+  connEl.innerHTML = '';
+  connections.forEach(c => {
+    const cHex='#'+(currentData.domainColors[c.node.domain]||0x888888).toString(16).padStart(6,'0');
+    const item = document.createElement('div'); item.className='connection-item';
+    item.innerHTML=`<span class="connection-dot" style="background:${cHex}"></span> ${c.node.label} <span class="connection-label">${c.label}</span>`;
+    item.addEventListener('click', ()=>selectNode(c.node));
+    connEl.appendChild(item);
+  });
+
+  document.getElementById('detail-panel').classList.add('visible');
+  highlightNode(node.id);
+  const pos = positions[node.id];
+  if (pos) orbit.target.lerp(pos.clone(), 0.3);
+}
+
+function deselectNode() {
+  selectedNode=null;
+  document.getElementById('detail-panel').classList.remove('visible');
+  resetHighlights();
+}
+document.getElementById('detail-close').addEventListener('click', deselectNode);
+
+function highlightNode(nodeId) {
+  if(!currentData)return;
+  nodeGroup.children.forEach(mesh=>{const isSel=mesh.userData.id===nodeId;const isConn=currentData.edges.some(e=>(e.source===nodeId&&e.target===mesh.userData.id)||(e.target===nodeId&&e.source===mesh.userData.id));mesh.material.opacity=isSel?1:isConn?0.9:0.15;mesh.material.emissiveIntensity=isSel?1:isConn?0.6:0.1;});
+  edgeGroup.children.forEach(line=>{const e=line.userData;const isConn=e.source===nodeId||e.target===nodeId;line.material.opacity=isConn?0.6:0.03;if(isConn){const tn=e.source===nodeId?nodeMap[e.target]:nodeMap[e.source];line.material.color.setHex(tn?(currentData.domainColors[tn.domain]||0x3a4a6a):0x3a4a6a);}else{line.material.color.setHex(0x3a4a6a);}});
+  glowGroup.children.forEach(s=>{if(!s.userData.isGlow)return;const isSel=s.userData.nodeId===nodeId;const isConn=currentData.edges.some(e=>(e.source===nodeId&&e.target===s.userData.nodeId)||(e.target===nodeId&&e.source===s.userData.nodeId));s.material.opacity=isSel?1:isConn?0.6:0.05;});
+}
+
+function resetHighlights() {
+  nodeGroup.children.forEach(m=>{m.material.opacity=0.95;m.material.emissiveIntensity=0.5;});
+  edgeGroup.children.forEach(l=>{l.material.opacity=0.15;l.material.color.setHex(0x3a4a6a);});
+  glowGroup.children.forEach(s=>{if(s.userData.isGlow)s.material.opacity=1;});
+}
+
+
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  SEARCH                                                      ║
+// ╚══════════════════════════════════════════════════════════════╝
+
+document.getElementById('search').addEventListener('input', function() {
+  if(!currentData)return;
+  const q=this.value.toLowerCase().trim();
+  hideInstructions();
+  if(!q){resetHighlights();if(selectedNode)highlightNode(selectedNode);updateStats('All',currentData.nodes.length);return;}
+  let count=0;
+  nodeGroup.children.forEach(mesh=>{const n=mesh.userData;const m=n.label.toLowerCase().includes(q)||n.domain.toLowerCase().includes(q)||n.type.toLowerCase().includes(q)||n.desc.toLowerCase().includes(q);mesh.material.opacity=m?1:0.08;mesh.material.emissiveIntensity=m?0.8:0.05;if(m)count++;});
+  glowGroup.children.forEach(s=>{if(!s.userData.isGlow)return;const n=nodeMap[s.userData.nodeId];if(!n)return;const m=n.label.toLowerCase().includes(q)||n.domain.toLowerCase().includes(q)||n.type.toLowerCase().includes(q)||n.desc.toLowerCase().includes(q);s.material.opacity=m?1:0.02;});
+  edgeGroup.children.forEach(l=>{l.material.opacity=0.03;});
+  updateStats(`"${this.value}"`,count);
+});
+
+
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  UTILITIES & ANIMATION                                       ║
+// ╚══════════════════════════════════════════════════════════════╝
+
+function updateStats(f,c){document.getElementById('stat-filter').innerHTML=`Showing: <span class="stat-value">${f}</span> (${c})`;}
+function hideInstructions(){document.getElementById('instructions').classList.add('hidden');}
+
+const clock = new THREE.Clock();
+function animate() {
+  requestAnimationFrame(animate);
+  const t=clock.getElapsedTime();
+  if(orbit.autoRotate)orbit.spherical.theta+=orbit.autoRotateSpeed;
+  if(!orbit.isDragging){orbit.dampingTheta*=0.95;orbit.dampingPhi*=0.95;orbit.spherical.theta+=orbit.dampingTheta;orbit.spherical.phi+=orbit.dampingPhi;}
+  updateCamera();
+  nodeGroup.children.forEach((mesh,i)=>{const p=positions[mesh.userData.id];if(p)mesh.position.y=p.y+Math.sin(t*0.4+i*0.7)*0.6;});
+  glowGroup.children.forEach(s=>{if(s.userData.isGlow){const m=nodeMeshes[s.userData.nodeId];if(m){s.position.x=m.position.x;s.position.y=m.position.y;s.position.z=m.position.z;}}});
+  stars.rotation.y=t*0.01;stars.rotation.x=Math.sin(t*0.005)*0.03;
+  renderer.render(scene,camera);
+}
+animate();
+
+window.addEventListener('resize',()=>{camera.aspect=window.innerWidth/window.innerHeight;camera.updateProjectionMatrix();renderer.setSize(window.innerWidth,window.innerHeight);});
+window.addEventListener('keydown',e=>{const si=document.getElementById('search');if(e.key==='Escape'){deselectNode();si.value='';si.dispatchEvent(new Event('input'));}if(e.key==='/'&&document.activeElement!==si){e.preventDefault();si.focus();}});
+
+
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  INIT                                                        ║
+// ╚══════════════════════════════════════════════════════════════╝
+
+await loadUniverseFiles();
+buildUniverseDropdown();
+const firstId = Object.keys(UNIVERSES)[0];
+if (firstId) loadUniverse(firstId, false);
+setTimeout(hideInstructions, 8000);
+
+</script>
+</body>
+</html>

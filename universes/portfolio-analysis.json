@@ -1,0 +1,386 @@
+{
+  "id": "portfolio-analysis",
+  "name": "Portfolio Analysis — Org Intelligence",
+  "desc": "A vertical slice into how a mid-market fund actually analyses deals. Six layers of organisational context that AI currently cannot access.",
+  "icon": "📊",
+  "iconBg": "linear-gradient(135deg, #10b981, #06b6d4)",
+  "domainColors": {
+    "Strategy & Competitive": "0xf59e0b",
+    "Organisational Judgment": "0xc084fc",
+    "Rules — Real Ones": "0xef4444",
+    "Institutional Memory": "0x3b82f6",
+    "Language & Standards": "0x06b6d4",
+    "Work Unit Intelligence": "0x10b981"
+  },
+  "nodes": [
+
+    {
+      "id": "sc-1",
+      "label": "Fund Thesis: Climate Infra",
+      "domain": "Strategy & Competitive",
+      "type": "Investment Thesis",
+      "desc": "Current thesis: infrastructure-layer climate tech with proven unit economics. Explicitly avoiding early-stage deep-tech and consumer clean energy. Thesis evolved after the 2022 Solara write-down.",
+      "weight": 5,
+      "signals": [
+        { "level": "high", "source": "IC meeting transcript, Nov 2024 — partner debate on thesis refinement after portfolio review" },
+        { "level": "high", "source": "LP letter draft with tracked changes — three rounds of edits revealing what partners cut vs kept" }
+      ]
+    },
+    {
+      "id": "sc-2",
+      "label": "Risk Appetite Shift",
+      "domain": "Strategy & Competitive",
+      "type": "Strategic Posture",
+      "desc": "Post-2023 markdowns moved the fund from \"growth at reasonable price\" to \"prove it first.\" Pipeline now filtered for 18-month path to cash-flow positive. Unspoken rule: nothing pre-revenue unless a partner personally sponsors it.",
+      "weight": 4,
+      "signals": [
+        { "level": "high", "source": "Deal review calls Q1–Q3 2024 — pattern of rejection reasons shifting from \"valuation\" to \"proof of traction\"" },
+        { "level": "medium", "source": "Partner's personal deal tracker spreadsheet — colour-coded risk flags changed mid-2023" }
+      ]
+    },
+    {
+      "id": "sc-3",
+      "label": "Competitive: Brookfield",
+      "domain": "Strategy & Competitive",
+      "type": "Competitor Intelligence",
+      "desc": "Brookfield moving downstream into mid-market infra. Lost two deals to them in H2 2024. Their advantage: balance sheet flexibility. Our advantage: speed and sector expertise. IC now requires explicit \"why not Brookfield\" in every memo.",
+      "weight": 4,
+      "signals": [
+        { "level": "high", "source": "Slack thread between deal leads after losing GreenGrid deal — real-time frustration and strategic recalibration" },
+        { "level": "medium", "source": "Competitive tracking spreadsheet with win/loss annotations" }
+      ]
+    },
+    {
+      "id": "sc-4",
+      "label": "LP Pressure: ESG Reporting",
+      "domain": "Strategy & Competitive",
+      "type": "Stakeholder Constraint",
+      "desc": "Two anchor LPs now requiring SFDR Article 9 alignment. This isn't optional — it shapes which deals we can even bring to IC. The compliance team built a pre-screening filter that kills 30% of pipeline before anyone senior sees it.",
+      "weight": 3,
+      "signals": [
+        { "level": "medium", "source": "Email chain between IR and compliance re: LP reporting requirements — shows the real constraints" },
+        { "level": "high", "source": "Screen recording of analyst running ESG pre-screen — shows tabs open, checks performed, order of operations" }
+      ]
+    },
+
+    {
+      "id": "oj-1",
+      "label": "The \"Partner Smell Test\"",
+      "domain": "Organisational Judgment",
+      "type": "Decision Pattern",
+      "desc": "Before any deal reaches IC, the sponsoring partner does an informal read of the other partners. This happens over coffee, not in meetings. If two partners give a lukewarm response, the deal gets quietly deprioritised. No formal record. The analyst never knows why their deal died.",
+      "weight": 5,
+      "signals": [
+        { "level": "high", "source": "Meeting transcript — partner says \"I already ran this past Sarah and James, they're both interested\" — reveals the pre-IC filtering process" },
+        { "level": "low", "source": "General interview — partners describe \"collaborative decision-making\" but omit the informal veto" }
+      ]
+    },
+    {
+      "id": "oj-2",
+      "label": "Management Team Assessment",
+      "domain": "Organisational Judgment",
+      "type": "Evaluation Heuristic",
+      "desc": "The stated process: structured management assessment framework. The real process: the partner watches how the CEO handles the first difficult question in a meeting. If they deflect or get defensive, the deal is effectively dead regardless of the numbers.",
+      "weight": 5,
+      "signals": [
+        { "level": "high", "source": "Recording of management meeting — partner later says in debrief \"did you see how he handled the margin question? That tells you everything\"" },
+        { "level": "high", "source": "Annotated CIM — partner's margin notes: \"CEO avoids direct answers → pass\"" }
+      ]
+    },
+    {
+      "id": "oj-3",
+      "label": "Valuation Anchoring",
+      "domain": "Organisational Judgment",
+      "type": "Cognitive Pattern",
+      "desc": "The team unconsciously anchors to the last comparable deal they did. When Meridian closed at 11x, every subsequent deal in the sector gets evaluated against 11x even if market conditions shifted. A senior associate noticed and raised it — was told \"that's just pattern recognition.\"",
+      "weight": 4,
+      "signals": [
+        { "level": "high", "source": "IC transcript — analyst presents 14x comp, partner responds \"that's a long way from what we paid for Meridian\" before looking at the financials" },
+        { "level": "medium", "source": "Senior associate's personal notes on deal process — \"valuation discussion always starts with Meridian\"" }
+      ]
+    },
+    {
+      "id": "oj-4",
+      "label": "The 48-Hour Rule",
+      "domain": "Organisational Judgment",
+      "type": "Informal Process",
+      "desc": "After any management meeting, no decision for 48 hours. Not written anywhere. Partners learned this after the Nextera investment — moved too fast, missed red flags that emerged in the week after the meeting. Now enforced socially, not procedurally.",
+      "weight": 3,
+      "signals": [
+        { "level": "high", "source": "Email from partner to associate: \"Good meeting but let's sit with it. Remember Nextera.\"" },
+        { "level": "medium", "source": "Calendar analysis — consistent 2-3 day gap between management meetings and follow-up actions" }
+      ]
+    },
+
+    {
+      "id": "rr-1",
+      "label": "Check Size: Hard Floor",
+      "domain": "Rules — Real Ones",
+      "type": "Non-Negotiable",
+      "desc": "$25M minimum check size. Genuinely non-negotiable — even when a partner found a \"perfect\" $15M deal, the IC said no. The fund economics don't work below $25M given the team time each deal requires. This kills roughly 40% of inbound.",
+      "weight": 5,
+      "signals": [
+        { "level": "high", "source": "IC recording — partner argues passionately for exception, gets shut down: \"We've had this conversation. The math doesn't change.\"" },
+        { "level": "medium", "source": "Deal log — every sub-$25M entry marked \"declined: size\" with no further notes" }
+      ]
+    },
+    {
+      "id": "rr-2",
+      "label": "Geographic: Flexible in Practice",
+      "domain": "Rules — Real Ones",
+      "type": "Bendable Rule",
+      "desc": "Official policy: North America and Western Europe only. Reality: the fund did a deal in Singapore last year because a partner had deep relationships there. The \"rule\" is really \"we need existing relationships in the jurisdiction.\" No relationship, no deal — regardless of geography.",
+      "weight": 3,
+      "signals": [
+        { "level": "high", "source": "Slack DM — partner says \"the geo policy is really a relationship policy, we just can't say that to LPs\"" },
+        { "level": "medium", "source": "Investment memos — Singapore deal justified by \"existing operational network\" not \"geographic exception\"" }
+      ]
+    },
+    {
+      "id": "rr-3",
+      "label": "ESG Pre-Screen: Real Filter",
+      "domain": "Rules — Real Ones",
+      "type": "Regulatory Constraint",
+      "desc": "Since the SFDR alignment requirement, the ESG pre-screen has actual teeth. Analyst runs a 12-point check before the deal enters the pipeline. Three \"reds\" = automatic kill. Two \"ambers\" = partner must personally approve continuation.",
+      "weight": 4,
+      "signals": [
+        { "level": "high", "source": "Screen recording of analyst performing ESG screen — pauses on three criteria, checks guidance doc, highlights concerns" },
+        { "level": "high", "source": "Tracked changes on ESG policy doc — shows which criteria were added after LP pushback" }
+      ]
+    },
+    {
+      "id": "rr-4",
+      "label": "Quality Bar: \"The Memo Test\"",
+      "domain": "Rules — Real Ones",
+      "type": "Quality Standard",
+      "desc": "If the investment memo can't be read and understood in 15 minutes, it goes back. Not for being too long — for being unclear. The actual standard is: \"Could a smart person with no sector knowledge follow the logic?\"",
+      "weight": 4,
+      "signals": [
+        { "level": "high", "source": "Tracked changes on draft memo — partner deletes entire section with comment: \"I still don't understand the thesis after reading this twice. Try again.\"" },
+        { "level": "medium", "source": "Email from associate to peer: \"3rd rewrite. He wants it simpler but I don't know what to cut.\"" }
+      ]
+    },
+
+    {
+      "id": "im-1",
+      "label": "Solara Write-Down (2022)",
+      "domain": "Institutional Memory",
+      "type": "Cautionary Pattern",
+      "desc": "The deal that changed everything. Solar manufacturing play that looked like infrastructure but was really technology risk. Lost 60% of invested capital. Now every deal gets the \"is this actually infra or is it tech risk in disguise?\" question.",
+      "weight": 5,
+      "signals": [
+        { "level": "high", "source": "Post-mortem meeting transcript — two-hour debrief where partners are unusually candid about what they missed" },
+        { "level": "high", "source": "Updated IC checklist with \"technology dependency assessment\" added — the Solara rule made tangible" }
+      ]
+    },
+    {
+      "id": "im-2",
+      "label": "Nextera: Speed Kills",
+      "domain": "Institutional Memory",
+      "type": "Cautionary Pattern",
+      "desc": "Invested within two weeks of first meeting. Due diligence gaps emerged six months in. Still a performing investment, but the process failure created the 48-hour rule and the requirement for at least one dissenting voice in IC before approval.",
+      "weight": 4,
+      "signals": [
+        { "level": "high", "source": "IC meeting where partner says \"I don't want another Nextera\" — shorthand everyone understands but an AI would miss entirely" },
+        { "level": "medium", "source": "Process document update log — shows changes timestamped to one month after Nextera close" }
+      ]
+    },
+    {
+      "id": "im-3",
+      "label": "Meridian: The Gold Standard",
+      "domain": "Institutional Memory",
+      "type": "Success Pattern",
+      "desc": "Best-performing investment in Fund III. EV charging infrastructure. What made it work: management team had done it before, unit economics proven in two cities before scaling, and the partner had a 10-year relationship with the CEO. This is the template.",
+      "weight": 5,
+      "signals": [
+        { "level": "high", "source": "LP meeting recording where partner explains the deal — the \"unofficial\" version with more context than any memo" },
+        { "level": "medium", "source": "Final investment memo vs internal debate transcripts — reveals what was simplified for the formal record" }
+      ]
+    },
+    {
+      "id": "im-4",
+      "label": "Relationship Map: Advisory",
+      "domain": "Institutional Memory",
+      "type": "Network Intelligence",
+      "desc": "The fund's real edge is a network of 30-40 operating executives who informally advise on deals. This network lives in partners' heads and contact lists. When a deal comes in, the first question is \"who do we know who's operated in this space?\"",
+      "weight": 4,
+      "signals": [
+        { "level": "high", "source": "Slack messages — partner shares contact: \"Call Mike Chen. He ran the supply chain at [competitor]. He'll tell you what the memo won't.\"" },
+        { "level": "low", "source": "CRM system — has names but not relationship quality, history, or when to call vs when not to" }
+      ]
+    },
+
+    {
+      "id": "ls-1",
+      "label": "Memo Structure: Thesis-First",
+      "domain": "Language & Standards",
+      "type": "Document Standard",
+      "desc": "The investment thesis must be in the first paragraph. Not background, not market overview — the thesis. \"We are investing $X in Y because Z.\" Partners scan the first three sentences and decide whether to keep reading.",
+      "weight": 4,
+      "signals": [
+        { "level": "high", "source": "Annotated memo drafts — partner writes \"WHERE IS THE THESIS\" on page 3 of an associate's first attempt" },
+        { "level": "high", "source": "Screen recording of partner reading memo — scrolls past first two pages, goes back to beginning, sighs" }
+      ]
+    },
+    {
+      "id": "ls-2",
+      "label": "Risk Language: \"Concerns\"",
+      "domain": "Language & Standards",
+      "type": "Communication Code",
+      "desc": "Internal vocabulary has implicit severity levels. \"Concern\" = serious, needs addressing before IC. \"Question\" = want to understand better, probably fine. \"Issue\" = deal-killer unless resolved. \"Observation\" = noted for monitoring, not blocking.",
+      "weight": 4,
+      "signals": [
+        { "level": "high", "source": "Email where senior corrects associate: \"Don't call it an 'issue' in the memo — it's a 'concern.' If you call it an issue, IC will think it's a blocker.\"" },
+        { "level": "medium", "source": "Comparing final memos — consistent language pattern across all approved deals reveals the implicit taxonomy" }
+      ]
+    },
+    {
+      "id": "ls-3",
+      "label": "Numbers: Show the Sensitivities",
+      "domain": "Language & Standards",
+      "type": "Analytical Standard",
+      "desc": "Never present a single-case financial model. Always base, upside, downside. But the real standard: the downside case must be genuinely painful, not \"base minus 10%.\" Partners can spot a sandbagged downside instantly.",
+      "weight": 4,
+      "signals": [
+        { "level": "high", "source": "IC transcript — \"Your downside assumes 15% growth. In what universe is 15% growth a bad outcome? Show me what happens when they lose their biggest customer.\"" },
+        { "level": "high", "source": "Partner edits to model — redlined cells where downside assumptions were insufficiently aggressive" }
+      ]
+    },
+    {
+      "id": "ls-4",
+      "label": "The \"So What\" Standard",
+      "domain": "Language & Standards",
+      "type": "Quality Threshold",
+      "desc": "Every section of analysis must answer \"so what does this mean for our investment?\" Market data without interpretation gets rejected. \"The market is growing 20% CAGR\" — so what? Tell me what it means for the deal.",
+      "weight": 3,
+      "signals": [
+        { "level": "high", "source": "Tracked changes — partner deletes market overview paragraph with comment: \"I can Google this. Tell me what it means for the deal.\"" },
+        { "level": "medium", "source": "Associates' shared doc of \"partner feedback patterns\" — crowdsourced wisdom on what gets past review" }
+      ]
+    },
+
+    {
+      "id": "wu-1",
+      "label": "Deal Screening Process",
+      "domain": "Work Unit Intelligence",
+      "type": "Work Unit",
+      "desc": "The first gate. Where 70% of inbound dies. The difference between how it's documented and how it actually works is the difference between a process map and organisational intelligence.",
+      "weight": 5,
+      "work_unit": {
+        "sensing": "Inbound from 6 channels: broker relationships (40%), LP co-invest referrals (20%), direct approaches (15%), conference contacts (10%), advisory network tips (10%), cold inbound (5%). The channel matters — a broker-sourced deal gets more initial trust than cold inbound because the broker's reputation is on the line. Analyst checks sector fit, size, geography in first 10 minutes. But the real filter: does this pattern-match to anything we've seen succeed or fail before?",
+        "memory": "Every screening decision is made against the ghost of Solara (what looks like infra but is really tech risk) and the template of Meridian (proven management + proven economics + existing relationship). These aren't checklists — they're instincts that take 2-3 years of deal exposure to develop. The analyst's personal triage template is the closest thing to this being externalised.",
+        "reasoning": "Formal: check size ≥ $25M → geography fit → ESG pre-screen → sector alignment. Actual: does this feel like a deal a partner will want to sponsor? Because without partner sponsorship, the best-screened deal in the world goes nowhere. Analysts learn to read partner enthusiasm as a leading indicator and adjust their screening effort accordingly.",
+        "creation": "2-page screening memo with go/no-go recommendation. But the real output is the 30-second verbal pitch to a partner in the hallway. If that doesn't land, the memo never gets written."
+      },
+      "signals": [
+        { "level": "high", "source": "Screen recording of analyst processing inbound deal — shows actual decision tree, not the documented one" },
+        { "level": "high", "source": "Analyst's personal \"triage template\" — a shadow artefact that encodes years of learned pattern recognition" },
+        { "level": "medium", "source": "Deal log with timestamps — reveals how long each screening stage actually takes vs documented SLA" }
+      ]
+    },
+    {
+      "id": "wu-2",
+      "label": "Due Diligence Assembly",
+      "domain": "Work Unit Intelligence",
+      "type": "Work Unit",
+      "desc": "Where the real analysis happens. Not the checkbox exercise the process document describes — the adversarial inquiry that determines whether the fund's capital is at risk.",
+      "weight": 5,
+      "work_unit": {
+        "sensing": "Management meetings (primary signal — 60% of conviction comes from here). Data room documents (verify, don't discover). Third-party reports (market sizing, technical due diligence). Expert network calls — these are where you ask the questions the management team won't answer honestly. Customer reference calls, but reading between the lines: enthusiasm vs politeness.",
+        "memory": "Prior deal comparables — not just financial, but structural. \"This reminds me of the Apex deal where the customer concentration looked fine until their biggest customer got acquired.\" Sector-specific risk patterns built from 10+ years of deals. The partner's personal mental model of what goes wrong in this type of business.",
+        "reasoning": "The organising question is not \"what makes this attractive?\" — it's \"what would make us lose money?\" Every analysis section exists to answer a risk question. The associate maps out the kill scenarios first, then works backward to test each one. If a kill scenario can't be tested, that itself is a finding. The 15-minute memo rule forces ruthless prioritisation of what matters.",
+        "creation": "Full IC memo with appendices. Maximum 15-minute read time. Thesis in paragraph one. Key risks by page two. Model in the appendix, not the body. The creation standard is: a smart person who knows nothing about this sector should be able to follow the logic and identify the key bet. Supporting materials: full financial model, management assessment notes, expert call summaries, competitive landscape map."
+      },
+      "signals": [
+        { "level": "high", "source": "Call transcripts with expert network advisors — questions reveal what the team is really worried about vs. the checkbox diligence" },
+        { "level": "high", "source": "Annotated CIM with three colours of highlights — shows senior person's actual reading process and priority hierarchy" },
+        { "level": "high", "source": "Draft memo tracked changes — the gap between v1 and final reveals what the quality bar actually requires" },
+        { "level": "medium", "source": "Expert network call prep docs — the questions the team prepares reveal their real concerns" }
+      ]
+    },
+    {
+      "id": "wu-3",
+      "label": "IC Presentation",
+      "domain": "Work Unit Intelligence",
+      "type": "Work Unit",
+      "desc": "Not a presentation — a navigation exercise. The outcome is determined as much by reading the room as by the quality of the analysis.",
+      "weight": 4,
+      "work_unit": {
+        "sensing": "Reading partner body language during the presentation. Knowing which partner cares about what — Sarah always asks about management quality and team dynamics, James goes straight to the financial model and unit economics, Lisa probes competitive dynamics and market positioning. Sensing also includes the pre-meeting temperature: has the sponsoring partner already socialised this? Who's already leaning yes? Who needs convincing?",
+        "memory": "Every past IC outcome. What worked: leading with risk and showing you've already addressed it. What failed: leading with market size (\"we know the market is big, tell us why THIS company\"). The Nextera precedent — rushing IC approval is now a social taboo. The partner who was burned by that deal will always ask \"what are we missing?\" and needs a genuine answer, not a deflection.",
+        "reasoning": "Anticipate objections based on who's in the room. Prepare the answer to Sarah's management question before she asks it. Have the model sensitivity James will request already built. Know Lisa's competitive framing preference and structure the landscape section accordingly. The meta-reasoning: if you can't anticipate the objections, you don't understand the deal well enough to present it.",
+        "creation": "A presentation that front-loads answers to the questions you know are coming. Not a linear walk-through — a strategically ordered argument. The deck is a prop; the real creation is the narrative arc of the discussion. Supporting materials pre-loaded for the questions that will come. The best IC presentations feel like conversations, not pitches."
+      },
+      "signals": [
+        { "level": "high", "source": "Pre-IC prep call recording — associate asks partner: \"What is Sarah going to push back on?\" and gets a 10-minute coaching session revealing individual partner patterns" },
+        { "level": "high", "source": "IC meeting recordings — compare successful vs unsuccessful presentations to identify what actually drives approval" },
+        { "level": "medium", "source": "IC presentation decks — compare versions to see what was added after partner coaching vs initial draft" },
+        { "level": "medium", "source": "Post-IC debrief notes — \"we almost lost them when James asked about customer concentration\"" }
+      ]
+    },
+    {
+      "id": "wu-4",
+      "label": "Portfolio Monitoring",
+      "domain": "Work Unit Intelligence",
+      "type": "Work Unit",
+      "desc": "The ongoing intelligence operation. Where formal reporting meets informal sensing and the gap between the two is where problems hide.",
+      "weight": 4,
+      "work_unit": {
+        "sensing": "Monthly financials from portfolio companies. Quarterly board meetings — the official story. Informal CEO check-ins over dinner — what's actually happening. The board meeting tells you the company line; the dinner tells you whether the CEO is worried. Industry events where you bump into competitors' portfolio companies. LP questions that reveal market intelligence you didn't have.",
+        "memory": "Trajectory patterns from prior portfolio companies. \"Revenue growth looked exactly like this at Apex before the wheels came off.\" The portfolio company's own history — comparing current quarter to the plan they presented at IC. Relationship history with the management team — have they been honest about bad news before?",
+        "reasoning": "Delta from plan is the primary analytical frame. Not just financial delta — operational milestone delta, hiring plan delta, customer pipeline delta. Pattern recognition against prior portfolio company trajectories — is this a normal growth wobble or an early warning sign? The traffic light system forces binary categorisation: are we on track or not? Amber is not allowed to persist — it must resolve to green or red within one quarter.",
+        "creation": "Quarterly portfolio report with traffic light system. But the real output is the conversation the report triggers. The report is a forcing function for partners to discuss portfolio health without ego. Supporting materials: board packs, financial summaries, operational KPI dashboards. The highest-value creation: the one-paragraph assessment that tells the partnership \"here is what I'm actually worried about\" — distinct from the formal reporting."
+      },
+      "signals": [
+        { "level": "high", "source": "Partner's notes after CEO dinner — handwritten, unstructured, more revealing than any board pack" },
+        { "level": "high", "source": "Slack channel #portfolio-watch — real-time concerns shared between deal leads, unfiltered" },
+        { "level": "medium", "source": "Quarterly report compared to subsequent partner discussion — shows what the report didn't capture that the conversation surfaced" },
+        { "level": "low", "source": "Board pack documents — the official version, useful for tracking what the company chose to present" }
+      ]
+    }
+  ],
+  "edges": [
+    { "source": "sc-1", "target": "sc-2", "label": "shapes" },
+    { "source": "sc-3", "target": "sc-1", "label": "threatens" },
+    { "source": "sc-4", "target": "sc-1", "label": "constrains" },
+    { "source": "sc-4", "target": "rr-3", "label": "enforces" },
+
+    { "source": "oj-1", "target": "sc-2", "label": "enacts" },
+    { "source": "oj-2", "target": "wu-2", "label": "governs" },
+    { "source": "oj-3", "target": "im-3", "label": "anchors to" },
+    { "source": "oj-4", "target": "im-2", "label": "born from" },
+
+    { "source": "rr-1", "target": "wu-1", "label": "filters" },
+    { "source": "rr-2", "target": "im-4", "label": "really means" },
+    { "source": "rr-3", "target": "sc-4", "label": "implements" },
+    { "source": "rr-4", "target": "ls-1", "label": "enforces" },
+
+    { "source": "im-1", "target": "sc-1", "label": "caused shift" },
+    { "source": "im-1", "target": "wu-1", "label": "embedded in" },
+    { "source": "im-2", "target": "oj-4", "label": "created" },
+    { "source": "im-3", "target": "oj-3", "label": "anchors" },
+    { "source": "im-3", "target": "wu-2", "label": "templates" },
+    { "source": "im-4", "target": "wu-2", "label": "accelerates" },
+    { "source": "im-4", "target": "rr-2", "label": "enables exceptions" },
+
+    { "source": "ls-1", "target": "wu-2", "label": "structures" },
+    { "source": "ls-2", "target": "wu-3", "label": "calibrates" },
+    { "source": "ls-3", "target": "wu-2", "label": "standard for" },
+    { "source": "ls-4", "target": "rr-4", "label": "operationalises" },
+    { "source": "ls-4", "target": "wu-2", "label": "quality gate" },
+
+    { "source": "wu-1", "target": "wu-2", "label": "feeds" },
+    { "source": "wu-2", "target": "wu-3", "label": "produces" },
+    { "source": "wu-3", "target": "oj-1", "label": "navigates" },
+    { "source": "wu-4", "target": "im-1", "label": "watches for" },
+    { "source": "wu-4", "target": "im-3", "label": "benchmarks against" },
+
+    { "source": "sc-3", "target": "wu-1", "label": "adds filter" },
+    { "source": "oj-2", "target": "ls-2", "label": "shapes vocabulary" },
+    { "source": "oj-1", "target": "rr-1", "label": "overrides proposals" },
+    { "source": "sc-2", "target": "rr-1", "label": "reinforces" },
+    { "source": "ls-3", "target": "oj-3", "label": "challenges" },
+    { "source": "wu-1", "target": "rr-3", "label": "triggers" },
+    { "source": "im-1", "target": "oj-2", "label": "heightened by" }
+  ]
+}
