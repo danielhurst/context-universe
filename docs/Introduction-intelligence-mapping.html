@@ -1,0 +1,1868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Intelligence Mapping Method — Context Moat</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=JetBrains+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --black: #0A0A0A;
+  --black-mid: #141414;
+  --black-light: #1A1A1A;
+  --copper: #B87333;
+  --copper-light: #D4A574;
+  --copper-pale: #F0D9BB;
+  --copper-dim: rgba(184,115,51,0.15);
+  --cream: #FAF9F7;
+  --cream-mid: #F5F4F0;
+  --cream-dim: #E8E6E1;
+  --text: #F5F5F5;
+  --text-mid: #A0A0A0;
+  --text-dim: #666666;
+  --text-dark: #1A1A1A;
+  --text-dark-mid: #4A4A4A;
+  --border: rgba(255,255,255,0.08);
+  --border-copper: rgba(184,115,51,0.3);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--black);
+  color: var(--text);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* ── NAV ── */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 1000;
+  padding: 20px 64px;
+  background: rgba(10,10,10,0.95);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  color: var(--text);
+  letter-spacing: 2px;
+  font-weight: 400;
+  text-decoration: none;
+}
+
+.logo span { color: var(--copper); font-style: italic; }
+
+.nav-links {
+  display: flex;
+  gap: 32px;
+  align-items: center;
+}
+
+.nav-links a {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--text-mid);
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.nav-links a:hover { color: var(--copper); }
+.nav-cta { background: var(--copper) !important; color: white !important; padding: 10px 20px !important; }
+
+/* ── HERO ── */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  padding: 140px 64px 80px;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 15% 85%, rgba(184,115,51,0.12) 0%, transparent 45%),
+    radial-gradient(circle at 85% 15%, rgba(212,165,116,0.07) 0%, transparent 45%),
+    radial-gradient(circle at 50% 50%, rgba(184,115,51,0.03) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.hero-grid-bg {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(184,115,51,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(184,115,51,0.04) 1px, transparent 1px);
+  background-size: 80px 80px;
+  pointer-events: none;
+  mask-image: radial-gradient(ellipse at 50% 50%, black 30%, transparent 80%);
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+  max-width: 860px;
+}
+
+.eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  color: var(--copper);
+  display: block;
+  margin-bottom: 28px;
+}
+
+.hero h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 64px;
+  font-weight: 400;
+  line-height: 1.05;
+  margin-bottom: 28px;
+  letter-spacing: -1.5px;
+}
+
+.hero h1 em { color: var(--copper); font-style: italic; }
+
+.hero-lead {
+  font-size: 20px;
+  color: var(--text-mid);
+  max-width: 640px;
+  line-height: 1.7;
+  margin-bottom: 48px;
+  font-weight: 300;
+}
+
+.hero-stats {
+  display: flex;
+  gap: 48px;
+  margin-bottom: 48px;
+}
+
+.hero-stat-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 36px;
+  color: var(--copper);
+  display: block;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.hero-stat-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+}
+
+.hero-cta {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.btn-primary {
+  display: inline-block;
+  padding: 16px 32px;
+  background: var(--copper);
+  color: white;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-primary:hover {
+  background: #8B5A2B;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(184,115,51,0.3);
+}
+
+.btn-ghost {
+  display: inline-block;
+  padding: 16px 32px;
+  background: transparent;
+  color: var(--text-mid);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-decoration: none;
+  border: 1px solid var(--border);
+  transition: all 0.3s;
+}
+
+.btn-ghost:hover {
+  color: var(--text);
+  border-color: var(--copper);
+}
+
+/* ── SECTIONS ── */
+section { padding: 100px 64px; }
+
+.section-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.section-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  color: var(--copper);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, var(--border-copper), transparent);
+  max-width: 200px;
+}
+
+h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 44px;
+  font-weight: 400;
+  line-height: 1.2;
+  margin-bottom: 20px;
+  letter-spacing: -0.5px;
+}
+
+h2 em { color: var(--copper); font-style: italic; }
+
+.section-light {
+  background: var(--cream);
+  color: var(--text-dark);
+}
+
+.section-light .section-label { color: var(--copper); }
+.section-light .section-label::after { background: linear-gradient(to right, rgba(184,115,51,0.4), transparent); }
+
+/* ── PROBLEM SECTION ── */
+.problem-intro {
+  font-size: 20px;
+  color: var(--text-mid);
+  max-width: 680px;
+  line-height: 1.7;
+  font-weight: 300;
+  margin-bottom: 56px;
+}
+
+.problem-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3px;
+  margin-bottom: 56px;
+}
+
+.problem-card {
+  background: var(--black-mid);
+  border: 1px solid var(--border);
+  padding: 36px 32px;
+  position: relative;
+  transition: border-color 0.3s;
+}
+
+.problem-card:hover { border-color: var(--border-copper); }
+
+.problem-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--copper), transparent);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.problem-card:hover::before { opacity: 1; }
+
+.problem-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 56px;
+  font-weight: 400;
+  color: rgba(184,115,51,0.15);
+  line-height: 1;
+  margin-bottom: -8px;
+}
+
+.problem-card h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 12px;
+  line-height: 1.2;
+}
+
+.problem-card p {
+  font-size: 15px;
+  color: var(--text-mid);
+  line-height: 1.7;
+}
+
+.moat-statement {
+  background: rgba(184,115,51,0.06);
+  border: 1px solid var(--border-copper);
+  border-left: 3px solid var(--copper);
+  padding: 36px 40px;
+  position: relative;
+}
+
+.moat-statement p {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  font-style: italic;
+  color: var(--text);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.moat-statement p strong {
+  color: var(--copper);
+  font-style: normal;
+}
+
+/* ── WHERE IT LIVES ── */
+.intelligence-sources {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 3px;
+  margin: 48px 0;
+}
+
+.source-card {
+  background: var(--black-mid);
+  border: 1px solid var(--border);
+  padding: 32px 28px;
+  position: relative;
+  overflow: hidden;
+}
+
+.source-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--copper), transparent);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.source-card:hover::after { opacity: 1; }
+
+.source-icon {
+  font-size: 28px;
+  margin-bottom: 16px;
+  display: block;
+}
+
+.source-card h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+
+.source-card p {
+  font-size: 14px;
+  color: var(--text-mid);
+  line-height: 1.7;
+}
+
+.source-tag {
+  display: inline-block;
+  margin-top: 16px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border: 1px solid var(--border-copper);
+  color: var(--copper);
+}
+
+/* ── INTELLIGENCE LAYER ── */
+.layer-categories {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 3px;
+  margin: 48px 0;
+}
+
+.layer-cat {
+  background: var(--black-mid);
+  border: 1px solid var(--border);
+  padding: 28px 24px;
+  transition: all 0.3s;
+  position: relative;
+}
+
+.layer-cat:hover {
+  border-color: var(--border-copper);
+  transform: translateY(-4px);
+}
+
+.layer-cat-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--copper);
+  margin-bottom: 10px;
+  display: block;
+}
+
+.layer-cat h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+
+.layer-cat p {
+  font-size: 13px;
+  color: var(--text-mid);
+  line-height: 1.65;
+}
+
+.layer-cat ul {
+  list-style: none;
+  margin-top: 14px;
+}
+
+.layer-cat li {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--text-dim);
+  line-height: 1.8;
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+}
+
+.layer-cat li::before {
+  content: '→';
+  color: var(--copper);
+  opacity: 0.6;
+  flex-shrink: 0;
+}
+
+/* ── MATRIX ── */
+.matrix-wrap {
+  background: var(--black-mid);
+  border: 1px solid var(--border-copper);
+  padding: 40px;
+  position: relative;
+}
+
+.matrix-title {
+  text-align: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 32px;
+}
+
+.matrix-layout {
+  display: flex;
+  gap: 0;
+}
+
+.matrix-y-axis {
+  width: 48px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 48px;
+  gap: 12px;
+}
+
+.axis-label-top {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--copper);
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  text-transform: uppercase;
+}
+
+.axis-label-bottom {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  text-transform: uppercase;
+}
+
+.axis-line-v {
+  flex: 1;
+  width: 1px;
+  background: linear-gradient(to bottom, var(--copper), rgba(102,102,102,0.3));
+  opacity: 0.4;
+}
+
+.matrix-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.matrix-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3px;
+  flex: 1;
+}
+
+.q {
+  padding: 28px 24px;
+  min-height: 240px;
+  position: relative;
+  transition: filter 0.2s;
+}
+
+.q:hover { filter: brightness(1.08); }
+
+.q-tl { background: rgba(184,115,51,0.07); border: 1px solid rgba(184,115,51,0.2); }
+.q-tr { background: rgba(212,98,42,0.09); border: 1px solid rgba(212,98,42,0.25); }
+.q-bl { background: rgba(74,124,106,0.07); border: 1px solid rgba(74,124,106,0.2); }
+.q-br { background: rgba(138,160,180,0.06); border: 1px solid rgba(138,160,180,0.18); }
+
+.q-zone {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  display: inline-block;
+  padding: 3px 10px;
+  margin-bottom: 14px;
+}
+
+.q-tl .q-zone { background: rgba(184,115,51,0.15); color: var(--copper-light); }
+.q-tr .q-zone { background: rgba(212,98,42,0.2); color: #e07a4a; }
+.q-bl .q-zone { background: rgba(74,124,106,0.2); color: #6aab92; }
+.q-br .q-zone { background: rgba(138,160,180,0.12); color: #a8bfcf; }
+
+.q-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 10px;
+  line-height: 1.2;
+}
+
+.q-body {
+  font-size: 13px;
+  color: var(--text-mid);
+  line-height: 1.7;
+  margin-bottom: 14px;
+}
+
+.q-items {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--text-dim);
+  line-height: 1.9;
+}
+
+.q-items span { display: flex; gap: 6px; }
+.q-items span::before { content: '→'; opacity: 0.5; }
+
+.q-action {
+  position: absolute;
+  bottom: 14px;
+  right: 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border: 1px solid;
+}
+
+.q-tl .q-action { border-color: rgba(184,115,51,0.3); color: var(--copper); }
+.q-tr .q-action { border-color: rgba(212,98,42,0.4); color: #e07a4a; }
+.q-bl .q-action { border-color: rgba(74,124,106,0.4); color: #6aab92; }
+.q-br .q-action { border-color: rgba(138,160,180,0.3); color: #a8bfcf; }
+
+.matrix-x-axis {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 8px 0;
+  height: 48px;
+}
+
+.axis-label-left {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--copper);
+}
+
+.axis-label-center {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: rgba(184,115,51,0.3);
+}
+
+.axis-label-right {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+/* ── SECOND MATRIX: IMPLEMENTATION ── */
+.impl-matrix {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3px;
+  margin: 32px 0;
+}
+
+.impl-q {
+  padding: 28px 24px;
+  min-height: 180px;
+  border: 1px solid var(--border);
+  position: relative;
+  transition: border-color 0.3s;
+}
+
+.impl-q:hover { border-color: var(--border-copper); }
+
+.impl-q-tl { background: rgba(74,124,106,0.08); }
+.impl-q-tr { background: rgba(184,115,51,0.08); }
+.impl-q-bl { background: rgba(138,160,180,0.06); }
+.impl-q-br { background: rgba(212,98,42,0.08); }
+
+.impl-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  display: inline-block;
+  padding: 3px 10px;
+  margin-bottom: 12px;
+}
+
+.impl-q-tl .impl-tag { background: rgba(74,124,106,0.2); color: #6aab92; }
+.impl-q-tr .impl-tag { background: rgba(184,115,51,0.2); color: var(--copper); }
+.impl-q-bl .impl-tag { background: rgba(138,160,180,0.15); color: #a8bfcf; }
+.impl-q-br .impl-tag { background: rgba(212,98,42,0.2); color: #e07a4a; }
+
+.impl-q h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.impl-q p {
+  font-size: 13px;
+  color: var(--text-mid);
+  line-height: 1.65;
+  margin-bottom: 12px;
+}
+
+.impl-q-action {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--text-dim);
+  font-weight: 500;
+}
+
+.impl-q-tl .impl-q-action { color: #6aab92; }
+.impl-q-tr .impl-q-action { color: var(--copper); }
+.impl-q-bl .impl-q-action { color: #a8bfcf; }
+.impl-q-br .impl-q-action { color: #e07a4a; }
+
+/* ── PROCESS STEPS ── */
+.process-steps {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 3px;
+  margin: 48px 0;
+}
+
+.step {
+  background: var(--black-mid);
+  border: 1px solid var(--border);
+  padding: 32px 24px;
+  position: relative;
+  transition: all 0.3s;
+}
+
+.step:hover {
+  border-color: var(--border-copper);
+  transform: translateY(-4px);
+}
+
+.step::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--copper), transparent);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.step:hover::before { opacity: 1; }
+
+.step-num {
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  font-family: 'Playfair Display', serif;
+  font-size: 52px;
+  font-weight: 700;
+  color: rgba(184,115,51,0.12);
+  line-height: 1;
+}
+
+.step-phase {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  color: var(--copper);
+  margin-bottom: 8px;
+  display: block;
+}
+
+.step h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.step-duration {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--text-dim);
+  margin-bottom: 16px;
+  display: block;
+}
+
+.step p {
+  font-size: 14px;
+  color: var(--text-mid);
+  line-height: 1.65;
+  margin-bottom: 16px;
+}
+
+.step-outputs {
+  border-top: 1px solid var(--border);
+  padding-top: 14px;
+}
+
+.step-output-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+}
+
+.step-output-item {
+  font-size: 12px;
+  color: var(--text-mid);
+  line-height: 1.7;
+  display: flex;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.step-output-item::before {
+  content: '◆';
+  font-size: 6px;
+  margin-top: 4px;
+  flex-shrink: 0;
+  color: var(--copper);
+}
+
+/* ── EXTRACTION TOOL ── */
+.extraction-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: start;
+}
+
+.extraction-left p {
+  font-size: 16px;
+  color: var(--text-dark-mid);
+  line-height: 1.8;
+  margin-bottom: 20px;
+}
+
+.signal-sources {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3px;
+  margin: 24px 0;
+}
+
+.signal-source {
+  background: white;
+  border: 1px solid rgba(0,0,0,0.08);
+  padding: 16px 18px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  transition: border-color 0.3s;
+}
+
+.signal-source:hover { border-color: rgba(184,115,51,0.4); }
+
+.signal-icon { font-size: 18px; flex-shrink: 0; }
+
+.signal-source strong {
+  display: block;
+  font-size: 13px;
+  color: var(--text-dark);
+  margin-bottom: 3px;
+  font-weight: 500;
+}
+
+.signal-source span {
+  font-size: 12px;
+  color: #666;
+  line-height: 1.5;
+}
+
+.signal-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  margin-top: 6px;
+  display: inline-block;
+}
+
+.badge-high { background: rgba(74,124,106,0.15); color: #4a7c6a; }
+.badge-med { background: rgba(184,115,51,0.12); color: #8B5A2B; }
+
+.extraction-right {
+  background: var(--black);
+  border: 1px solid var(--border-copper);
+  padding: 32px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.code-header {
+  font-size: 9px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--copper);
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.code-block {
+  font-size: 11.5px;
+  line-height: 2;
+  color: var(--text-dim);
+}
+
+.code-key { color: var(--copper-light); }
+.code-val { color: #a8bfcf; }
+.code-comment { color: rgba(102,102,102,0.6); font-style: italic; }
+.code-highlight { color: var(--text); }
+.code-indent { padding-left: 20px; }
+.code-section {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255,255,255,0.04);
+}
+
+/* ── FAILURE MODES ── */
+.failure-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 3px;
+  margin-top: 48px;
+}
+
+.failure-card {
+  background: var(--cream-mid);
+  border: 1px solid rgba(0,0,0,0.08);
+  border-top: 3px solid;
+  padding: 28px 24px;
+}
+
+.failure-card:nth-child(1) { border-top-color: #d4622a; }
+.failure-card:nth-child(2) { border-top-color: var(--copper); }
+.failure-card:nth-child(3) { border-top-color: #4a7c6a; }
+
+.failure-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 44px;
+  font-weight: 400;
+  opacity: 0.15;
+  color: var(--text-dark);
+  line-height: 1;
+  margin-bottom: -4px;
+}
+
+.failure-card h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  color: var(--text-dark);
+  margin-bottom: 12px;
+}
+
+.failure-card p {
+  font-size: 14px;
+  color: var(--text-dark-mid);
+  line-height: 1.75;
+}
+
+/* ── COMPOUNDING ── */
+.compound-steps {
+  margin: 48px 0;
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.compound-step {
+  display: grid;
+  grid-template-columns: 200px 1fr 120px;
+  align-items: center;
+  padding: 20px 32px;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.2s;
+  gap: 32px;
+}
+
+.compound-step:last-child { border-bottom: none; }
+.compound-step:hover { background: rgba(184,115,51,0.03); }
+
+.compound-step-exec {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px;
+  color: var(--copper);
+  font-style: italic;
+}
+
+.compound-step-desc {
+  font-size: 14px;
+  color: var(--text-mid);
+}
+
+.compound-step-quality {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-align: right;
+}
+
+.q-weak { color: var(--text-dim); }
+.q-growing { color: var(--copper); }
+.q-strong { color: #6aab92; }
+.q-authoritative { color: #a8e6cf; font-weight: 500; }
+
+.compound-bar {
+  height: 3px;
+  background: var(--border);
+  margin-top: 4px;
+  overflow: hidden;
+}
+
+.compound-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--copper), #6aab92);
+}
+
+/* ── QUALIFICATIONS ── */
+.qual-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 64px;
+  margin-top: 48px;
+}
+
+.qual-list h4 {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  margin-bottom: 24px;
+  color: var(--text-dark-mid);
+}
+
+.qual-list.right h4 { color: var(--copper); }
+
+.qual-list ul { list-style: none; }
+
+.qual-list li {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 12px;
+  align-items: flex-start;
+  padding: 14px 16px;
+  background: rgba(0,0,0,0.03);
+  border: 1px solid rgba(0,0,0,0.06);
+  transition: all 0.3s;
+}
+
+.qual-list li:hover {
+  background: rgba(184,115,51,0.04);
+  border-color: rgba(184,115,51,0.2);
+}
+
+.qual-list .mark {
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--copper);
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1.2;
+  flex-shrink: 0;
+}
+
+.qual-list li div strong {
+  display: block;
+  color: var(--text-dark);
+  font-weight: 500;
+  margin-bottom: 3px;
+  font-size: 14px;
+}
+
+.qual-list li div span {
+  color: var(--text-dark-mid);
+  font-size: 13px;
+}
+
+/* ── CTA ── */
+.cta-wrap {
+  max-width: 700px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.cta-box {
+  background: var(--cream-mid);
+  border: 1px solid rgba(0,0,0,0.1);
+  padding: 56px 48px;
+  position: relative;
+}
+
+.cta-box::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 120px;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--copper), transparent);
+}
+
+.cta-box h2 {
+  color: var(--text-dark);
+  font-size: 36px;
+  margin-bottom: 16px;
+}
+
+.cta-box p {
+  color: var(--text-dark-mid);
+  font-size: 17px;
+  margin-bottom: 32px;
+  line-height: 1.7;
+}
+
+.urgency-note {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--copper);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-top: 16px;
+}
+
+/* ── FOOTER ── */
+footer {
+  background: var(--black);
+  border-top: 1px solid var(--border);
+  padding: 40px 64px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.footer-brand {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px;
+  font-style: italic;
+  color: var(--copper);
+}
+
+.footer-meta {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-up { animation: fadeUp 0.7s ease both; }
+.delay-1 { animation-delay: 0.1s; }
+.delay-2 { animation-delay: 0.2s; }
+.delay-3 { animation-delay: 0.3s; }
+.delay-4 { animation-delay: 0.4s; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 1024px) {
+  .layer-categories { grid-template-columns: repeat(2, 1fr); }
+  .process-steps { grid-template-columns: 1fr 1fr; }
+  .extraction-layout { grid-template-columns: 1fr; }
+  .problem-grid { grid-template-columns: 1fr; }
+  .qual-grid { grid-template-columns: 1fr; gap: 40px; }
+  .failure-grid { grid-template-columns: 1fr; }
+  .intelligence-sources { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 768px) {
+  nav { padding: 16px 24px; }
+  .nav-links { display: none; }
+  section { padding: 80px 24px; }
+  .hero { padding: 120px 24px 60px; }
+  .hero h1 { font-size: 40px; }
+  h2 { font-size: 32px; }
+  .process-steps, .layer-categories, .intelligence-sources, .signal-sources { grid-template-columns: 1fr; }
+  .matrix-grid, .impl-matrix { grid-template-columns: 1fr; }
+  .compound-step { grid-template-columns: 1fr; gap: 8px; }
+  footer { flex-direction: column; gap: 16px; text-align: center; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="logo">Context <span>Moat</span></a>
+  <div class="nav-links">
+    <a href="#problem">The Problem</a>
+    <a href="#method">The Method</a>
+    <a href="#matrix">Intelligence Map</a>
+    <a href="#process">Process</a>
+    <a href="#contact" class="nav-cta">Start a Conversation</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="top">
+  <div class="hero-bg"></div>
+  <div class="hero-grid-bg"></div>
+  <div class="hero-content fade-up">
+    <span class="eyebrow">A Consulting Methodology</span>
+    <h1>The <em>Intelligence</em><br>Mapping Method</h1>
+    <p class="hero-lead">Your competitive advantage lives in people's heads, private files, and conversations that disappear the moment they end. AI can read everything you've written down — but what's written down isn't how you actually think, decide, or compete.</p>
+    <div class="hero-stats">
+      <div>
+        <span class="hero-stat-num">95%</span>
+        <span class="hero-stat-label">of AI pilots deliver zero measurable ROI</span>
+      </div>
+      <div>
+        <span class="hero-stat-num">$2.3M</span>
+        <span class="hero-stat-label">average cost of a failed implementation</span>
+      </div>
+      <div>
+        <span class="hero-stat-num">42%</span>
+        <span class="hero-stat-label">of companies abandoned AI in 2025</span>
+      </div>
+    </div>
+    <div class="hero-cta">
+      <a href="#contact" class="btn-primary">Start a Conversation</a>
+      <a href="#method" class="btn-ghost">See the Method</a>
+    </div>
+  </div>
+</section>
+
+<!-- PROBLEM -->
+<section id="problem" style="background: var(--black);">
+  <div class="section-inner">
+    <span class="section-label">The Problem</span>
+    <h2>Every tool you deploy starts <em>blind</em></h2>
+    <p class="problem-intro">Off-the-shelf AI gives you exactly the same capability as everyone else. It reads your documents. But your documents aren't how you actually operate. Every tool starts blind, stays blind, and builds nothing that's distinctly yours.</p>
+
+    <div class="problem-grid">
+      <div class="problem-card">
+        <div class="problem-num">01</div>
+        <h3>You Don't Know Your Own Moat</h3>
+        <p>Most executives believe they know their competitive advantage. Customer relationships. Domain expertise. Proprietary process. But these are beliefs, not operating realities. The intelligence that creates the advantage exists only in people — and people leave, retire, and forget.</p>
+      </div>
+      <div class="problem-card">
+        <div class="problem-num">02</div>
+        <h3>AI Can't Access What's in People's Heads</h3>
+        <p>The real decision logic, the informal filters, the pattern recognition built over fifteen years — none of this is in any document. AI can read your Confluence. It can't read how your best partner actually evaluates a deal. So it produces generic output and you spend hours reworking it.</p>
+      </div>
+      <div class="problem-card">
+        <div class="problem-num">03</div>
+        <h3>Every Implementation Starts From Zero</h3>
+        <p>Point solutions don't connect. They don't learn from each other. Each new tool begins knowing nothing about your organisation. You accumulate AI tools. You don't build AI intelligence. The spend rises. The advantage doesn't materialise.</p>
+      </div>
+      <div class="problem-card">
+        <div class="problem-num">04</div>
+        <h3>Pilots Are Built on Documented Reality</h3>
+        <p>When implementations fail it's almost never the technology. It's that they were built on what your organisation says it does — process maps, documented workflows, policy documents — not how it actually operates. They hit real behaviour and break.</p>
+      </div>
+    </div>
+
+    <div class="moat-statement">
+      <p>The intelligence that makes your organisation distinctly good at what it does lives in people's heads, private files, group instincts, and conversations that disappear. <strong>Nobody has ever mapped it. No AI tool can reach it. And without it, every implementation you build is generic by design.</strong></p>
+    </div>
+  </div>
+</section>
+
+<!-- WHERE IT LIVES -->
+<section style="background: var(--black-mid);">
+  <div class="section-inner">
+    <span class="section-label">Where Intelligence Actually Lives</span>
+    <h2>Not in your documents.<br><em>In your people.</em></h2>
+
+    <div class="intelligence-sources">
+      <div class="source-card">
+        <span class="source-icon">🧠</span>
+        <h3>People's Heads</h3>
+        <p>Judgment, pattern recognition, gut feel built from years of experience. Not articulable on demand. The senior analyst who knows a deal is wrong before the model says so.</p>
+        <span class="source-tag">Tacit · Primary</span>
+      </div>
+      <div class="source-card">
+        <span class="source-icon">💬</span>
+        <h3>Conversations</h3>
+        <p>The real reasoning happens in meetings, hallway chats, Slack threads. Spoken, then gone. The disagreement in a deal meeting. The "I don't know why but this feels off."</p>
+        <span class="source-tag">Tacit · Ephemeral</span>
+      </div>
+      <div class="source-card">
+        <span class="source-icon">📁</span>
+        <h3>Personal Files</h3>
+        <p>Spreadsheets, templates, checklists individuals built for themselves and never shared. Shadow systems that actually work because they encode real operational intelligence.</p>
+        <span class="source-tag">Explicit · Hidden</span>
+      </div>
+      <div class="source-card">
+        <span class="source-icon">🤝</span>
+        <h3>Group Dynamics</h3>
+        <p>How a team thinks together. The shorthand. The unspoken assumptions. What never needs to be said because everyone already knows it. Groupthink at its best and worst.</p>
+        <span class="source-tag">Tacit · Collective</span>
+      </div>
+      <div class="source-card">
+        <span class="source-icon">🔗</span>
+        <h3>Relationships</h3>
+        <p>Who trusts whom. Who defers to whom. Who gets consulted before anything goes formal. The informal authority graph that bears no resemblance to the org chart.</p>
+        <span class="source-tag">Implicit · Political</span>
+      </div>
+      <div class="source-card">
+        <span class="source-icon">⚡</span>
+        <h3>Physical Instinct</h3>
+        <p>The gut feel that a client isn't right before any data supports it. Pattern matching that the person couldn't explain if you asked them. The fastest and least accessible intelligence of all.</p>
+        <span class="source-tag">Tacit · Irreplaceable</span>
+      </div>
+    </div>
+
+    <div class="moat-statement" style="background: rgba(184,115,51,0.05);">
+      <p>You can't replace any of it with AI. <strong>But you can map it, enhance it, and make it available to every AI solution you build.</strong> That map is the thing nobody has. That's the gap we fill.</p>
+    </div>
+  </div>
+</section>
+
+<!-- THE METHOD -->
+<section id="method" style="background: var(--black);">
+  <div class="section-inner">
+    <span class="section-label">Our Approach</span>
+    <h2>We build your <em>Intelligence Layer</em></h2>
+    <p style="font-size: 18px; color: var(--text-mid); max-width: 680px; line-height: 1.7; margin-bottom: 56px; font-weight: 300;">The Intelligence Layer sits between your organisation and every AI tool you use. Not a replacement for ChatGPT, Copilot, or any point solution — the thing that makes them work for your organisation specifically. It holds the real intelligence, feeds it into any AI tool, and learns from every execution.</p>
+
+    <div class="layer-categories">
+      <div class="layer-cat">
+        <span class="layer-cat-label">01</span>
+        <h3>Strategy & Context</h3>
+        <p>Where the org is going and why. The bets being made. Risk appetite. Competitive positioning. What shapes every downstream decision but lives only in leadership's heads.</p>
+        <ul>
+          <li>Market positioning</li>
+          <li>Strategic bets</li>
+          <li>Risk appetite shifts</li>
+          <li>Competitive moves</li>
+        </ul>
+      </div>
+      <div class="layer-cat">
+        <span class="layer-cat-label">02</span>
+        <h3>Organisational Judgment</h3>
+        <p>How decisions actually get made. Real thresholds. Informal filters that kill something before it reaches a formal process. Patterns experts recognise instantly.</p>
+        <ul>
+          <li>Decision thresholds</li>
+          <li>Informal filters</li>
+          <li>Pattern recognition</li>
+          <li>Expert heuristics</li>
+        </ul>
+      </div>
+      <div class="layer-cat">
+        <span class="layer-cat-label">03</span>
+        <h3>Real Rules</h3>
+        <p>Not policy documents. The actual operating rules. What's genuinely non-negotiable versus what gets bent. The exceptions that reveal what actually matters.</p>
+        <ul>
+          <li>Non-negotiables</li>
+          <li>Exceptions & when</li>
+          <li>Unwritten standards</li>
+          <li>Bend points</li>
+        </ul>
+      </div>
+      <div class="layer-cat">
+        <span class="layer-cat-label">04</span>
+        <h3>Institutional Memory</h3>
+        <p>What the org knows from experience. Past decisions and why. What's been tried and failed. Context everyone senior already knows but nobody explains.</p>
+        <ul>
+          <li>Past decisions & why</li>
+          <li>What failed & why</li>
+          <li>Relationship history</li>
+          <li>Undocumented context</li>
+        </ul>
+      </div>
+      <div class="layer-cat">
+        <span class="layer-cat-label">05</span>
+        <h3>Language & Standards</h3>
+        <p>How the org talks. The specific framing that signals credibility. The implicit quality bar senior people apply instantly to know if something is good enough.</p>
+        <ul>
+          <li>Native vocabulary</li>
+          <li>Credibility signals</li>
+          <li>Quality bar</li>
+          <li>Format standards</li>
+        </ul>
+      </div>
+      <div class="layer-cat">
+        <span class="layer-cat-label">06</span>
+        <h3>Work Unit Intelligence</h3>
+        <p>For each discrete activity: the sensing signals that matter, the memory being drawn on, the reasoning logic, the creation standards. Not the template — the thinking behind it.</p>
+        <ul>
+          <li>Sensing signals</li>
+          <li>Reasoning logic</li>
+          <li>Memory sources</li>
+          <li>Creation standards</li>
+        </ul>
+      </div>
+      <div class="layer-cat">
+        <span class="layer-cat-label">07</span>
+        <h3>Relationships</h3>
+        <p>Who trusts whom. Who has informal authority. Who gets consulted before anything goes formal. The real decision network that determines what actually happens.</p>
+        <ul>
+          <li>Informal authority</li>
+          <li>Trust networks</li>
+          <li>Consultation patterns</li>
+          <li>Political economy</li>
+        </ul>
+      </div>
+      <div class="layer-cat">
+        <span class="layer-cat-label">08</span>
+        <h3>Exceptions</h3>
+        <p>Where the rules get bent, why, and what that reveals about what actually matters. The most underrated category. It's where the real ontology lives.</p>
+        <ul>
+          <li>Exception patterns</li>
+          <li>Exception triggers</li>
+          <li>What they reveal</li>
+          <li>Informal override logic</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- INTELLIGENCE MAP / MATRIX -->
+<section id="matrix" style="background: var(--black-mid);">
+  <div class="section-inner">
+    <span class="section-label">Phase One — The Intelligence Map</span>
+    <h2>What Phase One <em>reveals</em></h2>
+    <p style="font-size: 17px; color: var(--text-mid); max-width: 660px; line-height: 1.7; margin-bottom: 48px; font-weight: 300;">Before building anything, we map the knowledge terrain across a thin vertical slice of your organisation. Two dimensions. Four zones. Each zone requires a different action and a different approach to make it accessible to AI.</p>
+
+    <!-- MATRIX 1: Knowledge Terrain -->
+    <div class="matrix-wrap" style="margin-bottom: 64px;">
+      <div class="matrix-title">Knowledge Terrain — Explicit / Tacit vs Shared / Held</div>
+      <div class="matrix-layout">
+        <div class="matrix-y-axis">
+          <span class="axis-label-top">Shared</span>
+          <div class="axis-line-v"></div>
+          <span class="axis-label-bottom">Held</span>
+        </div>
+        <div class="matrix-body">
+          <div class="matrix-grid">
+            <!-- TL -->
+            <div class="q q-tl">
+              <div class="q-zone">Zone 1</div>
+              <div class="q-title">The Foundation</div>
+              <div class="q-body">Documented processes, shared playbooks, formal decision records. Easiest to connect to AI — but rarely sufficient. Over-reliance produces generic output that doesn't reflect how the organisation actually performs.</div>
+              <div class="q-items">
+                <span>Process documentation</span>
+                <span>Policy & compliance records</span>
+                <span>Shared dashboards</span>
+              </div>
+              <div class="q-action">Capture → Index</div>
+            </div>
+            <!-- TR -->
+            <div class="q q-tr">
+              <div class="q-zone">Zone 2 · High Value</div>
+              <div class="q-title">The Invisible Infrastructure</div>
+              <div class="q-body">Knowledge the org relies on collectively but has never formalised. Team norms, unwritten rules, consistent judgment calls never documented. Where most AI context gaps live — and the biggest performance gains available.</div>
+              <div class="q-items">
+                <span>Unwritten client relationship rules</span>
+                <span>How decisions actually escalate</span>
+                <span>What "good" looks like in practice</span>
+              </div>
+              <div class="q-action">Elicit → Encode</div>
+            </div>
+            <!-- BL -->
+            <div class="q q-bl">
+              <div class="q-zone">Zone 3 · Political</div>
+              <div class="q-title">Protected Assets</div>
+              <div class="q-body">Documented knowledge deliberately kept siloed. Client relationships, proprietary models, expertise that confers status. People here aren't obstructionist — they're rationally protecting real leverage. Requires negotiation, not extraction.</div>
+              <div class="q-items">
+                <span>Individual client intelligence</span>
+                <span>Proprietary analytical models</span>
+                <span>Relationship history & context</span>
+              </div>
+              <div class="q-action">Negotiate → Govern</div>
+            </div>
+            <!-- BR -->
+            <div class="q q-br">
+              <div class="q-zone">Zone 4 · Critical Risk</div>
+              <div class="q-title">Concentrated Judgment</div>
+              <div class="q-body">Knowledge existing only in specific individuals' heads — never written, never shared. When these people leave, it leaves with them. AI systems that can't access this zone will systematically underperform the humans they're meant to assist.</div>
+              <div class="q-items">
+                <span>Senior partner intuition</span>
+                <span>Experienced risk reader patterns</span>
+                <span>Long-tenure relationship memory</span>
+              </div>
+              <div class="q-action">Surface → Transfer</div>
+            </div>
+          </div>
+          <div class="matrix-x-axis">
+            <span class="axis-label-left">← Explicit</span>
+            <span class="axis-label-center">Knowledge Type</span>
+            <span class="axis-label-right">Tacit →</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MATRIX 2: Implementation Decisions -->
+    <h3 style="font-family: 'Playfair Display', serif; font-size: 28px; color: var(--text); margin-bottom: 12px; font-weight: 400;">The Implementation Decision Matrix</h3>
+    <p style="font-size: 16px; color: var(--text-mid); max-width: 660px; line-height: 1.7; margin-bottom: 32px;">From the knowledge terrain map, each piece of intelligence gets an implementation decision. The map tells you where things are. This tells you what to do with them.</p>
+
+    <div class="impl-matrix">
+      <div class="impl-q impl-q-tl">
+        <div class="impl-tag">Capturable + Replaceable</div>
+        <h3>Automate</h3>
+        <p>Clear value, feasible now, low risk. Intelligence can be captured and AI can execute reliably. Start here for fast, demonstrable ROI.</p>
+        <div class="impl-q-action">→ First point solution</div>
+      </div>
+      <div class="impl-q impl-q-tr">
+        <div class="impl-tag">Capturable + Enhance</div>
+        <h3>Augment</h3>
+        <p>Build AI that draws on captured context to make humans faster and more consistent. AI assists, human decides. Output quality rises immediately.</p>
+        <div class="impl-q-action">→ AI-assisted workflow</div>
+      </div>
+      <div class="impl-q impl-q-bl">
+        <div class="impl-tag">Hard to Capture + Human Only</div>
+        <h3>Protect & Document</h3>
+        <p>Not an AI problem. A knowledge retention and succession problem. Flag it, plan for it, ensure it transfers when people move on.</p>
+        <div class="impl-q-action">→ Succession planning</div>
+      </div>
+      <div class="impl-q impl-q-br">
+        <div class="impl-tag">Hard to Capture + Enhance</div>
+        <h3>Extract First</h3>
+        <p>The interview and artefact work. Get it out of heads before you can do anything with it. This is where the methodology earns its value.</p>
+        <div class="impl-q-action">→ Extraction methodology</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- EXTRACTION TOOL -->
+<section style="background: var(--cream);">
+  <div class="section-inner">
+    <span class="section-label" style="color: var(--copper);">The Extraction Tool</span>
+    <h2 style="color: var(--text-dark);">AI does the <em>trawling</em>.<br>You do the sense-making.</h2>
+
+    <div class="extraction-layout">
+      <div class="extraction-left">
+        <p>Nobody wants a consultant reading their Slack messages. The extraction tool processes your existing signal at scale — meeting transcripts, call recordings, annotated documents, email threads — and surfaces structured intelligence candidates in hours, not weeks.</p>
+        <p>You validate what's real, discard what's noise, fill gaps with targeted interviews. Two days of your time, not six weeks of ours.</p>
+
+        <h3 style="font-family: 'Playfair Display', serif; font-size: 22px; color: var(--text-dark); margin: 28px 0 16px; font-weight: 400;">Signal Sources — Ranked by Quality</h3>
+        <div class="signal-sources">
+          <div class="signal-source">
+            <span class="signal-icon">🎙️</span>
+            <div>
+              <strong>Meeting Transcripts</strong>
+              <span>People reason out loud in real conversations. The disagreement in a deal meeting. The "I don't know why but this feels wrong." Richest source, mostly untouched.</span>
+              <div class="signal-badge badge-high">Highest Signal</div>
+            </div>
+          </div>
+          <div class="signal-source">
+            <span class="signal-icon">🖥️</span>
+            <div>
+              <strong>Screen Recordings</strong>
+              <span>Watching someone do the work. Where they pause, what they check, the order they read things. Behaviour that never surfaces in interviews.</span>
+              <div class="signal-badge badge-high">Highest Signal</div>
+            </div>
+          </div>
+          <div class="signal-source">
+            <span class="signal-icon">📝</span>
+            <div>
+              <strong>Annotated Documents</strong>
+              <span>A partner's edits to an analyst's memo contain more intelligence about judgment than any interview. The edit is the standard made visible.</span>
+              <div class="signal-badge badge-high">High Signal</div>
+            </div>
+          </div>
+          <div class="signal-source">
+            <span class="signal-icon">💬</span>
+            <div>
+              <strong>Slack / Email Threads</strong>
+              <span>Informal reasoning before formal decisions. Where someone says "I'm not comfortable with this because..." before the committee sanitises it.</span>
+              <div class="signal-badge badge-high">High Signal</div>
+            </div>
+          </div>
+          <div class="signal-source">
+            <span class="signal-icon">📊</span>
+            <div>
+              <strong>Personal Artefacts</strong>
+              <span>The spreadsheets and templates individuals built for themselves. Crystallised personal intelligence that never made it into shared systems.</span>
+              <div class="signal-badge badge-med">Medium Signal</div>
+            </div>
+          </div>
+          <div class="signal-source">
+            <span class="signal-icon">🎯</span>
+            <div>
+              <strong>Targeted Interviews</strong>
+              <span>Last resort, not first. Designed to fill specific gaps the other sources left. Not "describe your process" — "walk me through this exact decision."</span>
+              <div class="signal-badge badge-med">Medium Signal</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="extraction-right">
+        <div class="code-header">Intelligence Candidates — Sample Output</div>
+        <div class="code-block">
+          <div class="code-comment">// Work unit: investment_memo</div>
+          <div class="code-comment">// Source: 14 IC transcripts, 6 months</div>
+          <div style="margin-top: 12px;">
+            <span class="code-key">judgment_candidates</span> <span style="color: var(--text-dim)">(8)</span>
+          </div>
+          <div class="code-indent">
+            <div><span class="code-val">→ "Market size threshold $500M+"</span></div>
+            <div style="padding-left: 16px; font-size: 10px; color: var(--text-dim)">confidence: 0.91 · observed: 14x</div>
+            <div style="margin-top: 6px;"><span class="code-val">→ "Partner X requires sector thesis"</span></div>
+            <div style="padding-left: 16px; font-size: 10px; color: var(--text-dim)">confidence: 0.76 · observed: 6x</div>
+          </div>
+
+          <div class="code-section">
+            <span class="code-key">rules_candidates</span> <span style="color: var(--text-dim)">(5)</span>
+            <div class="code-indent">
+              <div><span class="code-val">→ "Model sign-off before IC"</span></div>
+              <div style="padding-left: 16px; font-size: 10px; color: var(--text-dim)">confidence: 0.94 · RULE</div>
+              <div style="margin-top: 6px;"><span class="code-val">→ "CFO informal approval first"</span></div>
+              <div style="padding-left: 16px; font-size: 10px; color: var(--text-dim)">confidence: 0.82 · EXCEPTION_PATTERN</div>
+            </div>
+          </div>
+
+          <div class="code-section">
+            <span class="code-key">language_candidates</span> <span style="color: var(--text-dim)">(6)</span>
+            <div class="code-indent">
+              <div><span class="code-val">→ "Use 'thesis' not 'hypothesis'"</span></div>
+              <div style="padding-left: 16px; font-size: 10px; color: var(--text-dim)">confidence: 0.88 · STANDARD</div>
+            </div>
+          </div>
+
+          <div class="code-section" style="border-top: 1px solid rgba(212,98,42,0.3);">
+            <span style="color: #e07a4a;">⚠ gaps_flagged</span> <span style="color: var(--text-dim)">(2)</span>
+            <div class="code-indent">
+              <div style="color: #e07a4a; font-size: 11px;">→ No signal: how risk gets weighted</div>
+              <div style="color: #e07a4a; font-size: 11px;">→ Missing: first-screen kill criteria</div>
+            </div>
+          </div>
+
+          <div class="code-section" style="border-top: 1px solid rgba(184,115,51,0.2);">
+            <span style="color: var(--text-dim); font-size: 10px;">⚡ 3 interview prompts auto-generated</span>
+            <div class="code-indent" style="font-size: 10px; color: rgba(102,102,102,0.7); margin-top: 4px;">
+              <div>→ "What kills a deal in first 60s?"</div>
+              <div>→ "How do you weight mgmt vs market?"</div>
+              <div>→ "Last deal you passed on — why?"</div>
+            </div>
+          </div>
+
+          <div class="code-section" style="border-top: 1px solid rgba(138,160,180,0.2);">
+            <span style="color: #a8bfcf; font-size: 10px;">⚠ contradiction_detected</span>
+            <div class="code-indent" style="font-size: 10px; color: rgba(168,191,207,0.6); margin-top: 4px;">
+              <div>→ 2 conflicting rules on exit timing</div>
+              <div>→ Flagged for human resolution</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROCESS -->
+<section id="process" style="background: var(--black);">
+  <div class="section-inner">
+    <span class="section-label">The Process</span>
+    <h2>Four phases. Minimal<br><em>input from you.</em></h2>
+
+    <div class="process-steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <span class="step-phase">Phase One</span>
+        <h3>Intelligence Mapping</h3>
+        <span class="step-duration">2–3 weeks</span>
+        <p>We mine 3–6 months of transcripts, artefacts, and outputs for a chosen vertical slice. The extraction tool processes the signal. You validate the output. No workshops. No process mapping sessions.</p>
+        <div class="step-outputs">
+          <div class="step-output-label">Deliverables</div>
+          <div class="step-output-item">Knowledge terrain map — four zones</div>
+          <div class="step-output-item">Intelligence candidates — validated</div>
+          <div class="step-output-item">Political economy analysis</div>
+          <div class="step-output-item">Bias & decay risk profile</div>
+          <div class="step-output-item">Gap-targeted interview script</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">02</div>
+        <span class="step-phase">Phase Two</span>
+        <h3>Context Architecture</h3>
+        <span class="step-duration">1–2 weeks</span>
+        <p>We structure what we've found into your Context Graph — the machine-readable intelligence layer any AI tool can query via MCP. Governance, access controls, and confidence scoring built in from day one.</p>
+        <div class="step-outputs">
+          <div class="step-output-label">Deliverables</div>
+          <div class="step-output-item">Context Graph — initial population</div>
+          <div class="step-output-item">MCP server configuration</div>
+          <div class="step-output-item">Governance & access framework</div>
+          <div class="step-output-item">Implementation decision matrix</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">03</div>
+        <span class="step-phase">Phase Three</span>
+        <h3>Intelligent Build</h3>
+        <span class="step-duration">2–4 weeks</span>
+        <p>We ship the first point solution on top of the graph. Instrumented from day one — every execution, override, and exception feeds signal back automatically. The graph starts learning immediately.</p>
+        <div class="step-outputs">
+          <div class="step-output-label">Deliverables</div>
+          <div class="step-output-item">First AI solution — production-ready</div>
+          <div class="step-output-item">Signal feedback loop — live</div>
+          <div class="step-output-item">ROI instrumentation</div>
+          <div class="step-output-item">Handoff & ownership model</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">04</div>
+        <span class="step-phase">Phase Four</span>
+        <h3>Expand</h3>
+        <span class="step-duration">Ongoing</span>
+        <p>Each new work unit and each new solution builds on what came before. The graph deepens. Deployment gets faster. Cost per solution drops. The moat compounds with every execution.</p>
+        <div class="step-outputs">
+          <div class="step-output-label">What Changes</div>
+          <div class="step-output-item">Each solution 30–40% faster to deploy</div>
+          <div class="step-output-item">Graph surfaces next opportunities</div>
+          <div class="step-output-item">Intelligence compounds automatically</div>
+          <div class="step-output-item">Competitors can't replicate the depth</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Compounding -->
+    <h3 style="font-family: 'Playfair Display', serif; font-size: 28px; color: var(--text); margin: 64px 0 12px; font-weight: 400;">The Compounding Effect</h3>
+    <p style="font-size: 15px; color: var(--text-mid); margin-bottom: 24px;">Every AI execution produces signal. Every signal update improves the graph. The graph makes the next execution better.</p>
+
+    <div class="compound-steps">
+      <div class="compound-step">
+        <div class="compound-step-exec">Execution 1</div>
+        <div class="compound-step-desc">Thin context. Reasonable output. Human overrides several elements. Each override is a learning event — the graph records what was wrong and why.</div>
+        <div>
+          <div class="compound-step-quality q-weak">Early Stage</div>
+          <div class="compound-bar"><div class="compound-bar-fill" style="width: 15%"></div></div>
+        </div>
+      </div>
+      <div class="compound-step">
+        <div class="compound-step-exec">Execution 10</div>
+        <div class="compound-step-desc">Richer context. Fewer overrides needed. The judgment logic is starting to be understood. Outputs feel more native. Practitioner trust begins to build.</div>
+        <div>
+          <div class="compound-step-quality q-growing">Growing</div>
+          <div class="compound-bar"><div class="compound-bar-fill" style="width: 40%"></div></div>
+        </div>
+      </div>
+      <div class="compound-step">
+        <div class="compound-step-exec">Execution 100</div>
+        <div class="compound-step-desc">Dense context. Excellent output. Rare corrections. The graph has seen most of the edge cases and knows how this organisation handles them.</div>
+        <div>
+          <div class="compound-step-quality q-strong">Strong</div>
+          <div class="compound-bar"><div class="compound-bar-fill" style="width: 75%"></div></div>
+        </div>
+      </div>
+      <div class="compound-step" style="background: rgba(184,115,51,0.03);">
+        <div class="compound-step-exec">Execution 1,000+</div>
+        <div class="compound-step-desc">Graph is authoritative. Output is indistinguishable from your best people. Every edge case seen and captured. New people inherit the institutional intelligence on day one.</div>
+        <div>
+          <div class="compound-step-quality q-authoritative">Authoritative</div>
+          <div class="compound-bar"><div class="compound-bar-fill" style="width: 97%"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHY IT FAILS WITHOUT THIS -->
+<section class="section-light">
+  <div class="section-inner">
+    <span class="section-label" style="color: var(--copper);">Why Jumping Straight to Build Fails</span>
+    <h2 style="color: var(--text-dark);">The three failure modes<br><em>we design against</em></h2>
+
+    <div class="failure-grid">
+      <div class="failure-card">
+        <div class="failure-num">01</div>
+        <h3>Context Poverty</h3>
+        <p>Without mapping what the organisation actually knows, AI systems retrieve from the surface layer only. Outputs feel generic because they are — the system doesn't have access to the judgment, relationships, and tacit patterns that define genuine performance. Rework becomes the norm. Trust never builds.</p>
+      </div>
+      <div class="failure-card">
+        <div class="failure-num">02</div>
+        <h3>Political Resistance</h3>
+        <p>People who hold tacit knowledge resist contributing it to systems they don't trust, built without their input, that threaten their leverage. Without surfacing this dynamic in Phase One and designing around it in Phase Two, the context layer never gets the signal it needs. The most valuable intelligence stays locked.</p>
+      </div>
+      <div class="failure-card">
+        <div class="failure-num">03</div>
+        <h3>Compounding Bias</h3>
+        <p>AI systems that retrieve historical judgment without understanding which of that judgment should be trusted create a feedback loop — institutional blind spots become load-bearing. Each correct decision obscures the systematic errors building underneath. Phase Two designs against this from the start.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHO THIS IS FOR -->
+<section style="background: var(--black);">
+  <div class="section-inner">
+    <span class="section-label">Ideal Engagement</span>
+    <h2>Built for organisations<br>ready to <em>stop piloting</em></h2>
+
+    <div class="qual-grid" style="color: var(--text);">
+      <div class="qual-list">
+        <h4>This works when</h4>
+        <ul>
+          <li>
+            <span class="mark">✓</span>
+            <div><strong>You've run at least one AI pilot</strong><span>You know the tools. You've seen them underperform. You understand the context problem viscerally.</span></div>
+          </li>
+          <li>
+            <span class="mark">✓</span>
+            <div><strong>Your board is asking the moat question</strong><span>AI spend is visible. The question "what's our advantage?" has been asked and you don't have a clean answer.</span></div>
+          </li>
+          <li>
+            <span class="mark">✓</span>
+            <div><strong>You have a vertical slice in mind</strong><span>One activity, one process, one work unit where the intelligence problem is most visible and most costly.</span></div>
+          </li>
+          <li>
+            <span class="mark">✓</span>
+            <div><strong>You have transcripts and artefacts</strong><span>Three to six months of meeting recordings, annotated documents, working files. Most enterprises have this sitting untouched.</span></div>
+          </li>
+        </ul>
+      </div>
+      <div class="qual-list right">
+        <h4>What you get</h4>
+        <ul>
+          <li>
+            <span class="mark">→</span>
+            <div><strong>A living intelligence map</strong><span>Interactive, referenceable, growing. Not a deliverable that sits in a folder — a hosted asset that compounds over time.</span></div>
+          </li>
+          <li>
+            <span class="mark">→</span>
+            <div><strong>A working AI solution</strong><span>Production-ready, instrumented, drawing from and feeding into the graph. Immediate, measurable ROI.</span></div>
+          </li>
+          <li>
+            <span class="mark">→</span>
+            <div><strong>An expansion roadmap</strong><span>The graph reveals the next opportunities automatically. You know exactly where to build next and why.</span></div>
+          </li>
+          <li>
+            <span class="mark">→</span>
+            <div><strong>Your own intelligence layer</strong><span>The tools stay commodities. The Intelligence Layer is yours. It doesn't walk out the door. It doesn't go stale. It compounds.</span></div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section id="contact" class="section-light">
+  <div class="section-inner">
+    <div class="cta-wrap">
+      <div class="cta-box">
+        <span class="eyebrow" style="color: var(--copper);">Start the Conversation</span>
+        <h2>What is your<br>AI moat?</h2>
+        <p>The first session is a strategic conversation. We'll work through where your competitive advantage actually lives today, whether it's accessible to AI, and what it would take to make it permanent. No pitch. No proposal. Just the right questions.</p>
+        <a href="mailto:dan@contextmoat.com" class="btn-primary">Book a Session</a>
+        <div class="urgency-note">2026 is the year of scale or fail — boards are asking</div>
+      </div>
+      <p style="text-align: center; margin-top: 20px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-dim);">Or reach out directly · <a href="mailto:dan@contextmoat.com" style="color: var(--copper); text-decoration: none;">dan@contextmoat.com</a></p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-brand">Context Moat</div>
+  <div class="footer-meta">Confidential · Not for distribution · v2.0</div>
+</footer>
+
+</body>
+</html>

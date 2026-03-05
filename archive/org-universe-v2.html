@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Org Universe — Context Explorer</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,300&family=JetBrains+Mono:wght@300;400&display=swap');
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg-deep: #06080f;
+    --bg-panel: rgba(12, 16, 28, 0.88);
+    --bg-card: rgba(18, 24, 42, 0.75);
+    --border: rgba(80, 120, 200, 0.12);
+    --border-active: rgba(100, 160, 255, 0.3);
+    --text-primary: #e2e8f4;
+    --text-secondary: #8090b0;
+    --text-dim: #4a5670;
+    --glow-intensity: 0.6;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    background: var(--bg-deep);
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text-primary);
+  }
+
+  #canvas-container { position: fixed; inset: 0; z-index: 0; }
+  canvas { display: block; }
+
+  #starfield {
+    position: fixed; inset: 0; z-index: -1;
+    background: radial-gradient(ellipse at 30% 20%, rgba(20, 40, 80, 0.4) 0%, transparent 60%),
+                radial-gradient(ellipse at 70% 80%, rgba(40, 20, 60, 0.3) 0%, transparent 50%),
+                var(--bg-deep);
+  }
+
+  /* ─── Top bar ─── */
+  .top-bar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 20px;
+    background: linear-gradient(180deg, rgba(6,8,15,0.96) 0%, rgba(6,8,15,0.0) 100%);
+    pointer-events: none;
+  }
+  .top-bar > * { pointer-events: auto; }
+
+  .logo {
+    display: flex; align-items: center; gap: 10px;
+    font-weight: 700; font-size: 15px; letter-spacing: 0.5px;
+    color: var(--text-primary); white-space: nowrap; flex-shrink: 0;
+  }
+  .logo-icon {
+    width: 28px; height: 28px; border-radius: 8px;
+    background: linear-gradient(135deg, #3b82f6, #10b981);
+    display: grid; place-items: center;
+    font-size: 14px; font-weight: 700; color: white;
+  }
+  .logo span { color: var(--text-secondary); font-weight: 300; margin-left: 2px; }
+
+  /* ─── Universe Switcher ─── */
+  .universe-switcher {
+    position: relative; flex-shrink: 0;
+  }
+  .universe-btn {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 14px; border-radius: 10px;
+    border: 1px solid var(--border-active);
+    background: rgba(59, 130, 246, 0.08);
+    color: var(--text-primary);
+    font-family: inherit; font-size: 12.5px; font-weight: 500;
+    cursor: pointer; transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .universe-btn:hover { background: rgba(59, 130, 246, 0.15); }
+  .universe-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
+  .universe-btn .chevron { transition: transform 0.2s; }
+  .universe-btn.open .chevron { transform: rotate(180deg); }
+
+  .universe-dropdown {
+    position: absolute; top: calc(100% + 8px); left: 0;
+    min-width: 320px;
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    backdrop-filter: blur(24px);
+    padding: 8px;
+    opacity: 0; transform: translateY(-8px);
+    pointer-events: none;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 200;
+  }
+  .universe-dropdown.open {
+    opacity: 1; transform: translateY(0); pointer-events: auto;
+  }
+  .universe-option {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 12px 14px; border-radius: 10px;
+    cursor: pointer; transition: background 0.15s;
+    border: 1px solid transparent;
+  }
+  .universe-option:hover { background: rgba(255,255,255,0.04); }
+  .universe-option.active {
+    background: rgba(59, 130, 246, 0.08);
+    border-color: rgba(59, 130, 246, 0.2);
+  }
+  .universe-option-icon {
+    width: 36px; height: 36px; border-radius: 10px;
+    display: grid; place-items: center;
+    font-size: 16px; flex-shrink: 0; margin-top: 2px;
+  }
+  .universe-option-text { flex: 1; min-width: 0; }
+  .universe-option-name { font-size: 13.5px; font-weight: 600; margin-bottom: 3px; }
+  .universe-option-desc { font-size: 11.5px; color: var(--text-secondary); line-height: 1.45; }
+  .universe-option-meta {
+    font-size: 10.5px; color: var(--text-dim); margin-top: 4px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ─── Search ─── */
+  .search-wrap { position: relative; flex: 1; max-width: 380px; }
+  .search-wrap svg {
+    position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+    width: 16px; height: 16px; color: var(--text-dim); pointer-events: none;
+  }
+  .search-input {
+    width: 100%; padding: 9px 16px 9px 40px;
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 12px; color: var(--text-primary);
+    font-family: inherit; font-size: 13px; outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    backdrop-filter: blur(12px);
+  }
+  .search-input::placeholder { color: var(--text-dim); }
+  .search-input:focus { border-color: var(--border-active); box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+
+  /* ─── Domain filters ─── */
+  .filters { display: flex; gap: 5px; flex-wrap: wrap; margin-left: auto; }
+  .filter-btn {
+    padding: 5px 12px; border-radius: 20px;
+    border: 1px solid var(--border); background: var(--bg-card);
+    color: var(--text-secondary); font-family: inherit; font-size: 11.5px; font-weight: 500;
+    cursor: pointer; transition: all 0.25s ease;
+    backdrop-filter: blur(8px); white-space: nowrap;
+  }
+  .filter-btn:hover { border-color: var(--border-active); color: var(--text-primary); }
+  .filter-btn.active { color: white; border-color: transparent; }
+
+  /* ─── Detail panel ─── */
+  .detail-panel {
+    position: fixed; right: 20px; top: 72px; z-index: 100;
+    width: 360px;
+    background: var(--bg-panel); border: 1px solid var(--border);
+    border-radius: 16px; padding: 24px;
+    backdrop-filter: blur(20px);
+    transform: translateX(calc(100% + 40px)); opacity: 0;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+    max-height: calc(100vh - 110px); overflow-y: auto;
+  }
+  .detail-panel.visible { transform: translateX(0); opacity: 1; }
+  .detail-panel::-webkit-scrollbar { width: 4px; }
+  .detail-panel::-webkit-scrollbar-track { background: transparent; }
+  .detail-panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  .detail-close {
+    position: absolute; top: 14px; right: 14px;
+    width: 28px; height: 28px; border-radius: 8px;
+    border: 1px solid var(--border); background: var(--bg-card);
+    color: var(--text-secondary); display: grid; place-items: center;
+    cursor: pointer; font-size: 14px; transition: all 0.2s;
+  }
+  .detail-close:hover { background: rgba(255,255,255,0.05); color: var(--text-primary); }
+
+  .detail-domain {
+    display: inline-block; padding: 4px 10px; border-radius: 6px;
+    font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;
+    margin-bottom: 12px;
+  }
+  .detail-title { font-size: 19px; font-weight: 700; line-height: 1.3; margin-bottom: 6px; }
+  .detail-type {
+    font-size: 12px; color: var(--text-dim); margin-bottom: 14px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .detail-desc { font-size: 13px; line-height: 1.65; color: var(--text-secondary); margin-bottom: 18px; }
+
+  .detail-section-title {
+    font-size: 10.5px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 1.2px; color: var(--text-dim); margin-bottom: 8px; margin-top: 16px;
+  }
+  .detail-section-title:first-of-type { margin-top: 0; }
+
+  .detail-connections { display: flex; flex-direction: column; gap: 5px; }
+  .connection-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 7px 10px; border-radius: 8px;
+    background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+    font-size: 12px; cursor: pointer; transition: all 0.2s;
+  }
+  .connection-item:hover { background: rgba(255,255,255,0.06); border-color: var(--border-active); }
+  .connection-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .connection-label {
+    color: var(--text-dim); font-size: 10.5px; margin-left: auto;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ─── Signal sources ─── */
+  .signal-sources { display: flex; flex-direction: column; gap: 4px; }
+  .signal-item {
+    display: flex; align-items: flex-start; gap: 8px;
+    padding: 6px 10px; border-radius: 7px;
+    background: rgba(255,255,255,0.02);
+    font-size: 11.5px; line-height: 1.4; color: var(--text-secondary);
+  }
+  .signal-badge {
+    flex-shrink: 0; padding: 2px 6px; border-radius: 4px;
+    font-size: 9px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.5px; margin-top: 1px;
+  }
+  .signal-high { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+  .signal-medium { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+  .signal-low { background: rgba(100, 116, 139, 0.15); color: #94a3b8; }
+
+  /* ─── Stats bar ─── */
+  .stats-bar {
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 100;
+    display: flex; gap: 20px; align-items: center;
+    padding: 10px 24px;
+    background: var(--bg-panel); border: 1px solid var(--border);
+    border-radius: 14px; backdrop-filter: blur(20px);
+    font-size: 11.5px; color: var(--text-secondary);
+  }
+  .stat-value { color: var(--text-primary); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .stat-sep { width: 1px; height: 14px; background: var(--border); }
+
+  /* ─── Tooltip ─── */
+  .tooltip {
+    position: fixed; z-index: 200;
+    padding: 8px 14px; background: rgba(12, 16, 28, 0.95);
+    border: 1px solid var(--border-active); border-radius: 10px;
+    backdrop-filter: blur(12px); pointer-events: none;
+    opacity: 0; transition: opacity 0.15s;
+    font-size: 13px; font-weight: 500; white-space: nowrap;
+  }
+  .tooltip.visible { opacity: 1; }
+  .tooltip-domain { font-size: 10px; color: var(--text-dim); font-family: 'JetBrains Mono', monospace; margin-top: 2px; }
+
+  /* ─── Instructions ─── */
+  .instructions {
+    position: fixed; bottom: 64px; left: 50%; transform: translateX(-50%);
+    z-index: 90; font-size: 11.5px; color: var(--text-dim);
+    text-align: center; transition: opacity 1s ease; pointer-events: none;
+  }
+  .instructions.hidden { opacity: 0; }
+  .instructions kbd {
+    display: inline-block; padding: 2px 6px;
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 4px; font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; margin: 0 2px;
+  }
+
+  /* ─── Transition overlay ─── */
+  .transition-overlay {
+    position: fixed; inset: 0; z-index: 300;
+    background: var(--bg-deep);
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.5s ease;
+  }
+  .transition-overlay.active { opacity: 1; pointer-events: auto; }
+
+  @media (max-width: 1000px) {
+    .filters { display: none; }
+    .detail-panel { width: calc(100vw - 32px); right: 16px; }
+  }
+  @media (max-width: 600px) {
+    .top-bar { padding: 10px 12px; gap: 8px; flex-wrap: wrap; }
+    .logo span { display: none; }
+    .universe-btn .btn-label { display: none; }
+    .search-wrap { max-width: 100%; order: 10; flex-basis: 100%; }
+    .stats-bar { bottom: 10px; gap: 12px; padding: 8px 16px; font-size: 10.5px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="starfield"></div>
+<div id="canvas-container"></div>
+<div class="transition-overlay" id="transition-overlay"></div>
+
+<!-- Top Bar -->
+<div class="top-bar">
+  <div class="logo">
+    <div class="logo-icon">◈</div>
+    Org Universe <span>Explorer</span>
+  </div>
+
+  <!-- Universe Switcher -->
+  <div class="universe-switcher" id="universe-switcher">
+    <button class="universe-btn" id="universe-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2a10 10 0 0 1 0 20M12 2a10 10 0 0 0 0 20M2 12h20"/></svg>
+      <span class="btn-label" id="universe-btn-label">AI Company — Product & Market</span>
+      <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+    </button>
+    <div class="universe-dropdown" id="universe-dropdown"></div>
+  </div>
+
+  <div class="search-wrap">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+    <input class="search-input" id="search" placeholder="Search nodes, domains, relationships..." autocomplete="off" />
+  </div>
+
+  <div class="filters" id="filters"></div>
+</div>
+
+<!-- Detail Panel -->
+<div class="detail-panel" id="detail-panel">
+  <button class="detail-close" id="detail-close">✕</button>
+  <div class="detail-domain" id="detail-domain"></div>
+  <div class="detail-title" id="detail-title"></div>
+  <div class="detail-type" id="detail-type"></div>
+  <div class="detail-desc" id="detail-desc"></div>
+  <div id="detail-signals-section" style="display:none;">
+    <div class="detail-section-title">Signal Sources</div>
+    <div class="signal-sources" id="detail-signals"></div>
+  </div>
+  <div class="detail-section-title">Connections</div>
+  <div class="detail-connections" id="detail-connections"></div>
+</div>
+
+<!-- Tooltip -->
+<div class="tooltip" id="tooltip">
+  <div id="tooltip-name"></div>
+  <div class="tooltip-domain" id="tooltip-domain"></div>
+</div>
+
+<!-- Stats Bar -->
+<div class="stats-bar" id="stats-bar">
+  <div><span class="stat-value" id="stat-nodes">0</span> nodes</div>
+  <div class="stat-sep"></div>
+  <div><span class="stat-value" id="stat-edges">0</span> connections</div>
+  <div class="stat-sep"></div>
+  <div><span class="stat-value" id="stat-domains">0</span> domains</div>
+  <div class="stat-sep"></div>
+  <div id="stat-filter">Showing: <span class="stat-value">All</span></div>
+</div>
+
+<!-- Instructions -->
+<div class="instructions" id="instructions">
+  <kbd>Click</kbd> node to inspect · <kbd>Drag</kbd> rotate · <kbd>Scroll</kbd> zoom · <kbd>/</kbd> search · <kbd>Esc</kbd> reset
+</div>
+
+<script type="importmap">
+{ "imports": { "three": "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.js" } }
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  UNIVERSE REGISTRY — Add new universes here                  ║
+// ╚══════════════════════════════════════════════════════════════╝
+
+const UNIVERSES = {
+
+// ────────────────────────────────────────
+// UNIVERSE 1: AI Company — Product & Market
+// ────────────────────────────────────────
+"ai-company": {
+  name: "AI Company — Product & Market",
+  desc: "Product strategy, competitive landscape, and go-to-market context for a frontier AI company.",
+  icon: "🤖",
+  iconBg: "linear-gradient(135deg, #3b82f6, #8b5cf6)",
+  domainColors: {
+    "Strategy": 0xf59e0b, "Products": 0x3b82f6, "Projects": 0x8b5cf6,
+    "Marketing": 0xec4899, "Ethos": 0x10b981, "Customers": 0x06b6d4,
+    "Competitors": 0xef4444, "Context": 0xf97316,
+  },
+  nodes: [
+    { id: 'strat-1', label: 'AI Safety Leadership', domain: 'Strategy', type: 'Strategic Pillar', desc: 'Position as the responsible AI leader. Build trust through transparency, research publication, and safety-first development practices.', weight: 5 },
+    { id: 'strat-2', label: 'Enterprise Adoption', domain: 'Strategy', type: 'Growth Vector', desc: 'Drive enterprise revenue through API platform, reliability guarantees, and compliance-ready deployments.', weight: 4 },
+    { id: 'strat-3', label: 'Developer Ecosystem', domain: 'Strategy', type: 'Growth Vector', desc: 'Build a thriving developer community with best-in-class APIs, SDKs, and documentation.', weight: 4 },
+    { id: 'strat-4', label: 'Research Moat', domain: 'Strategy', type: 'Competitive Advantage', desc: 'Maintain frontier capabilities through Constitutional AI, RLHF advances, and novel architectures.', weight: 5 },
+    { id: 'prod-1', label: 'Claude API', domain: 'Products', type: 'Core Product', desc: 'Primary revenue driver. REST API with streaming, function calling, vision, and 200K context window.', weight: 5 },
+    { id: 'prod-2', label: 'Claude.ai', domain: 'Products', type: 'Consumer Product', desc: 'Web interface for direct consumer access. Pro tier with extended usage and priority access.', weight: 4 },
+    { id: 'prod-3', label: 'Claude for Enterprise', domain: 'Products', type: 'Enterprise Product', desc: 'SSO, admin controls, usage analytics, data isolation, custom fine-tuning. SOC 2 compliant.', weight: 4 },
+    { id: 'prod-4', label: 'Claude Code', domain: 'Products', type: 'Developer Tool', desc: 'CLI-based agentic coding assistant. Terminal-native workflow for developers.', weight: 3 },
+    { id: 'prod-5', label: 'Model Context Protocol', domain: 'Products', type: 'Platform', desc: 'Open protocol enabling AI models to connect with external tools and data sources seamlessly.', weight: 4 },
+    { id: 'proj-1', label: 'Claude 4 Development', domain: 'Projects', type: 'Active Project', desc: 'Next-generation model training. Focus on reasoning, reliability, and expanded multimodal capabilities.', weight: 5 },
+    { id: 'proj-2', label: 'Safety Evals Framework', domain: 'Projects', type: 'Research Project', desc: 'Comprehensive evaluation suite for model safety, bias detection, and capability assessment.', weight: 3 },
+    { id: 'proj-3', label: 'Enterprise Onboarding', domain: 'Projects', type: 'Go-to-Market', desc: 'Streamline enterprise sales cycle from 6 weeks to 2 weeks with self-serve provisioning.', weight: 3 },
+    { id: 'proj-4', label: 'Agentic Systems', domain: 'Projects', type: 'R&D Initiative', desc: 'Multi-step autonomous agent capabilities with tool use, planning, and execution monitoring.', weight: 4 },
+    { id: 'mkt-1', label: 'Trustworthy AI', domain: 'Marketing', type: 'Brand Position', desc: 'Core brand narrative: the AI you can trust. Safety, honesty, and helpfulness as differentiators.', weight: 4 },
+    { id: 'mkt-2', label: 'Developer Relations', domain: 'Marketing', type: 'Channel Strategy', desc: 'Conference talks, open-source contributions, technical blog posts, and community engagement.', weight: 3 },
+    { id: 'mkt-3', label: 'Enterprise Case Studies', domain: 'Marketing', type: 'Content Strategy', desc: 'Published case studies from Fortune 500 deployments showcasing ROI and reliability.', weight: 3 },
+    { id: 'mkt-4', label: 'Research Publications', domain: 'Marketing', type: 'Thought Leadership', desc: 'Peer-reviewed papers and blog posts establishing technical credibility and safety commitment.', weight: 4 },
+    { id: 'eth-1', label: 'Constitutional AI', domain: 'Ethos', type: 'Core Principle', desc: 'Models trained to be helpful, harmless, and honest through constitutional principles rather than pure RLHF.', weight: 5 },
+    { id: 'eth-2', label: 'Responsible Scaling', domain: 'Ethos', type: 'Policy Framework', desc: 'Committed to pausing scaling if safety benchmarks are not met. Published RSP with concrete thresholds.', weight: 4 },
+    { id: 'eth-3', label: 'Transparency Reports', domain: 'Ethos', type: 'Governance', desc: 'Regular public reporting on model capabilities, safety incidents, and policy decisions.', weight: 3 },
+    { id: 'eth-4', label: 'Benefit Corporation', domain: 'Ethos', type: 'Structure', desc: 'Public Benefit Corporation structure aligning fiduciary duty with societal benefit.', weight: 3 },
+    { id: 'cust-1', label: 'Enterprise CTOs', domain: 'Customers', type: 'Primary Persona', desc: 'Risk-averse technology leaders at Fortune 500 companies evaluating AI deployment. Need reliability, compliance, support.', weight: 5 },
+    { id: 'cust-2', label: 'AI-Native Startups', domain: 'Customers', type: 'Growth Segment', desc: 'Fast-moving startups building products on top of Claude API. Price-sensitive, need cutting-edge features.', weight: 4 },
+    { id: 'cust-3', label: 'Individual Developers', domain: 'Customers', type: 'Community', desc: 'Solo devs and small teams exploring AI capabilities. Influence future enterprise decisions.', weight: 3 },
+    { id: 'cust-4', label: 'Research Institutions', domain: 'Customers', type: 'Strategic Partners', desc: 'Universities and labs using Claude for research. Contribute to safety ecosystem and credibility.', weight: 3 },
+    { id: 'comp-1', label: 'OpenAI / GPT', domain: 'Competitors', type: 'Primary Competitor', desc: 'Market leader by brand recognition. Strong consumer product, broad enterprise adoption, aggressive pricing.', weight: 5 },
+    { id: 'comp-2', label: 'Google DeepMind', domain: 'Competitors', type: 'Primary Competitor', desc: 'Deepest research talent pool. Gemini models with multimodal strength. Distribution through Google Cloud.', weight: 4 },
+    { id: 'comp-3', label: 'Meta / LLaMA', domain: 'Competitors', type: 'Open Source Threat', desc: 'Open-weight models disrupting pricing. Strong adoption in research and cost-sensitive deployments.', weight: 4 },
+    { id: 'comp-4', label: 'Mistral AI', domain: 'Competitors', type: 'Emerging Competitor', desc: 'European competitor with efficient models and strong enterprise traction, especially in EU markets.', weight: 3 },
+    { id: 'ctx-1', label: 'AI Regulation Wave', domain: 'Context', type: 'Regulatory', desc: 'EU AI Act enforcement, US executive orders, and global regulatory frameworks reshaping deployment requirements.', weight: 4 },
+    { id: 'ctx-2', label: 'Enterprise AI Budget', domain: 'Context', type: 'Market Trend', desc: 'Enterprise AI spending projected to reach $200B+ by 2025. Budget shifting from experimentation to production.', weight: 4 },
+    { id: 'ctx-3', label: 'Open Source Pressure', domain: 'Context', type: 'Market Dynamic', desc: 'LLaMA, Mixtral, and others closing capability gap with closed models, pressuring API pricing.', weight: 3 },
+    { id: 'ctx-4', label: 'Safety-Washing Backlash', domain: 'Context', type: 'Reputational Risk', desc: 'Growing skepticism of AI safety claims. Need to demonstrate genuine commitment vs. marketing.', weight: 3 },
+    { id: 'ctx-5', label: 'Agentic AI Demand', domain: 'Context', type: 'Market Trend', desc: 'Explosion of demand for autonomous AI agents that can complete multi-step workflows independently.', weight: 4 },
+  ],
+  edges: [
+    { source: 'strat-1', target: 'eth-1', label: 'embodies' },
+    { source: 'strat-2', target: 'prod-3', label: 'drives' },
+    { source: 'strat-3', target: 'prod-1', label: 'enables' },
+    { source: 'strat-3', target: 'prod-5', label: 'powers' },
+    { source: 'strat-4', target: 'proj-1', label: 'funds' },
+    { source: 'prod-1', target: 'proj-1', label: 'next version' },
+    { source: 'prod-4', target: 'proj-4', label: 'depends on' },
+    { source: 'prod-5', target: 'proj-4', label: 'enables' },
+    { source: 'prod-3', target: 'proj-3', label: 'requires' },
+    { source: 'prod-1', target: 'cust-2', label: 'primary interface' },
+    { source: 'prod-2', target: 'cust-3', label: 'serves' },
+    { source: 'prod-3', target: 'cust-1', label: 'targets' },
+    { source: 'prod-4', target: 'cust-3', label: 'empowers' },
+    { source: 'prod-1', target: 'cust-4', label: 'used by' },
+    { source: 'strat-1', target: 'comp-1', label: 'differentiates from' },
+    { source: 'strat-4', target: 'comp-2', label: 'competes with' },
+    { source: 'strat-2', target: 'comp-1', label: 'competes for' },
+    { source: 'mkt-1', target: 'strat-1', label: 'communicates' },
+    { source: 'mkt-2', target: 'strat-3', label: 'supports' },
+    { source: 'mkt-3', target: 'strat-2', label: 'accelerates' },
+    { source: 'mkt-4', target: 'strat-4', label: 'amplifies' },
+    { source: 'eth-1', target: 'prod-1', label: 'governs' },
+    { source: 'eth-2', target: 'proj-1', label: 'constrains' },
+    { source: 'eth-3', target: 'mkt-4', label: 'feeds' },
+    { source: 'eth-4', target: 'strat-1', label: 'structures' },
+    { source: 'ctx-1', target: 'eth-2', label: 'validates' },
+    { source: 'ctx-1', target: 'prod-3', label: 'drives demand' },
+    { source: 'ctx-2', target: 'strat-2', label: 'creates opportunity' },
+    { source: 'ctx-3', target: 'comp-3', label: 'empowers' },
+    { source: 'ctx-3', target: 'prod-1', label: 'pressures pricing' },
+    { source: 'ctx-4', target: 'eth-1', label: 'raises bar for' },
+    { source: 'ctx-4', target: 'mkt-1', label: 'challenges' },
+    { source: 'ctx-5', target: 'proj-4', label: 'fuels' },
+    { source: 'ctx-5', target: 'prod-4', label: 'validates' },
+    { source: 'cust-1', target: 'ctx-1', label: 'demands compliance' },
+    { source: 'comp-3', target: 'ctx-3', label: 'drives' },
+    { source: 'proj-2', target: 'eth-1', label: 'measures' },
+    { source: 'cust-2', target: 'prod-5', label: 'adopts' },
+    { source: 'comp-1', target: 'ctx-5', label: 'leads in' },
+  ],
+},
+
+// ────────────────────────────────────────
+// UNIVERSE 2: Portfolio Analysis — Organisational Intelligence
+// ────────────────────────────────────────
+"portfolio-analysis": {
+  name: "Portfolio Analysis — Org Intelligence",
+  desc: "A vertical slice into how a mid-market fund actually analyses deals. Six layers of organisational context that AI currently cannot access.",
+  icon: "📊",
+  iconBg: "linear-gradient(135deg, #10b981, #06b6d4)",
+  domainColors: {
+    "Strategy & Competitive": 0xf59e0b,
+    "Organisational Judgment": 0xc084fc,
+    "Rules — Real Ones": 0xef4444,
+    "Institutional Memory": 0x3b82f6,
+    "Language & Standards": 0x06b6d4,
+    "Work Unit Intelligence": 0x10b981,
+  },
+  nodes: [
+    // ─── Strategy & Competitive Context ───
+    { id: 'sc-1', label: 'Fund Thesis: Climate Infra', domain: 'Strategy & Competitive', type: 'Investment Thesis', desc: 'Current thesis: infrastructure-layer climate tech with proven unit economics. Explicitly avoiding early-stage deep-tech and consumer clean energy. Thesis evolved after the 2022 Solara write-down.', weight: 5,
+      signals: [{ level: 'high', source: 'IC meeting transcript, Nov 2024 — partner debate on thesis refinement after portfolio review' }, { level: 'high', source: 'LP letter draft with tracked changes — three rounds of edits revealing what partners cut vs kept' }] },
+    { id: 'sc-2', label: 'Risk Appetite Shift', domain: 'Strategy & Competitive', type: 'Strategic Posture', desc: 'Post-2023 markdowns moved the fund from "growth at reasonable price" to "prove it first." Pipeline now filtered for 18-month path to cash-flow positive. Unspoken rule: nothing pre-revenue unless a partner personally sponsors it.', weight: 4,
+      signals: [{ level: 'high', source: 'Deal review calls Q1–Q3 2024 — pattern of rejection reasons shifting from "valuation" to "proof of traction"' }, { level: 'medium', source: 'Partner\'s personal deal tracker spreadsheet — colour-coded risk flags changed mid-2023' }] },
+    { id: 'sc-3', label: 'Competitive: Brookfield', domain: 'Strategy & Competitive', type: 'Competitor Intelligence', desc: 'Brookfield moving downstream into mid-market infra. Lost two deals to them in H2 2024. Their advantage: balance sheet flexibility. Our advantage: speed and sector expertise. IC now requires explicit "why not Brookfield" in every memo.', weight: 4,
+      signals: [{ level: 'high', source: 'Slack thread between deal leads after losing GreenGrid deal — real-time frustration and strategic recalibration' }, { level: 'medium', source: 'Competitive tracking spreadsheet with win/loss annotations' }] },
+    { id: 'sc-4', label: 'LP Pressure: ESG Reporting', domain: 'Strategy & Competitive', type: 'Stakeholder Constraint', desc: 'Two anchor LPs now requiring SFDR Article 9 alignment. This isn\'t optional — it shapes which deals we can even bring to IC. The compliance team built a pre-screening filter that kills 30% of pipeline before anyone senior sees it.', weight: 3,
+      signals: [{ level: 'medium', source: 'Email chain between IR and compliance re: LP reporting requirements — shows the real constraints' }, { level: 'high', source: 'Screen recording of analyst running ESG pre-screen — shows tabs open, checks performed, order of operations' }] },
+
+    // ─── Organisational Judgment ───
+    { id: 'oj-1', label: 'The "Partner Smell Test"', domain: 'Organisational Judgment', type: 'Decision Pattern', desc: 'Before any deal reaches IC, the sponsoring partner does an informal read of the other partners. This happens over coffee, not in meetings. If two partners give a lukewarm response, the deal gets quietly deprioritised. No formal record. The analyst never knows why their deal died.', weight: 5,
+      signals: [{ level: 'high', source: 'Meeting transcript — partner says "I already ran this past Sarah and James, they\'re both interested" — reveals the pre-IC filtering process' }, { level: 'low', source: 'General interview — partners describe "collaborative decision-making" but omit the informal veto' }] },
+    { id: 'oj-2', label: 'Management Team Assessment', domain: 'Organisational Judgment', type: 'Evaluation Heuristic', desc: 'The stated process: structured management assessment framework. The real process: the partner watches how the CEO handles the first difficult question in a meeting. If they deflect or get defensive, the deal is effectively dead regardless of the numbers. "I need to see how they handle bad news."', weight: 5,
+      signals: [{ level: 'high', source: 'Recording of management meeting — partner later says in debrief "did you see how he handled the margin question? That tells you everything"' }, { level: 'high', source: 'Annotated CIM — partner\'s margin notes: "CEO avoids direct answers → pass"' }] },
+    { id: 'oj-3', label: 'Valuation Anchoring', domain: 'Organisational Judgment', type: 'Cognitive Pattern', desc: 'The team unconsciously anchors to the last comparable deal they did. When Meridian closed at 11x, every subsequent deal in the sector gets evaluated against 11x even if market conditions shifted. A senior associate noticed and raised it — was told "that\'s just pattern recognition."', weight: 4,
+      signals: [{ level: 'high', source: 'IC transcript — analyst presents 14x comp, partner responds "that\'s a long way from what we paid for Meridian" before looking at the financials' }, { level: 'medium', source: 'Senior associate\'s personal notes on deal process — "valuation discussion always starts with Meridian"' }] },
+    { id: 'oj-4', label: 'The 48-Hour Rule', domain: 'Organisational Judgment', type: 'Informal Process', desc: 'After any management meeting, no decision for 48 hours. Not written anywhere. Partners learned this after the Nextera investment — moved too fast, missed red flags that emerged in the week after the meeting. Now enforced socially, not procedurally.', weight: 3,
+      signals: [{ level: 'high', source: 'Email from partner to associate: "Good meeting but let\'s sit with it. Remember Nextera."' }, { level: 'medium', source: 'Calendar analysis — consistent 2-3 day gap between management meetings and follow-up actions' }] },
+
+    // ─── Rules — Real Ones ───
+    { id: 'rr-1', label: 'Check Size: Hard Floor', domain: 'Rules — Real Ones', type: 'Non-Negotiable', desc: '$25M minimum check size. Genuinely non-negotiable — even when a partner found a "perfect" $15M deal, the IC said no. The fund economics don\'t work below $25M given the team time each deal requires. This kills roughly 40% of inbound.', weight: 5,
+      signals: [{ level: 'high', source: 'IC recording — partner argues passionately for exception, gets shut down: "We\'ve had this conversation. The math doesn\'t change."' }, { level: 'medium', source: 'Deal log — every sub-$25M entry marked "declined: size" with no further notes' }] },
+    { id: 'rr-2', label: 'Geographic: Flexible in Practice', domain: 'Rules — Real Ones', type: 'Bendable Rule', desc: 'Official policy: North America and Western Europe only. Reality: the fund did a deal in Singapore last year because a partner had deep relationships there. The "rule" is really "we need existing relationships in the jurisdiction." No relationship, no deal — regardless of geography.', weight: 3,
+      signals: [{ level: 'high', source: 'Slack DM — partner says "the geo policy is really a relationship policy, we just can\'t say that to LPs"' }, { level: 'medium', source: 'Investment memos — Singapore deal justified by "existing operational network" not "geographic exception"' }] },
+    { id: 'rr-3', label: 'ESG Pre-Screen: Real Filter', domain: 'Rules — Real Ones', type: 'Regulatory Constraint', desc: 'Since the SFDR alignment requirement, the ESG pre-screen has actual teeth. Analyst runs a 12-point check before the deal enters the pipeline. Three "reds" = automatic kill. Two "ambers" = partner must personally approve continuation. This catches things partners would previously have waved through.', weight: 4,
+      signals: [{ level: 'high', source: 'Screen recording of analyst performing ESG screen — pauses on three criteria, checks guidance doc, highlights concerns' }, { level: 'high', source: 'Tracked changes on ESG policy doc — shows which criteria were added after LP pushback' }] },
+    { id: 'rr-4', label: 'Quality Bar: "The Memo Test"', domain: 'Rules — Real Ones', type: 'Quality Standard', desc: 'If the investment memo can\'t be read and understood in 15 minutes, it goes back. Not for being too long — for being unclear. The actual standard is: "Could a smart person with no sector knowledge follow the logic?" Partners apply this instinctively. Associates learn it through painful iteration.', weight: 4,
+      signals: [{ level: 'high', source: 'Tracked changes on draft memo — partner deletes entire section with comment: "I still don\'t understand the thesis after reading this twice. Try again."' }, { level: 'medium', source: 'Email from associate to peer: "3rd rewrite. He wants it simpler but I don\'t know what to cut."' }] },
+
+    // ─── Institutional Memory ───
+    { id: 'im-1', label: 'Solara Write-Down (2022)', domain: 'Institutional Memory', type: 'Cautionary Pattern', desc: 'The deal that changed everything. Solar manufacturing play that looked like infrastructure but was really technology risk. Lost 60% of invested capital. Now every deal gets the "is this actually infra or is it tech risk in disguise?" question. Partners don\'t need to explain why — everyone who was there remembers.', weight: 5,
+      signals: [{ level: 'high', source: 'Post-mortem meeting transcript — two-hour debrief where partners are unusually candid about what they missed' }, { level: 'high', source: 'Updated IC checklist with "technology dependency assessment" added — the Solara rule made tangible' }] },
+    { id: 'im-2', label: 'Nextera: Speed Kills', domain: 'Institutional Memory', type: 'Cautionary Pattern', desc: 'Invested within two weeks of first meeting. Due diligence gaps emerged six months in. Still a performing investment, but the process failure created the 48-hour rule and the requirement for at least one dissenting voice in IC before approval.', weight: 4,
+      signals: [{ level: 'high', source: 'IC meeting where partner says "I don\'t want another Nextera" — shorthand everyone understands but an AI would miss entirely' }, { level: 'medium', source: 'Process document update log — shows changes timestamped to one month after Nextera close' }] },
+    { id: 'im-3', label: 'Meridian: The Gold Standard', domain: 'Institutional Memory', type: 'Success Pattern', desc: 'Best-performing investment in Fund III. EV charging infrastructure. What made it work: management team had done it before (acqui-hire from a competitor), unit economics proven in two cities before scaling, and the partner had a 10-year relationship with the CEO. This is the template — even though no one calls it a template.', weight: 5,
+      signals: [{ level: 'high', source: 'LP meeting recording where partner explains the deal — the "unofficial" version with more context than any memo' }, { level: 'medium', source: 'Final investment memo — reads as a narrative but compare it to the internal debate transcripts and you see what was simplified' }] },
+    { id: 'im-4', label: 'Relationship Map: Advisory', domain: 'Institutional Memory', type: 'Network Intelligence', desc: 'The fund\'s real edge is a network of 30-40 operating executives who informally advise on deals. This network lives in partners\' heads and contact lists. When a deal comes in, the first question is "who do we know who\'s operated in this space?" If the answer is nobody, diligence costs triple.', weight: 4,
+      signals: [{ level: 'high', source: 'Slack messages — partner shares contact: "Call Mike Chen. He ran the supply chain at [competitor]. He\'ll tell you what the memo won\'t."' }, { level: 'low', source: 'CRM system — has names but not relationship quality, history, or when to call vs when not to' }] },
+
+    // ─── Language & Standards ───
+    { id: 'ls-1', label: 'Memo Structure: Thesis-First', domain: 'Language & Standards', type: 'Document Standard', desc: 'The investment thesis must be in the first paragraph. Not background, not market overview — the thesis. "We are investing $X in Y because Z." Partners scan the first three sentences and decide whether to keep reading. Every memo that buries the thesis gets sent back.', weight: 4,
+      signals: [{ level: 'high', source: 'Annotated memo drafts — partner writes "WHERE IS THE THESIS" on page 3 of an associate\'s first attempt' }, { level: 'high', source: 'Screen recording of partner reading memo — scrolls past first two pages, goes back to beginning, sighs' }] },
+    { id: 'ls-2', label: 'Risk Language: "Concerns"', domain: 'Language & Standards', type: 'Communication Code', desc: 'Internal vocabulary has implicit severity levels. "Concern" = serious, needs addressing before IC. "Question" = want to understand better, probably fine. "Issue" = deal-killer unless resolved. "Observation" = noted for monitoring, not blocking. Associates who use these wrong get corrected fast.', weight: 4,
+      signals: [{ level: 'high', source: 'Email where senior corrects associate: "Don\'t call it an \'issue\' in the memo — it\'s a \'concern.\' If you call it an issue, IC will think it\'s a blocker."' }, { level: 'medium', source: 'Comparing final memos — consistent language pattern across all approved deals reveals the implicit taxonomy' }] },
+    { id: 'ls-3', label: 'Numbers: Show the Sensitivities', domain: 'Language & Standards', type: 'Analytical Standard', desc: 'Never present a single-case financial model. Always base, upside, downside. But the real standard: the downside case must be genuinely painful, not "base minus 10%." Partners can spot a sandbagged downside instantly. "If your downside still makes money, it\'s not a downside."', weight: 4,
+      signals: [{ level: 'high', source: 'IC transcript — "Your downside assumes 15% growth. In what universe is 15% growth a bad outcome? Show me what happens when they lose their biggest customer."' }, { level: 'high', source: 'Partner edits to model — redlined cells where downside assumptions were insufficiently aggressive' }] },
+    { id: 'ls-4', label: 'The "So What" Standard', domain: 'Language & Standards', type: 'Quality Threshold', desc: 'Every section of analysis must answer "so what does this mean for our investment?" Market data without interpretation gets rejected. "The market is growing 20% CAGR" — so what? "The market is growing 20% but our target is in a sub-segment growing 5% because regulators are slowing adoption" — that\'s useful.', weight: 3,
+      signals: [{ level: 'high', source: 'Tracked changes — partner deletes market overview paragraph with comment: "I can Google this. Tell me what it means for the deal."' }, { level: 'medium', source: 'Associates\' shared doc of "partner feedback patterns" — crowdsourced wisdom on what gets past review' }] },
+
+    // ─── Work Unit Intelligence ───
+    { id: 'wu-1', label: 'Deal Screening Process', domain: 'Work Unit Intelligence', type: 'SENSE → REASON → CREATE', desc: 'SENSING: Inbound from 6 channels, broker relationships, LP co-invest referrals. MEMORY: Pattern-match against Solara/Meridian templates. Is this infra or tech risk? REASONING: Check size, geography, ESG pre-screen, then the informal partner read. CREATION: 2-page screening memo with go/no-go recommendation.', weight: 5,
+      signals: [{ level: 'high', source: 'Screen recording of analyst processing inbound deal — shows actual decision tree, not the documented one' }, { level: 'high', source: 'Analyst\'s personal "triage template" — a shadow artefact that encodes years of learned pattern recognition into a checklist' }] },
+    { id: 'wu-2', label: 'Due Diligence Assembly', domain: 'Work Unit Intelligence', type: 'SENSE → REASON → CREATE', desc: 'SENSING: Management meetings, data room documents, third-party reports, expert network calls. MEMORY: Prior deal comparables, sector-specific risk patterns. REASONING: "What would make us lose money?" as the organising question, not "what makes this attractive?" CREATION: Full IC memo with appendices. 15-minute read time maximum.', weight: 5,
+      signals: [{ level: 'high', source: 'Call transcripts with expert network advisors — questions reveal what the team is really worried about vs. the checkbox diligence' }, { level: 'high', source: 'Annotated CIM with three colours of highlights — shows senior person\'s actual reading process and priority hierarchy' }] },
+    { id: 'wu-3', label: 'IC Presentation', domain: 'Work Unit Intelligence', type: 'SENSE → REASON → CREATE', desc: 'SENSING: Reading partner body language during presentation. Knowing which partner cares about what — Sarah always asks about management, James always goes to the model, Lisa probes competitive dynamics. REASONING: Anticipate objections based on who\'s in the room. CREATION: A presentation that front-loads answers to the questions you know are coming.', weight: 4,
+      signals: [{ level: 'high', source: 'Pre-IC prep call recording — associate asks partner: "What is Sarah going to push back on?" and gets a 10-minute coaching session' }, { level: 'medium', source: 'IC presentation decks — compare versions to see what was added after partner coaching vs initial draft' }] },
+    { id: 'wu-4', label: 'Portfolio Monitoring', domain: 'Work Unit Intelligence', type: 'SENSE → REASON → CREATE', desc: 'SENSING: Monthly financials, quarterly board meetings, informal CEO check-ins. The board meeting tells you the official story. The CEO check-in over dinner tells you what\'s actually happening. REASONING: Delta from plan, pattern recognition against prior portfolio company trajectories. CREATION: Quarterly portfolio report with traffic light system. But the real output is the conversation the report triggers.', weight: 4,
+      signals: [{ level: 'high', source: 'Partner\'s notes after CEO dinner — handwritten, unstructured, more revealing than any board pack' }, { level: 'medium', source: 'Quarterly report compared to subsequent partner discussion — shows what the report didn\'t capture that the conversation surfaced' }] },
+  ],
+  edges: [
+    // Strategy & Competitive interconnections
+    { source: 'sc-1', target: 'sc-2', label: 'shapes' },
+    { source: 'sc-3', target: 'sc-1', label: 'threatens' },
+    { source: 'sc-4', target: 'sc-1', label: 'constrains' },
+    { source: 'sc-4', target: 'rr-3', label: 'enforces' },
+
+    // Judgment ↔ Strategy
+    { source: 'oj-1', target: 'sc-2', label: 'enacts' },
+    { source: 'oj-2', target: 'wu-2', label: 'governs' },
+    { source: 'oj-3', target: 'im-3', label: 'anchors to' },
+    { source: 'oj-4', target: 'im-2', label: 'born from' },
+
+    // Rules ↔ Judgment
+    { source: 'rr-1', target: 'wu-1', label: 'filters' },
+    { source: 'rr-2', target: 'im-4', label: 'really means' },
+    { source: 'rr-3', target: 'sc-4', label: 'implements' },
+    { source: 'rr-4', target: 'ls-1', label: 'enforces' },
+
+    // Memory ↔ everything
+    { source: 'im-1', target: 'sc-1', label: 'caused shift' },
+    { source: 'im-1', target: 'wu-1', label: 'embedded in' },
+    { source: 'im-2', target: 'oj-4', label: 'created' },
+    { source: 'im-3', target: 'oj-3', label: 'anchors' },
+    { source: 'im-3', target: 'wu-2', label: 'templates' },
+    { source: 'im-4', target: 'wu-2', label: 'accelerates' },
+    { source: 'im-4', target: 'rr-2', label: 'enables exceptions' },
+
+    // Language ↔ Work Units
+    { source: 'ls-1', target: 'wu-2', label: 'structures' },
+    { source: 'ls-2', target: 'wu-3', label: 'calibrates' },
+    { source: 'ls-3', target: 'wu-2', label: 'standard for' },
+    { source: 'ls-4', target: 'rr-4', label: 'operationalises' },
+    { source: 'ls-4', target: 'wu-2', label: 'quality gate' },
+
+    // Work Units interconnect
+    { source: 'wu-1', target: 'wu-2', label: 'feeds' },
+    { source: 'wu-2', target: 'wu-3', label: 'produces' },
+    { source: 'wu-3', target: 'oj-1', label: 'navigates' },
+    { source: 'wu-4', target: 'im-1', label: 'watches for' },
+    { source: 'wu-4', target: 'im-3', label: 'benchmarks against' },
+
+    // Cross-layer
+    { source: 'sc-3', target: 'wu-1', label: 'adds filter' },
+    { source: 'oj-2', target: 'ls-2', label: 'shapes vocabulary' },
+    { source: 'oj-1', target: 'rr-1', label: 'overrides proposals' },
+    { source: 'sc-2', target: 'rr-1', label: 'reinforces' },
+    { source: 'ls-3', target: 'oj-3', label: 'challenges' },
+    { source: 'wu-1', target: 'rr-3', label: 'triggers' },
+    { source: 'im-1', target: 'oj-2', label: 'heightened by' },
+  ],
+},
+
+}; // end UNIVERSES
+
+
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  THREE.JS ENGINE                                             ║
+// ╚══════════════════════════════════════════════════════════════╝
+
+const container = document.getElementById('canvas-container');
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 2000);
+camera.position.set(0, 0, 280);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+container.appendChild(renderer.domElement);
+
+scene.add(new THREE.AmbientLight(0x334466, 0.4));
+const dirLight = new THREE.DirectionalLight(0x6688cc, 0.3);
+dirLight.position.set(100, 200, 100);
+scene.add(dirLight);
+
+// Stars (persistent across universes)
+const starCount = 3000;
+const starGeo = new THREE.BufferGeometry();
+const starPositions = new Float32Array(starCount * 3);
+for (let i = 0; i < starCount; i++) {
+  starPositions[i*3]=(Math.random()-0.5)*1600;
+  starPositions[i*3+1]=(Math.random()-0.5)*1600;
+  starPositions[i*3+2]=(Math.random()-0.5)*1600;
+}
+starGeo.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+const stars = new THREE.Points(starGeo, new THREE.PointsMaterial({
+  color: 0x556688, size: 0.8, transparent: true, opacity: 0.5, sizeAttenuation: true, depthWrite: false,
+}));
+scene.add(stars);
+
+
+// ─── Mutable state ───
+let currentUniverseId = null;
+let nodeMap = {};
+let positions = {};
+let nodeMeshes = {};
+let nodeGroup = new THREE.Group();
+let glowGroup = new THREE.Group();
+let edgeGroup = new THREE.Group();
+let currentData = null; // { nodes, edges, domainColors }
+let hoveredNode = null;
+let selectedNode = null;
+
+scene.add(nodeGroup);
+scene.add(glowGroup);
+scene.add(edgeGroup);
+
+
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  UNIVERSE LOADING                                            ║
+// ╚══════════════════════════════════════════════════════════════╝
+
+function loadUniverse(id, animate = true) {
+  const u = UNIVERSES[id];
+  if (!u) return;
+
+  const overlay = document.getElementById('transition-overlay');
+  if (animate && currentUniverseId) {
+    overlay.classList.add('active');
+    setTimeout(() => {
+      _buildUniverse(id, u);
+      setTimeout(() => overlay.classList.remove('active'), 100);
+    }, 450);
+  } else {
+    _buildUniverse(id, u);
+  }
+}
+
+function _buildUniverse(id, u) {
+  currentUniverseId = id;
+  currentData = u;
+
+  // Clear scene groups
+  nodeGroup.children.forEach(c => { c.geometry?.dispose(); c.material?.dispose(); });
+  glowGroup.children.forEach(c => { c.material?.map?.dispose(); c.material?.dispose(); });
+  edgeGroup.children.forEach(c => { c.geometry?.dispose(); c.material?.dispose(); });
+  nodeGroup.clear(); glowGroup.clear(); edgeGroup.clear();
+  nodeMap = {}; positions = {}; nodeMeshes = {};
+
+  // Deselect
+  selectedNode = null;
+  document.getElementById('detail-panel').classList.remove('visible');
+
+  // Build node index
+  u.nodes.forEach(n => { nodeMap[n.id] = n; });
+
+  // Compute positions
+  const SPREAD = 160;
+  const domainKeys = Object.keys(u.domainColors);
+  const domainCenters = {};
+  domainKeys.forEach((d, i) => {
+    const angle = (i / domainKeys.length) * Math.PI * 2;
+    const r = SPREAD * 0.5;
+    domainCenters[d] = new THREE.Vector3(Math.cos(angle)*r, (Math.random()-0.5)*r*0.6, Math.sin(angle)*r);
+  });
+
+  const velocities = {};
+  u.nodes.forEach(n => {
+    const c = domainCenters[n.domain] || new THREE.Vector3();
+    positions[n.id] = new THREE.Vector3(c.x+(Math.random()-0.5)*80, c.y+(Math.random()-0.5)*80, c.z+(Math.random()-0.5)*80);
+    velocities[n.id] = new THREE.Vector3();
+  });
+
+  // Force layout
+  const repulsion = 2800, attraction = 0.008, damping = 0.85, gravity = 0.002;
+  for (let iter = 0; iter < 300; iter++) {
+    for (let i = 0; i < u.nodes.length; i++) {
+      for (let j = i+1; j < u.nodes.length; j++) {
+        const pi = positions[u.nodes[i].id], pj = positions[u.nodes[j].id];
+        const diff = new THREE.Vector3().subVectors(pi, pj);
+        const dist = Math.max(diff.length(), 1);
+        diff.normalize().multiplyScalar(repulsion / (dist*dist));
+        velocities[u.nodes[i].id].add(diff);
+        velocities[u.nodes[j].id].sub(diff);
+      }
+    }
+    u.edges.forEach(e => {
+      const ps = positions[e.source], pt = positions[e.target];
+      if (!ps || !pt) return;
+      const diff = new THREE.Vector3().subVectors(pt, ps);
+      diff.normalize().multiplyScalar(diff.length() * attraction);
+      velocities[e.source].add(diff);
+      velocities[e.target].sub(diff);
+    });
+    u.nodes.forEach(n => {
+      velocities[n.id].add(new THREE.Vector3().copy(positions[n.id]).negate().multiplyScalar(gravity));
+      velocities[n.id].multiplyScalar(damping);
+      positions[n.id].add(velocities[n.id]);
+    });
+  }
+
+  // Create node meshes
+  u.nodes.forEach(n => {
+    const color = new THREE.Color(u.domainColors[n.domain] || 0x888888);
+    const baseSize = 1.5 + n.weight * 0.8;
+    const geo = new THREE.SphereGeometry(baseSize, 24, 24);
+    const mat = new THREE.MeshPhongMaterial({ color, emissive: color, emissiveIntensity: 0.5, shininess: 60, transparent: true, opacity: 0.95 });
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.position.copy(positions[n.id]);
+    mesh.userData = n;
+    nodeGroup.add(mesh);
+    nodeMeshes[n.id] = mesh;
+
+    // Glow sprite
+    const canvas = document.createElement('canvas');
+    canvas.width = 128; canvas.height = 128;
+    const ctx = canvas.getContext('2d');
+    const grad = ctx.createRadialGradient(64,64,0,64,64,64);
+    grad.addColorStop(0, `rgba(${Math.round(color.r*255)},${Math.round(color.g*255)},${Math.round(color.b*255)},0.5)`);
+    grad.addColorStop(0.4, `rgba(${Math.round(color.r*255)},${Math.round(color.g*255)},${Math.round(color.b*255)},0.15)`);
+    grad.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = grad; ctx.fillRect(0,0,128,128);
+    const tex = new THREE.CanvasTexture(canvas);
+    const spriteMat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending });
+    const sprite = new THREE.Sprite(spriteMat);
+    sprite.position.copy(positions[n.id]);
+    sprite.scale.set(baseSize*7, baseSize*7, 1);
+    sprite.userData = { isGlow: true, nodeId: n.id };
+    glowGroup.add(sprite);
+  });
+
+  // Create edges
+  u.edges.forEach(e => {
+    const ps = positions[e.source], pt = positions[e.target];
+    if (!ps || !pt) return;
+    const geo = new THREE.BufferGeometry().setFromPoints([ps, pt]);
+    const mat = new THREE.LineBasicMaterial({ color: 0x3a4a6a, transparent: true, opacity: 0.15, depthWrite: false });
+    const line = new THREE.Line(geo, mat);
+    line.userData = e;
+    edgeGroup.add(line);
+  });
+
+  // Update UI
+  buildFilters(u.domainColors);
+  document.getElementById('stat-nodes').textContent = u.nodes.length;
+  document.getElementById('stat-edges').textContent = u.edges.length;
+  document.getElementById('stat-domains').textContent = Object.keys(u.domainColors).length;
+  updateStats('All', u.nodes.length);
+
+  // Universe button label
+  document.getElementById('universe-btn-label').textContent = u.name;
+
+  // Reset camera
+  orbit.target.set(0,0,0);
+  orbit.spherical = { radius: 280, phi: Math.PI/2, theta: 0 };
+  orbit.autoRotate = true;
+
+  // Clear search
+  document.getElementById('search').value = '';
+
+  // Update dropdown active state
+  document.querySelectorAll('.universe-option').forEach(opt => {
+    opt.classList.toggle('active', opt.dataset.id === id);
+  });
+}
+
+
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  UI: UNIVERSE SWITCHER                                       ║
+// ╚══════════════════════════════════════════════════════════════╝
+
+function buildUniverseDropdown() {
+  const dropdown = document.getElementById('universe-dropdown');
+  dropdown.innerHTML = '';
+  Object.entries(UNIVERSES).forEach(([id, u]) => {
+    const opt = document.createElement('div');
+    opt.className = 'universe-option';
+    opt.dataset.id = id;
+    opt.innerHTML = `
+      <div class="universe-option-icon" style="background:${u.iconBg}">${u.icon}</div>
+      <div class="universe-option-text">
+        <div class="universe-option-name">${u.name}</div>
+        <div class="universe-option-desc">${u.desc}</div>
+        <div class="universe-option-meta">${u.nodes.length} nodes · ${u.edges.length} edges · ${Object.keys(u.domainColors).length} domains</div>
+      </div>`;
+    opt.addEventListener('click', () => {
+      if (id !== currentUniverseId) loadUniverse(id);
+      toggleDropdown(false);
+    });
+    dropdown.appendChild(opt);
+  });
+}
+
+const universeBtn = document.getElementById('universe-btn');
+const universeDropdown = document.getElementById('universe-dropdown');
+let dropdownOpen = false;
+
+function toggleDropdown(force) {
+  dropdownOpen = force !== undefined ? force : !dropdownOpen;
+  universeBtn.classList.toggle('open', dropdownOpen);
+  universeDropdown.classList.toggle('open', dropdownOpen);
+}
+
+universeBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleDropdown(); });
+document.addEventListener('click', () => toggleDropdown(false));
+universeDropdown.addEventListener('click', e => e.stopPropagation());
+
+
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  UI: DOMAIN FILTERS                                          ║
+// ╚══════════════════════════════════════════════════════════════╝
+
+function buildFilters(domainColors) {
+  const filtersEl = document.getElementById('filters');
+  filtersEl.innerHTML = '';
+  // All button
+  const allBtn = document.createElement('button');
+  allBtn.className = 'filter-btn active'; allBtn.dataset.domain = 'All'; allBtn.textContent = 'All';
+  filtersEl.appendChild(allBtn);
+  // Domain buttons
+  Object.keys(domainColors).forEach(d => {
+    const btn = document.createElement('button');
+    btn.className = 'filter-btn'; btn.dataset.domain = d; btn.textContent = d;
+    filtersEl.appendChild(btn);
+  });
+
+  // Inject dynamic styles for active states
+  let styleEl = document.getElementById('dynamic-filter-styles');
+  if (!styleEl) { styleEl = document.createElement('style'); styleEl.id = 'dynamic-filter-styles'; document.head.appendChild(styleEl); }
+  let css = '.filter-btn[data-domain="All"].active { background: rgba(100,160,255,0.25); border-color: rgba(100,160,255,0.3); }\n';
+  Object.entries(domainColors).forEach(([d, hex]) => {
+    const c = '#' + hex.toString(16).padStart(6,'0');
+    css += `.filter-btn[data-domain="${d}"].active { background: ${c}; }\n`;
+  });
+  styleEl.textContent = css;
+}
+
+document.getElementById('filters').addEventListener('click', e => {
+  const btn = e.target.closest('.filter-btn');
+  if (!btn || !currentData) return;
+  const domain = btn.dataset.domain;
+  hideInstructions();
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  if (domain === 'All') {
+    resetHighlights(); if (selectedNode) highlightNode(selectedNode);
+    updateStats('All', currentData.nodes.length); return;
+  }
+
+  let count = 0;
+  nodeGroup.children.forEach(mesh => {
+    const m = mesh.userData.domain === domain;
+    mesh.material.opacity = m ? 1 : 0.08;
+    mesh.material.emissiveIntensity = m ? 0.7 : 0.05;
+    if (m) count++;
+  });
+  glowGroup.children.forEach(s => {
+    if (!s.userData.isGlow) return;
+    const n = nodeMap[s.userData.nodeId];
+    s.material.opacity = n && n.domain === domain ? 1 : 0.02;
+  });
+  edgeGroup.children.forEach(line => {
+    const ed = line.userData;
+    const sn = nodeMap[ed.source], tn = nodeMap[ed.target];
+    const conn = (sn && sn.domain === domain) || (tn && tn.domain === domain);
+    line.material.opacity = conn ? 0.35 : 0.03;
+    line.material.color.setHex(conn ? (currentData.domainColors[domain] || 0x3a4a6a) : 0x3a4a6a);
+  });
+  updateStats(domain, count);
+});
+
+
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  ORBIT CONTROLS                                              ║
+// ╚══════════════════════════════════════════════════════════════╝
+
+const orbit = {
+  target: new THREE.Vector3(), spherical: { radius: 280, phi: Math.PI/2, theta: 0 },
+  isDragging: false, lastMouse: {x:0,y:0}, autoRotate: true, autoRotateSpeed: 0.0008,
+  dampingTheta: 0, dampingPhi: 0,
+};
+
+function updateCamera() {
+  const s = orbit.spherical;
+  s.phi = Math.max(0.2, Math.min(Math.PI-0.2, s.phi));
+  s.radius = Math.max(50, Math.min(600, s.radius));
+  camera.position.set(
+    orbit.target.x + s.radius * Math.sin(s.phi) * Math.cos(s.theta),
+    orbit.target.y + s.radius * Math.cos(s.phi),
+    orbit.target.z + s.radius * Math.sin(s.phi) * Math.sin(s.theta),
+  );
+  camera.lookAt(orbit.target);
+}
+
+renderer.domElement.addEventListener('pointerdown', e => {
+  if (e.button===0) { orbit.isDragging=true; orbit.lastMouse={x:e.clientX,y:e.clientY}; orbit.autoRotate=false; }
+});
+window.addEventListener('pointermove', e => {
+  if (orbit.isDragging) {
+    const dx=e.clientX-orbit.lastMouse.x, dy=e.clientY-orbit.lastMouse.y;
+    orbit.spherical.theta -= dx*0.005; orbit.spherical.phi -= dy*0.005;
+    orbit.dampingTheta=-dx*0.002; orbit.dampingPhi=-dy*0.002;
+    orbit.lastMouse={x:e.clientX,y:e.clientY};
+  }
+  handleHover(e);
+});
+window.addEventListener('pointerup', ()=>{ orbit.isDragging=false; });
+renderer.domElement.addEventListener('wheel', e => {
+  e.preventDefault(); orbit.spherical.radius+=e.deltaY*0.3; orbit.autoRotate=false;
+}, {passive:false});
+
+
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  RAYCASTING / HOVER / CLICK                                  ║
+// ╚══════════════════════════════════════════════════════════════╝
+
+const raycaster = new THREE.Raycaster();
+const pointer = new THREE.Vector2();
+const tooltip = document.getElementById('tooltip');
+
+function handleHover(e) {
+  pointer.x = (e.clientX/window.innerWidth)*2-1;
+  pointer.y = -(e.clientY/window.innerHeight)*2+1;
+  raycaster.setFromCamera(pointer, camera);
+  const hits = raycaster.intersectObjects(nodeGroup.children, false);
+  if (hits.length > 0) {
+    const n = hits[0].object.userData;
+    if (hoveredNode !== n.id) {
+      hoveredNode = n.id;
+      document.getElementById('tooltip-name').textContent = n.label;
+      document.getElementById('tooltip-domain').textContent = `${n.domain} · ${n.type}`;
+      tooltip.classList.add('visible');
+      document.body.style.cursor = 'pointer';
+    }
+    tooltip.style.left = e.clientX+16+'px'; tooltip.style.top = e.clientY-10+'px';
+  } else if (hoveredNode) {
+    hoveredNode = null; tooltip.classList.remove('visible'); document.body.style.cursor='default';
+  }
+}
+
+renderer.domElement.addEventListener('click', e => {
+  pointer.x=(e.clientX/window.innerWidth)*2-1;
+  pointer.y=-(e.clientY/window.innerHeight)*2+1;
+  raycaster.setFromCamera(pointer, camera);
+  const hits = raycaster.intersectObjects(nodeGroup.children, false);
+  if (hits.length > 0) { selectNode(hits[0].object.userData); hideInstructions(); }
+  else deselectNode();
+});
+
+
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  SELECTION & DETAIL PANEL                                    ║
+// ╚══════════════════════════════════════════════════════════════╝
+
+function selectNode(node) {
+  if (!currentData) return;
+  selectedNode = node.id;
+  const hexStr = '#' + (currentData.domainColors[node.domain] || 0x888888).toString(16).padStart(6,'0');
+
+  document.getElementById('detail-domain').textContent = node.domain;
+  document.getElementById('detail-domain').style.background = hexStr + '22';
+  document.getElementById('detail-domain').style.color = hexStr;
+  document.getElementById('detail-title').textContent = node.label;
+  document.getElementById('detail-type').textContent = node.type;
+  document.getElementById('detail-desc').textContent = node.desc;
+
+  // Signal sources
+  const sigSection = document.getElementById('detail-signals-section');
+  const sigEl = document.getElementById('detail-signals');
+  if (node.signals && node.signals.length > 0) {
+    sigSection.style.display = 'block';
+    sigEl.innerHTML = '';
+    node.signals.forEach(s => {
+      const item = document.createElement('div');
+      item.className = 'signal-item';
+      item.innerHTML = `<span class="signal-badge signal-${s.level}">${s.level}</span> <span>${s.source}</span>`;
+      sigEl.appendChild(item);
+    });
+  } else {
+    sigSection.style.display = 'none';
+  }
+
+  // Connections
+  const connections = [];
+  currentData.edges.forEach(e => {
+    if (e.source === node.id && nodeMap[e.target]) connections.push({ node: nodeMap[e.target], label: e.label });
+    if (e.target === node.id && nodeMap[e.source]) connections.push({ node: nodeMap[e.source], label: e.label });
+  });
+
+  const connEl = document.getElementById('detail-connections');
+  connEl.innerHTML = '';
+  connections.forEach(c => {
+    const cHex = '#' + (currentData.domainColors[c.node.domain]||0x888888).toString(16).padStart(6,'0');
+    const item = document.createElement('div');
+    item.className = 'connection-item';
+    item.innerHTML = `<span class="connection-dot" style="background:${cHex}"></span> ${c.node.label} <span class="connection-label">${c.label}</span>`;
+    item.addEventListener('click', () => selectNode(c.node));
+    connEl.appendChild(item);
+  });
+
+  document.getElementById('detail-panel').classList.add('visible');
+  highlightNode(node.id);
+
+  // Nudge camera toward node
+  const pos = positions[node.id];
+  if (pos) orbit.target.lerp(pos.clone(), 0.3);
+}
+
+function deselectNode() {
+  selectedNode = null;
+  document.getElementById('detail-panel').classList.remove('visible');
+  resetHighlights();
+}
+document.getElementById('detail-close').addEventListener('click', deselectNode);
+
+function highlightNode(nodeId) {
+  if (!currentData) return;
+  nodeGroup.children.forEach(mesh => {
+    const isSel = mesh.userData.id===nodeId;
+    const isConn = currentData.edges.some(e=>(e.source===nodeId&&e.target===mesh.userData.id)||(e.target===nodeId&&e.source===mesh.userData.id));
+    mesh.material.opacity = isSel?1:isConn?0.9:0.15;
+    mesh.material.emissiveIntensity = isSel?1:isConn?0.6:0.1;
+  });
+  edgeGroup.children.forEach(line => {
+    const e = line.userData;
+    const isConn = e.source===nodeId||e.target===nodeId;
+    line.material.opacity = isConn?0.6:0.03;
+    if (isConn) {
+      const tn = e.source===nodeId?nodeMap[e.target]:nodeMap[e.source];
+      line.material.color.setHex(tn ? (currentData.domainColors[tn.domain]||0x3a4a6a) : 0x3a4a6a);
+    } else { line.material.color.setHex(0x3a4a6a); }
+  });
+  glowGroup.children.forEach(s => {
+    if (!s.userData.isGlow) return;
+    const isSel = s.userData.nodeId===nodeId;
+    const isConn = currentData.edges.some(e=>(e.source===nodeId&&e.target===s.userData.nodeId)||(e.target===nodeId&&e.source===s.userData.nodeId));
+    s.material.opacity = isSel?1:isConn?0.6:0.05;
+  });
+}
+
+function resetHighlights() {
+  nodeGroup.children.forEach(m => { m.material.opacity=0.95; m.material.emissiveIntensity=0.5; });
+  edgeGroup.children.forEach(l => { l.material.opacity=0.15; l.material.color.setHex(0x3a4a6a); });
+  glowGroup.children.forEach(s => { if(s.userData.isGlow) s.material.opacity=1; });
+}
+
+
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  SEARCH                                                      ║
+// ╚══════════════════════════════════════════════════════════════╝
+
+document.getElementById('search').addEventListener('input', function() {
+  if (!currentData) return;
+  const q = this.value.toLowerCase().trim();
+  hideInstructions();
+  if (!q) { resetHighlights(); if(selectedNode) highlightNode(selectedNode); updateStats('All', currentData.nodes.length); return; }
+
+  let count = 0;
+  nodeGroup.children.forEach(mesh => {
+    const n = mesh.userData;
+    const m = n.label.toLowerCase().includes(q)||n.domain.toLowerCase().includes(q)||n.type.toLowerCase().includes(q)||n.desc.toLowerCase().includes(q);
+    mesh.material.opacity=m?1:0.08; mesh.material.emissiveIntensity=m?0.8:0.05; if(m)count++;
+  });
+  glowGroup.children.forEach(s => {
+    if(!s.userData.isGlow)return;
+    const n=nodeMap[s.userData.nodeId]; if(!n)return;
+    const m=n.label.toLowerCase().includes(q)||n.domain.toLowerCase().includes(q)||n.type.toLowerCase().includes(q)||n.desc.toLowerCase().includes(q);
+    s.material.opacity=m?1:0.02;
+  });
+  edgeGroup.children.forEach(l => { l.material.opacity=0.03; });
+  updateStats(`"${this.value}"`, count);
+});
+
+
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  UTILITIES                                                   ║
+// ╚══════════════════════════════════════════════════════════════╝
+
+function updateStats(filterName, count) {
+  document.getElementById('stat-filter').innerHTML = `Showing: <span class="stat-value">${filterName}</span> (${count})`;
+}
+function hideInstructions() { document.getElementById('instructions').classList.add('hidden'); }
+
+
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  ANIMATION LOOP                                              ║
+// ╚══════════════════════════════════════════════════════════════╝
+
+const clock = new THREE.Clock();
+
+function animate() {
+  requestAnimationFrame(animate);
+  const t = clock.getElapsedTime();
+
+  if (orbit.autoRotate) orbit.spherical.theta += orbit.autoRotateSpeed;
+  if (!orbit.isDragging) {
+    orbit.dampingTheta*=0.95; orbit.dampingPhi*=0.95;
+    orbit.spherical.theta+=orbit.dampingTheta; orbit.spherical.phi+=orbit.dampingPhi;
+  }
+  updateCamera();
+
+  // Node breathing
+  nodeGroup.children.forEach((mesh, i) => {
+    const p = positions[mesh.userData.id];
+    if (p) mesh.position.y = p.y + Math.sin(t*0.4+i*0.7)*0.6;
+  });
+  // Sync glows
+  glowGroup.children.forEach(s => {
+    if (s.userData.isGlow) { const m=nodeMeshes[s.userData.nodeId]; if(m){s.position.x=m.position.x;s.position.y=m.position.y;s.position.z=m.position.z;} }
+  });
+
+  stars.rotation.y = t*0.01; stars.rotation.x = Math.sin(t*0.005)*0.03;
+  renderer.render(scene, camera);
+}
+animate();
+
+
+// ─── Resize ──
+window.addEventListener('resize', () => {
+  camera.aspect=window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+// ─── Keyboard ──
+window.addEventListener('keydown', e => {
+  const si = document.getElementById('search');
+  if (e.key==='Escape') { deselectNode(); si.value=''; si.dispatchEvent(new Event('input')); }
+  if (e.key==='/' && document.activeElement!==si) { e.preventDefault(); si.focus(); }
+});
+
+// ─── Init ──
+buildUniverseDropdown();
+loadUniverse(Object.keys(UNIVERSES)[0], false);
+setTimeout(hideInstructions, 8000);
+
+</script>
+</body>
+</html>
