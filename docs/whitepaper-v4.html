@@ -1,0 +1,1550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mementum — Memory in Motion: Internal Whitepaper</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=JetBrains+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --black:#0A0A0A; --black-mid:#141414; --black-soft:#1a1a1a;
+  --copper:#B87333; --copper-light:#D4A574; --copper-dim:rgba(184,115,51,0.15);
+  --cream:#FAF9F7; --text:#F5F5F5; --text-mid:#A0A0A0; --text-dim:#666666;
+  --text-dark:#1A1A1A; --text-dark-mid:#4A4A4A;
+  --border:rgba(255,255,255,0.08); --border-copper:rgba(184,115,51,0.3);
+  --green:#34d399; --red:#f43f5e; --blue:#38bdf8; --purple:#a78bfa;
+}
+html { scroll-behavior:smooth; }
+body { font-family:'DM Sans',sans-serif; background:var(--black); color:var(--text); line-height:1.6; max-width:860px; margin:0 auto; padding:0 32px 100px; }
+
+/* ── Title block ── */
+.doc-title-block { padding:80px 0 64px; border-bottom:1px solid var(--border); margin-bottom:48px; }
+.eyebrow { font-family:'JetBrains Mono',monospace; font-size:11px; text-transform:uppercase; letter-spacing:4px; color:var(--copper); margin-bottom:16px; display:block; }
+.doc-title-block h1 { font-family:'Playfair Display',serif; font-size:48px; font-weight:400; line-height:1.1; margin-bottom:8px; letter-spacing:-1px; }
+.doc-title-block h1 em { color:var(--copper); font-style:italic; }
+.doc-tagline { font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--copper); letter-spacing:0.15em; text-transform:uppercase; margin-bottom:24px; }
+.doc-abstract { font-size:18px; color:var(--text-mid); line-height:1.75; max-width:660px; font-weight:300; margin-bottom:20px; }
+.doc-abstract strong { color:var(--text); font-weight:500; }
+.doc-audience { font-size:13px; color:var(--text-dim); font-style:italic; border-left:2px solid var(--border-copper); padding-left:14px; margin-top:8px; }
+.doc-meta { display:flex; gap:24px; margin-top:28px; flex-wrap:wrap; }
+.doc-meta-item { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:2px; }
+.doc-meta-item span { color:var(--copper); }
+
+/* ── TOC ── */
+.doc-toc { margin-bottom:56px; padding:24px 28px; background:var(--black-mid); border:1px solid var(--border); }
+.doc-toc .toc-title { font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:3px; text-transform:uppercase; color:var(--copper); margin-bottom:20px; }
+.toc-group { margin-bottom:16px; }
+.toc-group-label { font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--text-dim); margin-bottom:6px; }
+.doc-toc ul { list-style:none; }
+.doc-toc a { display:flex; justify-content:space-between; padding:5px 0; color:var(--text-mid); text-decoration:none; font-size:13px; border-bottom:1px solid rgba(255,255,255,0.04); }
+.doc-toc a:hover { color:var(--copper); }
+.doc-toc a .toc-num { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--text-dim); }
+
+/* ── Sections ── */
+section { padding:56px 0; }
+section+section { border-top:1px solid var(--border); }
+.section-label { font-family:'JetBrains Mono',monospace; font-size:10px; text-transform:uppercase; letter-spacing:4px; color:var(--copper); margin-bottom:16px; display:block; }
+h2 { font-family:'Playfair Display',serif; font-size:34px; font-weight:400; line-height:1.2; margin-bottom:20px; letter-spacing:-0.5px; }
+h2 em { color:var(--copper); font-style:italic; }
+h3 { font-family:'Playfair Display',serif; font-size:21px; font-weight:500; color:var(--text); margin:32px 0 12px; }
+h4 { font-family:'Playfair Display',serif; font-size:16px; font-weight:500; color:var(--text); margin:20px 0 8px; }
+p { font-size:15px; color:var(--text-mid); line-height:1.8; margin-bottom:16px; }
+p strong { color:var(--text); }
+a { color:var(--copper); text-decoration:none; }
+a:hover { text-decoration:underline; }
+code { font-family:'JetBrains Mono',monospace; font-size:12px; background:var(--black-mid); padding:2px 6px; border-radius:4px; color:var(--copper-light); }
+
+/* ── Callout boxes ── */
+.callout { background:rgba(184,115,51,0.06); border-left:3px solid var(--copper); padding:24px 28px; margin:32px 0; }
+.callout p { font-family:'Playfair Display',serif; font-size:18px; font-style:italic; color:var(--text); margin:0; line-height:1.6; }
+.callout strong { color:var(--copper); font-style:normal; }
+.callout.scene { border-left-color:var(--blue); background:rgba(56,189,248,0.05); }
+.callout.scene p { font-family:'DM Sans',sans-serif; font-size:15px; font-style:normal; color:var(--text-mid); }
+.callout.scene .scene-attr { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--blue); text-transform:uppercase; letter-spacing:2px; margin-bottom:10px; display:block; }
+.callout.warning { border-left-color:var(--red); background:rgba(244,63,94,0.05); }
+.callout.warning p { font-size:15px; font-style:normal; color:var(--text-mid); }
+.callout.insight { border-left-color:var(--green); background:rgba(52,211,153,0.05); }
+.callout.insight p { font-size:15px; font-style:normal; }
+
+/* ── Grids ── */
+.grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:3px; margin:28px 0; }
+.grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:3px; margin:28px 0; }
+.grid-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:3px; margin:28px 0; }
+.card { background:var(--black-mid); border:1px solid var(--border); padding:24px 20px; }
+.card-num { font-family:'Playfair Display',serif; font-size:40px; color:var(--copper-dim); line-height:1; margin-bottom:6px; }
+.card h3 { font-size:17px; margin:0 0 8px; }
+.card p { font-size:13px; margin:0; }
+.card .card-label { font-family:'JetBrains Mono',monospace; font-size:9px; text-transform:uppercase; letter-spacing:2px; color:var(--copper); margin-bottom:8px; display:block; }
+
+/* ── Before/after graph ── */
+.ba-wrap { margin:32px 0; border:1px solid var(--border); border-radius:8px; overflow:hidden; }
+.ba-panels { display:grid; grid-template-columns:1fr 1fr; min-height:400px; }
+.ba-panel { display:flex; flex-direction:column; }
+.ba-panel-before { border-right:1px solid var(--border); }
+.ba-header { padding:16px 20px 12px; border-bottom:1px solid var(--border); background:var(--black-mid); }
+.ba-eyebrow { font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:0.14em; text-transform:uppercase; margin-bottom:4px; }
+.ba-panel-before .ba-eyebrow { color:var(--red); }
+.ba-panel-after .ba-eyebrow { color:var(--green); }
+.ba-title { font-family:'Playfair Display',serif; font-size:16px; line-height:1.25; }
+.ba-panel-before .ba-title em { color:var(--red); font-style:italic; }
+.ba-panel-after .ba-title em { color:var(--green); font-style:italic; }
+.ba-desc { font-size:11px; color:var(--text-dim); margin-top:4px; line-height:1.45; }
+.ba-svg-wrap { flex:1; min-height:320px; }
+.ba-svg-wrap svg { width:100%; height:100%; display:block; }
+.ba-legend { display:flex; border-top:1px solid var(--border); background:var(--black-mid); }
+.ba-leg-item { flex:1; display:flex; align-items:center; justify-content:center; gap:6px; padding:8px 4px; border-right:1px solid var(--border); font-family:'JetBrains Mono',monospace; font-size:8px; color:var(--text-dim); }
+.ba-leg-item:last-child { border-right:none; }
+
+/* ── Eight categories ── */
+.eight-cats { display:grid; grid-template-columns:1fr 1fr; gap:3px; margin:28px 0; }
+.ecat { background:var(--black-mid); border:1px solid var(--border); border-left:3px solid; padding:20px 18px; }
+.ecat-top { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+.ecat-icon { font-size:17px; }
+.ecat-num { font-family:'JetBrains Mono',monospace; font-size:9px; text-transform:uppercase; letter-spacing:2px; }
+.ecat h3 { font-size:15px; margin:0 0 6px; }
+.ecat p { font-size:12px; margin:0 0 8px; }
+.ecat-meta { display:flex; gap:12px; flex-wrap:wrap; font-family:'JetBrains Mono',monospace; font-size:9px; color:var(--text-dim); }
+
+/* ── Market positioning ── */
+.buyer-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:3px; margin:28px 0; }
+.buyer-card { background:var(--black-mid); border:1px solid var(--border); border-top:3px solid; padding:20px 18px; }
+.buyer-card h3 { font-size:16px; margin:0 0 6px; }
+.buyer-card p { font-size:12px; margin:0; }
+.buyer-trigger { font-family:'JetBrains Mono',monospace; font-size:9px; text-transform:uppercase; letter-spacing:1.5px; margin-bottom:8px; display:block; }
+.buyer-quote { font-style:italic; font-size:12px; color:var(--text-mid); margin-top:10px; padding-top:10px; border-top:1px solid var(--border); }
+
+/* ── Services arc ── */
+.arc-steps { display:grid; grid-template-columns:repeat(4,1fr); gap:3px; margin:28px 0; position:relative; }
+.arc-step { background:var(--black-mid); border:1px solid var(--border); padding:20px 16px; position:relative; }
+.arc-step::after { content:'→'; position:absolute; right:-10px; top:50%; transform:translateY(-50%); color:var(--copper); font-size:14px; z-index:2; }
+.arc-step:last-child::after { display:none; }
+.arc-step-num { font-family:'JetBrains Mono',monospace; font-size:9px; text-transform:uppercase; letter-spacing:2px; color:var(--copper); margin-bottom:8px; }
+.arc-step h3 { font-size:14px; margin:0 0 6px; }
+.arc-step p { font-size:11px; margin:0; }
+.arc-step .arc-deliverable { font-family:'JetBrains Mono',monospace; font-size:9px; color:var(--text-dim); margin-top:8px; padding-top:8px; border-top:1px solid var(--border); }
+
+/* ── Compounding timeline ── */
+.ct-track { position:relative; padding-left:32px; margin:28px 0; }
+.ct-track::before { content:''; position:absolute; left:10px; top:8px; bottom:8px; width:1px; background:linear-gradient(to bottom,var(--copper) 0%,rgba(184,115,51,0.15) 100%); }
+.ct-event { position:relative; margin-bottom:28px; }
+.ct-event::before { content:''; position:absolute; left:-26px; top:6px; width:8px; height:8px; border-radius:50%; background:var(--copper); box-shadow:0 0 10px rgba(184,115,51,0.4); }
+.ct-event.future::before { background:none; border:1px solid rgba(184,115,51,0.35); box-shadow:none; }
+.ct-phase { font-family:'JetBrains Mono',monospace; font-size:9px; text-transform:uppercase; letter-spacing:2px; color:var(--copper); margin-bottom:3px; }
+.ct-event.future .ct-phase { color:rgba(184,115,51,0.45); }
+.ct-title { font-size:15px; font-weight:500; color:var(--text); margin-bottom:4px; }
+.ct-event.future .ct-title { color:var(--text-dim); }
+.ct-body { font-size:13px; color:var(--text-mid); line-height:1.65; }
+
+/* ── Tables ── */
+.doc-table { width:100%; border-collapse:collapse; margin:28px 0; font-size:13px; background:var(--black-mid); border:1px solid var(--border); }
+.doc-table th,.doc-table td { padding:12px 16px; text-align:left; border-bottom:1px solid var(--border); }
+.doc-table th { font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--copper); }
+.doc-table td { color:var(--text-mid); line-height:1.55; }
+.doc-table tr:last-child td { border-bottom:none; }
+.doc-table td strong { color:var(--text); }
+
+/* ── Gov list ── */
+.gov-list { list-style:none; margin:16px 0 24px; padding:0; }
+.gov-list li { font-size:14px; color:var(--text-mid); line-height:1.75; margin-bottom:12px; padding-left:20px; position:relative; }
+.gov-list li::before { content:''; position:absolute; left:0; top:9px; width:4px; height:4px; background:var(--copper); border-radius:2px; }
+.gov-list li strong { color:var(--text); }
+
+/* ── Process steps ── */
+.process-steps { display:grid; gap:3px; margin:28px 0; }
+.step { background:var(--black-mid); border:1px solid var(--border); padding:24px 28px; display:grid; grid-template-columns:48px 1fr; gap:20px; align-items:start; }
+.step-left .step-phase { font-family:'JetBrains Mono',monospace; font-size:9px; text-transform:uppercase; letter-spacing:2px; color:var(--copper); }
+.step-left .step-num { font-family:'Playfair Display',serif; font-size:32px; color:rgba(184,115,51,0.2); line-height:1; }
+.step h3 { font-size:18px; margin:0 0 4px; }
+.step-duration { font-size:11px; color:var(--text-dim); margin-bottom:12px; font-family:'JetBrains Mono',monospace; }
+.step p { font-size:14px; margin-bottom:0; }
+.step-outputs { margin-top:14px; border-top:1px solid var(--border); padding-top:12px; }
+.step-output-label { font-family:'JetBrains Mono',monospace; font-size:8px; letter-spacing:2px; text-transform:uppercase; color:var(--text-dim); margin-bottom:6px; }
+.step-output-item { font-size:12px; color:var(--text-mid); margin-bottom:3px; }
+
+/* ── Scorecard ── */
+.scorecard { display:grid; grid-template-columns:1fr 1fr; gap:3px; margin:28px 0; }
+.score-item { background:var(--black-mid); border:1px solid var(--border); padding:16px 18px; display:flex; align-items:flex-start; gap:14px; }
+.score-light { width:10px; height:10px; border-radius:50%; flex-shrink:0; margin-top:5px; }
+.score-light.green { background:var(--green); box-shadow:0 0 8px rgba(52,211,153,0.5); }
+.score-light.amber { background:#f59e0b; box-shadow:0 0 8px rgba(245,158,11,0.4); }
+.score-light.red { background:var(--red); box-shadow:0 0 8px rgba(244,63,94,0.4); }
+.score-body .score-label { font-family:'JetBrains Mono',monospace; font-size:9px; text-transform:uppercase; letter-spacing:1.5px; color:var(--text-dim); margin-bottom:3px; }
+.score-body .score-verdict { font-size:13px; color:var(--text-mid); line-height:1.5; }
+.score-body .score-verdict strong { color:var(--text); }
+
+/* ── TODO ── */
+.todo-box { margin:32px 0; padding:24px 28px; background:rgba(184,115,51,0.03); border:1px solid rgba(184,115,51,0.15); border-radius:6px; }
+.todo-box .todo-title { font-family:'JetBrains Mono',monospace; font-size:10px; text-transform:uppercase; letter-spacing:3px; color:var(--copper); margin-bottom:16px; }
+.todo-cat { font-family:'JetBrains Mono',monospace; font-size:9px; text-transform:uppercase; letter-spacing:2px; color:var(--text-dim); margin:16px 0 6px; }
+.todo-list { list-style:none; margin:0; padding:0; }
+.todo-list li { font-size:13px; color:var(--text-mid); line-height:1.65; margin-bottom:10px; padding-left:22px; position:relative; }
+.todo-list li::before { content:'☐'; position:absolute; left:0; color:rgba(184,115,51,0.5); }
+.todo-list li.done::before { content:'☑'; color:var(--green); opacity:1; }
+.todo-list li strong { color:var(--text); }
+
+/* ── Concentric ── */
+.concentric-wrap { margin:32px 0; padding:28px 24px; background:var(--black-mid); border:1px solid var(--border); border-radius:8px; }
+.concentric-headline { font-family:'Playfair Display',serif; font-size:18px; font-weight:500; color:var(--text); text-align:center; margin-bottom:24px; }
+.concentric-body { display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:32px 48px; }
+.concentric-diagram { position:relative; width:180px; height:180px; flex-shrink:0; }
+.concentric-diagram .ring { position:absolute; top:50%; left:50%; border-radius:50%; border:2px solid var(--copper); background:rgba(184,115,51,0.05); transform:translate(-50%,-50%); }
+.ring-outer { width:180px; height:180px; }
+.ring-mid { width:122px; height:122px; }
+.ring-inner { width:64px; height:64px; }
+.concentric-key { flex:1; min-width:240px; list-style:none; padding:0; }
+.concentric-key li { display:flex; align-items:flex-start; gap:12px; margin-bottom:16px; font-size:14px; line-height:1.5; }
+.ring-dot { flex-shrink:0; border-radius:50%; border:2px solid var(--copper); margin-top:4px; }
+.ring-dot.outer { width:12px; height:12px; }
+.ring-dot.mid { width:9px; height:9px; margin-top:5px; }
+.ring-dot.inner { width:6px; height:6px; margin-top:6px; }
+.key-title { font-family:'JetBrains Mono',monospace; font-size:10px; text-transform:uppercase; letter-spacing:1.5px; color:var(--copper); margin-bottom:2px; }
+.key-desc { color:var(--text-mid); font-size:13px; }
+.concentric-note { margin-top:20px; padding-top:16px; border-top:1px solid var(--border); font-size:13px; color:var(--text-mid); text-align:center; }
+
+/* ── Stages inline ── */
+.stages-inline { font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--copper); margin:20px 0; display:flex; flex-wrap:wrap; gap:8px 12px; align-items:center; }
+
+/* ── Screen gallery ── */
+.screen-gallery { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin-top:8px; }
+.screen-figure { margin:0; background:var(--black); border:1px solid var(--border); border-radius:8px; overflow:hidden; }
+.screen-figure img { display:block; width:100%; height:auto; border-bottom:1px solid var(--border); }
+.screen-figure figcaption { font-size:11px; color:var(--text-dim); padding:10px 12px; line-height:1.45; }
+.diagram-wrap { margin:32px 0; padding:24px; background:var(--black-mid); border:1px solid var(--border); border-radius:8px; overflow-x:auto; }
+.diagram-caption { font-size:11px; color:var(--text-dim); margin-top:12px; text-align:center; }
+
+/* ── Next steps ── */
+.next-steps { margin-top:48px; padding:24px 28px; background:var(--black-mid); border:1px solid var(--border-copper); }
+.next-steps strong { color:var(--text); }
+
+/* ── Footer ── */
+footer { margin-top:72px; padding-top:24px; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; }
+.footer-brand { font-family:'Playfair Display',serif; font-size:18px; font-style:italic; color:var(--copper); }
+.footer-brand span { font-family:'JetBrains Mono',monospace; font-size:10px; font-style:normal; color:var(--text-dim); display:block; letter-spacing:3px; text-transform:uppercase; }
+.footer-meta { font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:2px; color:var(--text-dim); text-transform:uppercase; }
+
+/* ── Vertical slice callout ── */
+.vs-card { background:var(--black-mid); border:1px solid var(--border); border-left:3px solid var(--copper); padding:20px 24px; margin:20px 0; }
+.vs-card .vs-label { font-family:'JetBrains Mono',monospace; font-size:9px; text-transform:uppercase; letter-spacing:2px; color:var(--copper); margin-bottom:8px; display:block; }
+.vs-card h3 { font-size:16px; margin:0 0 8px; }
+.vs-card p { font-size:13px; margin:0; }
+
+/* ── Prototype banner ── */
+.proto-banner { background:rgba(245,158,11,0.06); border:1px solid rgba(245,158,11,0.2); border-radius:6px; padding:12px 18px; display:flex; align-items:center; gap:12px; margin:20px 0; font-size:12px; color:var(--text-mid); }
+.proto-dot { width:7px; height:7px; border-radius:50%; background:#f59e0b; flex-shrink:0; animation:pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.3} }
+
+@media(max-width:768px){
+  body{padding:0 20px 60px;}
+  .doc-title-block h1{font-size:34px;}
+  h2{font-size:26px;}
+  .grid-2,.grid-3,.grid-4,.eight-cats,.buyer-grid,.arc-steps,.scorecard,.ba-panels{grid-template-columns:1fr;}
+  .arc-step::after{display:none;}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ TITLE ══ -->
+<header class="doc-title-block" id="top">
+  <span class="eyebrow">Internal whitepaper · v0.3 · First cut</span>
+  <h1><em>Mementum</em></h1>
+  <div class="doc-tagline">Memory in motion</div>
+  <p class="doc-abstract">Most organisations are deploying AI on top of what they've written down. <strong>What they've written down is not how they actually work.</strong> Mementum maps the real intelligence — the decisions, patterns, constraints, and reasoning that live in people's heads — structures it as a queryable intelligence layer, and deploys it as micro-skills that agents and humans use daily. The layer compounds. Competitors can buy the same models. They can't buy yours.</p>
+  <p class="doc-audience">For internal use: methodology development, client conversation preparation, partner briefings, and future product positioning.</p>
+  <div class="doc-meta">
+    <div class="doc-meta-item">Status: <span>First cut — prototype stage</span></div>
+    <div class="doc-meta-item">Author: <span>Dan Tran</span></div>
+    <div class="doc-meta-item">Updated: <span>March 2026</span></div>
+    <div class="doc-meta-item">Version: <span>0.3</span></div>
+  </div>
+</header>
+
+<!-- ══ TOC ══ -->
+<nav class="doc-toc" aria-label="Contents">
+  <div class="toc-title">Contents</div>
+  <div class="toc-group">
+    <div class="toc-group-label">Executive summary</div>
+    <ul>
+      <li><a href="#exec-summary">The thesis in one page <span class="toc-num">ES</span></a></li>
+      <li><a href="#scorecard">Document scorecard <span class="toc-num">SC</span></a></li>
+    </ul>
+  </div>
+  <div class="toc-group">
+    <div class="toc-group-label">The argument</div>
+    <ul>
+      <li><a href="#problem">1. The problem — why AI keeps failing the trust test <span class="toc-num">01</span></a></li>
+      <li><a href="#approach">2. The approach — building the intelligence layer <span class="toc-num">02</span></a></li>
+      <li><a href="#methodology">3. The methodology — eight categories, one framework <span class="toc-num">03</span></a></li>
+      <li><a href="#context-universe">4. The Context Universe — what gets built <span class="toc-num">04</span></a></li>
+      <li><a href="#second-brain">5. The second brain — what remains after we leave <span class="toc-num">05</span></a></li>
+    </ul>
+  </div>
+  <div class="toc-group">
+    <div class="toc-group-label">Go to market</div>
+    <ul>
+      <li><a href="#market">6. Market positioning — who buys and why <span class="toc-num">06</span></a></li>
+      <li><a href="#services-arc">7. The services arc — from engagement to compounding product <span class="toc-num">07</span></a></li>
+      <li><a href="#engagement">8. Engagement approach <span class="toc-num">08</span></a></li>
+    </ul>
+  </div>
+  <div class="toc-group">
+    <div class="toc-group-label">Reference</div>
+    <ul>
+      <li><a href="#example-advisory">A. Example: wealth management &amp; advisory <span class="toc-num">A</span></a></li>
+      <li><a href="#terminology">B. Terminology <span class="toc-num">B</span></a></li>
+      <li><a href="#appendix">C1–C2. Supporting detail &amp; five stages <span class="toc-num">C</span></a></li>
+      <li><a href="#knowledge-typology">C3. Knowledge typology — 2×2 + action matrix <span class="toc-num">C3</span></a></li>
+      <li><a href="#moat-attack">C4. GenAI moat attack table <span class="toc-num">C4</span></a></li>
+      <li><a href="#screenshots">C5. Prototype interface reference <span class="toc-num">C5</span></a></li>
+      <li><a href="#todo">D. Document TODO <span class="toc-num">D</span></a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════════════════════════════════
+     EXECUTIVE SUMMARY
+══════════════════════════════════════════════════════════════ -->
+<section id="exec-summary">
+  <span class="section-label">Executive summary</span>
+  <h2>The thesis in <em>one page</em></h2>
+
+  <p><strong>The problem.</strong> AI pilots fail because they're built on documentation, not reality. The documents are outdated. The real knowledge — how decisions actually get made, what constraints everyone knows but nobody wrote down, what patterns the best people recognise — lives in people's heads and disappears when they leave. Every new implementation starts from zero. Every output is generic. Trust never builds.</p>
+
+  <div class="callout scene">
+    <span class="scene-attr">In the field — mid-tier financial services firm</span>
+    <p>"We were halfway through building a pricing workflow end-to-end. Then we hit a wall. The documents were outdated and led us down the wrong path. We had to stop, call a meeting, and manually capture all the hidden assumptions, the biases, what actually goes on. The project extended by months. The real knowledge was there the whole time — nobody had ever written it down."</p>
+  </div>
+
+  <p><strong>The root cause.</strong> According to MIT research, 70–80% of AI pilots fail to scale — not because the models are wrong, but because they fail the trust test. Organisations deploy AI on documented processes. Documented processes are not real processes. Agents behave unpredictably because they don't know what knowledge should drive which skills. The foundation was never built.</p>
+
+  <p><strong>The insight.</strong> Every organisation contains eight types of knowledge that no existing system captures: how they interpret signals, the reasoning behind decisions, their standing positions, how things actually work, the patterns their best people recognise, the constraints everyone knows but nobody wrote, the nuances of key relationships, and the assumptions they've never tested. Generic AI tools don't reach any of it. That's the gap.</p>
+
+  <p><strong>The solution.</strong> Mementum maps all eight categories for a specific decision domain, structures them as a queryable intelligence layer deployed in the client's own cloud environment, and delivers micro-skills that agents and humans use immediately. The layer is governed by humans with AI surfacing candidates. It compounds with use. It is organisation-owned, portable, and irreplicable by competitors using the same models.</p>
+
+  <p><strong>The business model.</strong> Services engagement to educate on the methodology, discover the knowledge assets, and leave behind a deployable product. Ongoing relationship — retainer, project, or hybrid — to curate the knowledge layer and build new micro-skills as the organisation's intelligence deepens. Variable by client maturity.</p>
+
+  <div class="callout insight">
+    <p><strong>The one-sentence version:</strong> Your organisation's competitive advantage lives in people's heads — Mementum maps it, structures it as an intelligence layer your AI can actually use, and leaves it behind as a compounding asset that gets smarter every day you run it.</p>
+  </div>
+</section>
+
+<!-- ══ SCORECARD ══ -->
+<section id="scorecard">
+  <span class="section-label">Scorecard</span>
+  <h2>Where this document <em>currently stands</em></h2>
+  <p>Five tests every methodology whitepaper must pass. Used to track development of this document across versions.</p>
+
+  <div class="scorecard">
+    <div class="score-item">
+      <div class="score-light green"></div>
+      <div class="score-body">
+        <div class="score-label">Problem Test — does the reader feel seen?</div>
+        <div class="score-verdict"><strong>Green.</strong> The client scene (midway through a failed pilot) is specific, felt, and resonant. The root cause (trust failure, not model failure) reframes the problem correctly. The eight-category gap is concrete.</div>
+      </div>
+    </div>
+    <div class="score-item">
+      <div class="score-light green"></div>
+      <div class="score-body">
+        <div class="score-label">Insight Test — one idea they haven't heard before?</div>
+        <div class="score-verdict"><strong>Green.</strong> The eight-category taxonomy is the genuine insight — mutually exclusive, collectively exhaustive, and something no existing system captures. The "trust failure = knowledge architecture failure" reframe is original.</div>
+      </div>
+    </div>
+    <div class="score-item">
+      <div class="score-light amber"></div>
+      <div class="score-body">
+        <div class="score-label">Methodology Test — rigorous but not rigid?</div>
+        <div class="score-verdict"><strong>Amber.</strong> The five-stage process and eight categories are well-structured. Needs one more concrete worked example beyond advisory. Vertical slice framing strong but could use a visual decision-domain diagram.</div>
+      </div>
+    </div>
+    <div class="score-item">
+      <div class="score-light amber"></div>
+      <div class="score-body">
+        <div class="score-label">Product-Consulting Coherence Test — do they reinforce each other?</div>
+        <div class="score-verdict"><strong>Amber.</strong> The services-to-product arc is now clear. Needs sharper articulation of what the deployable package contains technically. Prototype status is honest — don't over-claim.</div>
+      </div>
+    </div>
+    <div class="score-item">
+      <div class="score-light amber"></div>
+      <div class="score-body">
+        <div class="score-label">Action Test — does the reader know what to do next?</div>
+        <div class="score-verdict"><strong>Amber.</strong> The "moat discovery session" CTA is clear. Needs a sharper articulation of what that first conversation produces — what does the CEO walk away with?</div>
+      </div>
+    </div>
+    <div class="score-item">
+      <div class="score-light amber"></div>
+      <div class="score-body">
+        <div class="score-label">Market Positioning Test — who buys and why?</div>
+        <div class="score-verdict"><strong>Amber → addressed in Section 6.</strong> Three buyer triggers now mapped with distinct entry points and language. Needs pricing signal and second vertical example to reach Green.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SECTION 1 — THE PROBLEM
+══════════════════════════════════════════════════════════════ -->
+<section id="problem">
+  <span class="section-label">1. The problem</span>
+  <h2>Why AI keeps failing <em>the trust test</em></h2>
+
+  <p>Organisations are under pressure. Vendors are loud. Competitors appear to be moving. The instinct is to deploy — buy a platform, run a pilot, show progress. And many pilots do show promise. The problem comes when you try to scale them.</p>
+
+  <div class="callout scene">
+    <span class="scene-attr">In the field — mid-tier financial services firm</span>
+    <p>"We were halfway through building a pricing workflow end-to-end. Then we hit a wall. The documents were outdated and led us down the wrong path. We had to stop, call a meeting, and manually capture all the hidden assumptions, the biases, what actually goes on. The project extended by months. The real knowledge was there the whole time — nobody had ever written it down."</p>
+  </div>
+
+  <p>This is not a model problem. It is not a prompt engineering problem. It is a knowledge architecture problem. The pilot failed the trust test because it was built on documented reality — and documented reality is not real reality.</p>
+
+  <div class="ba-wrap">
+    <div class="ba-panels">
+      <div class="ba-panel ba-panel-before">
+        <div class="ba-header">
+          <div class="ba-eyebrow">Before — the problem</div>
+          <div class="ba-title">Agents searching.<br><em>Finding nothing verified.</em></div>
+          <div class="ba-desc">Sources unstructured. Knowledge uncaptured. Agents and humans query the same void — no verified context, no connected skills, no trust.</div>
+        </div>
+        <div class="ba-svg-wrap"><svg id="svg-before"></svg></div>
+        <div class="ba-legend">
+          <div class="ba-leg-item"><svg width="11" height="11" viewBox="-6-6 12 12"><rect x="-3.5" y="-3.5" width="7" height="7" rx="1" transform="rotate(45)" fill="rgba(244,63,94,0.1)" stroke="#f43f5e" stroke-width="0.8" stroke-dasharray="2 2"/></svg>Raw sources</div>
+          <div class="ba-leg-item"><svg width="11" height="11" viewBox="-6-6 12 12"><circle r="4.5" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.18)" stroke-width="0.8" stroke-dasharray="2 2"/></svg>Uncaptured</div>
+          <div class="ba-leg-item"><svg width="11" height="11" viewBox="-6-6 12 12"><polygon points="0,-5 4.8,-1.6 3,4.1 -3,4.1 -4.8,-1.6" fill="rgba(245,158,11,0.05)" stroke="rgba(245,158,11,0.3)" stroke-width="0.8" stroke-dasharray="2 2"/></svg>Undefined skills</div>
+          <div class="ba-leg-item"><svg width="11" height="11" viewBox="-6-6 12 12"><circle r="4.5" fill="rgba(129,140,248,0.1)" stroke="#818cf8" stroke-width="1"/><text y="1" text-anchor="middle" dominant-baseline="middle" font-size="4" fill="#818cf8">A</text></svg>Agents / humans</div>
+        </div>
+      </div>
+      <div class="ba-panel ba-panel-after">
+        <div class="ba-header">
+          <div class="ba-eyebrow">After — Mementum</div>
+          <div class="ba-title">Verified sources → knowledge<br><em>→ skills → trusted action</em></div>
+          <div class="ba-desc">Eight knowledge categories mapped. Skills grounded in verified context. Agents and humans operate from the same intelligence layer — with provenance, governance, and trust built in.</div>
+        </div>
+        <div class="ba-svg-wrap"><svg id="svg-after"></svg></div>
+        <div class="ba-legend">
+          <div class="ba-leg-item"><svg width="11" height="11" viewBox="-6-6 12 12"><rect x="-3.5" y="-3.5" width="7" height="7" rx="1" transform="rotate(45)" fill="rgba(56,189,248,0.15)" stroke="#6b7db3" stroke-width="1"/></svg>Verified sources</div>
+          <div class="ba-leg-item"><svg width="11" height="11" viewBox="-6-6 12 12"><circle r="4.5" fill="rgba(167,139,250,0.12)" stroke="#a78bfa" stroke-width="1"/><circle r="1.5" fill="#a78bfa"/></svg>Knowledge nodes</div>
+          <div class="ba-leg-item"><svg width="11" height="11" viewBox="-6-6 12 12"><polygon points="0,-5 4.8,-1.6 3,4.1 -3,4.1 -4.8,-1.6" fill="rgba(245,158,11,0.15)" stroke="#f59e0b" stroke-width="1.2"/></svg>Active skills</div>
+          <div class="ba-leg-item"><svg width="11" height="11" viewBox="-6-6 12 12"><circle r="4.5" fill="rgba(129,140,248,0.15)" stroke="#818cf8" stroke-width="1.2"/><text y="1" text-anchor="middle" dominant-baseline="middle" font-size="4" fill="#818cf8">A</text></svg>Agents / humans</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3>The four structural failure modes</h3>
+  <div class="grid-2">
+    <div class="card"><div class="card-num">01</div><h3>You don't know your own moat</h3><p>Most leaders believe they know their advantage. In practice the intelligence that creates it lives in people — and people leave, retire, and forget. What's distinctive about your organisation is almost entirely undocumented.</p></div>
+    <div class="card"><div class="card-num">02</div><h3>AI can't access what's in heads</h3><p>The real decision logic and pattern recognition aren't in any document. AI can read your wiki; it can't read how your best people actually evaluate a deal. Output is generic; rework is constant; trust never builds.</p></div>
+    <div class="card"><div class="card-num">03</div><h3>Every implementation starts from zero</h3><p>Context built inside a vendor platform stays there. Change tools and you lose it. Pilots run in parallel and context never connects. You accumulate tools; you never accumulate intelligence.</p></div>
+    <div class="card"><div class="card-num">04</div><h3>Pilots are built on documented reality</h3><p>When implementations fail it's because they were built on what the org says it does — not how it actually operates. They hit real behaviour, produce outputs nobody trusts, and stall.</p></div>
+  </div>
+
+  <div class="callout">
+    <p>According to MIT research, 70–80% of AI pilots fail to scale. The cause is rarely the model. <strong>It's that nobody built the knowledge foundation first.</strong></p>
+  </div>
+
+  <h3>The three paths that fall short</h3>
+  <p><strong>Tool-first.</strong> Buy the platform, expect transformation. Reality: an organisation buying Copilot gets the same base model as every competitor. Differentiation comes from what you feed it — not the tool. You burn tokens, get generic output, try prompt engineering as a stopgap, switch models, and arrive six months later with less budget and no advantage.</p>
+  <p><strong>Strategy consulting.</strong> Deliver recommendations, hand over a deck, exit. Reality: static deliverables in a dynamic environment. The knowledge leaves with the engagement team. The org gets a snapshot of what it should do, without a living system to keep doing it.</p>
+  <p><strong>Hire AI engineers.</strong> Build internally with technical talent. Reality: technology teams optimise for technical metrics — latency, accuracy, cost. Business value depends on strategic alignment — decision quality, competitive positioning. The gap between engineering capability and organisational context remains.</p>
+
+  <div class="callout warning">
+    <p>None of these paths build anything that compounds. <strong>All three require you to start over when the next model arrives, the next regulation changes, or the next tool gets acquired.</strong> The intelligence stays in people's heads and documents. The implementation stays in the vendor's platform. The organisation learns nothing that it owns.</p>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SECTION 2 — THE APPROACH
+══════════════════════════════════════════════════════════════ -->
+<section id="approach">
+  <span class="section-label">2. The approach</span>
+  <h2>Building the <em>intelligence layer</em></h2>
+
+  <p>Your competitive moat is your structured intelligence graph. Models are commodities. Data is increasingly available. The structured context that makes AI output strategically valuable — your decision logic, competitive positioning, operational expertise, relationship history — is unique to your organisation and cannot be replicated by competitors buying the same tools.</p>
+
+  <p>This is the <strong>Intelligence Layer</strong>: the proprietary knowledge architecture that sits between commoditised models and your specific business outcomes. Build it first. Every tool you deploy on top of it becomes distinctly yours.</p>
+
+  <div class="concentric-wrap">
+    <p class="concentric-headline">Your tools are only as good as the context you feed them. Build the outer ring first.</p>
+    <div class="concentric-body">
+      <div class="concentric-diagram" aria-hidden="true">
+        <div class="ring ring-outer"></div>
+        <div class="ring ring-mid"></div>
+        <div class="ring ring-inner"></div>
+      </div>
+      <ul class="concentric-key">
+        <li><span class="ring-dot outer"></span><div><div class="key-title">Context Moat</div><div class="key-desc">Your mapped intelligence — decisions, patterns, constraints, positions. Owned by you. Queryable. Compounding with use. Invisible to competitors.</div></div></li>
+        <li><span class="ring-dot mid"></span><div><div class="key-title">Human-Agentic Workforce</div><div class="key-desc">Advisers, ops teams, and AI agents on the same context. Same answers, same language, same guardrails. Consistent across 1 or 300 people.</div></div></li>
+        <li><span class="ring-dot inner"></span><div><div class="key-title">AI Platform &amp; Tooling</div><div class="key-desc">Claude, Copilot, CRM, internal apps. Swappable. Only as good as the context you supply. Build the outer ring first.</div></div></li>
+      </ul>
+    </div>
+    <p class="concentric-note">The inner ring is where most organisations start. They should start here last.</p>
+  </div>
+
+  <h3>The competitive intelligence argument</h3>
+  <p>When you buy a generic AI tool and populate it with your documentation, you get outputs that approximate your organisation. Your competitors, using the same tool with their documentation, get approximately the same quality of outputs. The tool is not the differentiator.</p>
+  <p>What differentiates you is the intelligence that has allowed your organisation to survive and succeed until now: years of interpretation of market signals, reasoning behind decisions that worked and failed, patterns your best people have recognised across thousands of client interactions, constraints embedded in your regulatory history. Generic tools don't capture any of this.</p>
+  <p>When you start capturing this knowledge explicitly — structuring it as a queryable layer, having people use tools that accumulate against it, curating it with human judgment and AI assistance — something important happens: <strong>you become conscious of your own advantage</strong>. You can see what you know, identify where you're weak, and make deliberate decisions about how to differentiate your workforce and iterate your organisation toward a stronger position.</p>
+
+  <div class="callout">
+    <p>Competitors can buy the same AI models. They cannot buy the institutional memory, competitive intelligence, and organisational uniqueness you have been accumulating for years. <strong>The question is whether you've structured it so AI can use it — or whether it's still only in people's heads.</strong></p>
+  </div>
+
+  <h3>What we do differently</h3>
+  <div class="grid-2">
+    <div class="card">
+      <span class="card-label">Other consultants</span>
+      <ul class="gov-list" style="margin:0">
+        <li>Deliver strategy decks you can't execute</li>
+        <li>Recommend tools without mapping your intelligence first</li>
+        <li>Treat AI as a technology problem, not a knowledge architecture problem</li>
+        <li>Leave when the engagement ends, taking the knowledge with them</li>
+        <li>Build on vendor platforms — context stays locked in</li>
+      </ul>
+    </div>
+    <div class="card">
+      <span class="card-label">Mementum</span>
+      <ul class="gov-list" style="margin:0">
+        <li>Build the system that executes the strategy</li>
+        <li>Map the eight knowledge categories before recommending tools</li>
+        <li>Treat AI as a knowledge architecture problem — decomposing work into sense/remember/reason/create units</li>
+        <li>Leave a deployable product in your cloud environment that compounds without us</li>
+        <li>Open formats, organisation-owned, portable across tools</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SECTION 3 — METHODOLOGY
+══════════════════════════════════════════════════════════════ -->
+<section id="methodology">
+  <span class="section-label">3. The methodology</span>
+  <h2>Eight categories, <em>one framework</em></h2>
+
+  <p>Every organisation contains the same eight types of knowledge — but no existing system captures more than two or three of them. CRM captures relationship facts, not relational intelligence. Compliance manuals capture approved positions, not the reasoning behind them. Slack captures conversations, not decisions. The eight categories below are mutually exclusive and collectively exhaustive. Missing any one creates gaps that AI agents will hit and fail on.</p>
+
+  <div class="eight-cats">
+    <div class="ecat" style="border-left-color:#38bdf8">
+      <div class="ecat-top"><span class="ecat-icon">🔭</span><span class="ecat-num" style="color:#38bdf8">01 — Interpretation</span></div>
+      <h3>How the firm reads external signals</h3>
+      <p>Not the raw signal — the org's specific meaning-making. What this regulation, market event, or competitor move means <em>for us</em>. Lives in email threads and leadership conversations. Never in a document.</p>
+      <div class="ecat-meta"><span>Extract: automated ingestion + SME tagging</span><span>Refresh: weekly</span></div>
+    </div>
+    <div class="ecat" style="border-left-color:#a78bfa">
+      <div class="ecat-top"><span class="ecat-icon">⚖️</span><span class="ecat-num" style="color:#a78bfa">02 — Decision + Reasoning</span></div>
+      <h3>Choices made and the why</h3>
+      <p>A choice made, the options considered, the constraints at the time, and why this path was chosen. The reasoning is what no system captures. Every agent that needs to understand why things are the way they are needs this layer.</p>
+      <div class="ecat-meta"><span>Extract: decision archaeology workshops</span><span>Refresh: on event</span></div>
+    </div>
+    <div class="ecat" style="border-left-color:#e879f9">
+      <div class="ecat-top"><span class="ecat-icon">🏛</span><span class="ecat-num" style="color:#e879f9">03 — Standing Position</span></div>
+      <h3>Durable approved stances</h3>
+      <p>Beliefs, stances, and approved interpretations that guide how the firm acts in a category of situations. Regulatory positions, investment philosophy, client segment beliefs. Stable but must be actively governed.</p>
+      <div class="ecat-meta"><span>Extract: leadership interviews + compliance review</span><span>Refresh: quarterly</span></div>
+    </div>
+    <div class="ecat" style="border-left-color:#34d399">
+      <div class="ecat-top"><span class="ecat-icon">⚙</span><span class="ecat-num" style="color:#34d399">04 — Real Process</span></div>
+      <h3>How things actually work</h3>
+      <p>Including the exceptions, the informal consultations, the workarounds that never made it into any document. The gap between documented process and real process is precisely where AI agents fail and lose trust.</p>
+      <div class="ecat-meta"><span>Extract: shadowing + value stream mapping</span><span>Refresh: on change</span></div>
+    </div>
+    <div class="ecat" style="border-left-color:#fb923c">
+      <div class="ecat-top"><span class="ecat-icon">📡</span><span class="ecat-num" style="color:#fb923c">05 — Observed Pattern</span></div>
+      <h3>Recurring phenomena never written down</h3>
+      <p>Something seen repeatedly across clients, situations, or interactions but never written down. The hardest to extract and the most valuable. The difference between a model that pattern-matches your market and one that doesn't.</p>
+      <div class="ecat-meta"><span>Extract: interaction analysis + expert elicitation</span><span>Refresh: monthly</span></div>
+    </div>
+    <div class="ecat" style="border-left-color:#f43f5e">
+      <div class="ecat-top"><span class="ecat-icon">🚧</span><span class="ecat-num" style="color:#f43f5e">06 — Implicit Constraint</span></div>
+      <h3>Limits everyone knows but nobody wrote</h3>
+      <p>A limit that everyone who has been here long enough knows about but that is not written down. The things that cause new advisers and new AI agents to make avoidable, sometimes costly, mistakes. Only visible once broken.</p>
+      <div class="ecat-meta"><span>Extract: incident review + shadowing</span><span>Refresh: on incident</span></div>
+    </div>
+    <div class="ecat" style="border-left-color:#fbbf24">
+      <div class="ecat-top"><span class="ecat-icon">🤝</span><span class="ecat-num" style="color:#fbbf24">07 — Relationship Context</span></div>
+      <h3>Nuanced intelligence about key relationships</h3>
+      <p>How a specific relationship — with a client, regulator, or counterparty — actually works. The history, the sensitivities, the informal understandings. CRM captures facts. This captures intelligence.</p>
+      <div class="ecat-meta"><span>Extract: CRM augmentation + interviews</span><span>Refresh: after contact</span></div>
+    </div>
+    <div class="ecat" style="border-left-color:#86efac">
+      <div class="ecat-top"><span class="ecat-icon">💭</span><span class="ecat-num" style="color:#86efac">08 — Assumption</span></div>
+      <h3>Untested beliefs the org operates on</h3>
+      <p>Beliefs operating as fact that have never been explicitly tested or validated. The invisible water the firm swims in — only visible when it breaks. The assumptions most likely to be invalidated first under scrutiny.</p>
+      <div class="ecat-meta"><span>Extract: pre-mortem + scenario sessions</span><span>Refresh: quarterly</span></div>
+    </div>
+  </div>
+
+  <h3>Vertical slicing — the delivery mechanism</h3>
+  <p>We don't map the whole organisation at once. We go deep on one decision domain — the complete set of knowledge, workflow, and judgment that governs a specific business outcome. End-to-end, verified, production-grade, in 90–120 days.</p>
+
+  <div class="vs-card">
+    <span class="vs-label">What a vertical slice is</span>
+    <h3>One decision domain — fully mapped and activated</h3>
+    <p>Everything that governs a specific business outcome: all eight knowledge categories, all relevant sources, the real workflow including exceptions and informal consultations, the output standards, the feedback mechanism. Not a proof of concept. A production system. Built to be reused as the foundation for the next slice.</p>
+  </div>
+
+  <p>Vertical slices work because they deliver measurable ROI before asking for broader commitment, create reusable knowledge patterns that accelerate subsequent builds, and force clarity on what the organisation actually knows in one domain — which often reveals more about the whole org than months of workshops would.</p>
+
+  <h3>The unit of work decomposition</h3>
+  <p>Within each vertical slice, every activity is decomposed into four intelligence functions. This is what prevents the "monolithic chatbot" failure mode — where one system tries to do everything and does nothing well.</p>
+
+  <div class="doc-table" style="overflow:hidden;border-radius:6px;">
+    <table class="doc-table">
+      <thead><tr><th>Unit</th><th>Function</th><th>Requires from knowledge layer</th></tr></thead>
+      <tbody>
+        <tr><td><strong>SENSE</strong></td><td>Monitor signals, classify intent, detect urgency</td><td>Your specific signal vocabulary, failure modes, sensitivity patterns</td></tr>
+        <tr><td><strong>REMEMBER</strong></td><td>Instant recall of relevant organisational context</td><td>Your history, positions, policies, who knows what</td></tr>
+        <tr><td><strong>REASON</strong></td><td>Multi-step analysis, diagnosis, recommendation</td><td>Your decision logic, playbooks, risk frameworks, exceptions</td></tr>
+        <tr><td><strong>CREATE</strong></td><td>Generate outputs aligned with organisational voice</td><td>Your brand voice, approval requirements, compliance standards</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>How we capture knowledge — five methods</h3>
+  <p>Traditional knowledge capture fails because it asks people to describe what they do, then writes it down. People describe the ideal. The ideal is not the real. We capture knowledge in motion — from what people actually do.</p>
+  <ul class="gov-list">
+    <li><strong>Ambient conversation capture.</strong> Meeting transcripts analysed for decision patterns, expertise location, and reasoning reconstruction — the "why" behind decisions, not just the "what."</li>
+    <li><strong>Decision archaeology.</strong> Reconstructing reasoning behind significant past decisions: document version histories, email threads, alternatives considered and rejected.</li>
+    <li><strong>Expertise pulse.</strong> Surface knowledge when needed, capture in the context of a real problem, encode immediately while fresh — not extracted in isolation weeks earlier.</li>
+    <li><strong>Tension detection.</strong> Continuous scanning for contradictions between documents, between stated policy and actual practice, between specs and implementation. Tensions are where human judgment is most needed.</li>
+    <li><strong>Friction logging.</strong> Identify knowledge gaps from operational friction: high-escalation areas, frequently queried but missing topics, low-confidence AI outputs.</li>
+  </ul>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SECTION 4 — CONTEXT UNIVERSE
+══════════════════════════════════════════════════════════════ -->
+<section id="context-universe">
+  <span class="section-label">4. The Context Universe</span>
+  <h2>What gets <em>built</em></h2>
+
+  <div class="proto-banner">
+    <div class="proto-dot"></div>
+    <span>Current status: prototype. First engagement being scoped. Ingestion tooling available. All technical claims reflect target architecture — not yet fully validated in production.</span>
+  </div>
+
+  <p>The Context Universe is the concrete artefact that implements the Intelligence Layer. It is a machine-readable, queryable graph of your organisation's knowledge — nodes (concepts, rules, judgments, patterns across all eight categories) and edges (relationships between them), tagged by domain, with provenance on every node.</p>
+  <p>It is not a wiki or a search engine. It is a conversant institutional memory: people ask in natural language, add through structured pathways, and it learns from usage. It knows when it doesn't know — flagging gaps rather than guessing — which is the foundation of trust.</p>
+
+  <h3>Five components</h3>
+  <ul class="gov-list">
+    <li><strong>Context Pack</strong> — the queryable corpus. The contents of the universe in a form that tools and agents can consume via API or MCP.</li>
+    <li><strong>MCP server</strong> — exposes the Context Pack to AI tools via slash commands. Users and agents query the same context without each tool rebuilding it.</li>
+    <li><strong>Context Connectors</strong> — inject context into existing tools (Claude, Copilot, CRM, internal apps) without replacing them.</li>
+    <li><strong>Human Curation Layer</strong> — the governance interface: coverage by layer, curation queue, approval workflows, gap resolution. No technical knowledge required.</li>
+    <li><strong>Compounding Loop</strong> — feedback from every query, correction, and guardrail trigger surfaces as candidates for the curation queue. Humans approve. The layer improves.</li>
+  </ul>
+
+  <h3>The processing pipeline</h3>
+  <div class="diagram-wrap">
+    <div class="mermaid">
+flowchart LR
+  A[Ingest] --> B[Chunk] --> C[Extract across 8 categories] --> D[Classify] --> E[Human validation] --> F[Store with provenance]
+    </div>
+    <p class="diagram-caption">Raw artefacts → validated knowledge nodes in six steps. Human validation is non-optional.</p>
+  </div>
+
+  <h3>Indicative tech stack — open and portable</h3>
+  <div class="diagram-wrap">
+    <div class="mermaid">
+flowchart TB
+  subgraph ING["Ingestion"]
+    I[Meetings · Docs · Slack · Email · CRM]
+  end
+  subgraph PROC["Processing"]
+    C[Claude — extract across 8 categories]
+    L[LlamaIndex — retrieval orchestration]
+  end
+  subgraph STOR["Storage — client-owned"]
+    V[Chroma / Qdrant — vector store]
+    PG[PostgreSQL — structured metadata + provenance]
+  end
+  subgraph DELIVER["Delivery"]
+    MCP[MCP server — slash commands and tool integrations]
+    LL[LiteLLM — model routing. No data leaves client environment.]
+  end
+  ING --> PROC --> STOR --> DELIVER
+    </div>
+    <p class="diagram-caption">All components open-source and portable. Deployed in client's cloud environment. Organisation owns everything.</p>
+  </div>
+
+  <h4>Prototype screenshots</h4>
+  <div class="screen-gallery">
+    <figure class="screen-figure"><img src="assets/context-universe/living-map-overview.png" alt="Context Universe overview"/><figcaption>Overview: inputs become institutional memory, deployed into AI execution.</figcaption></figure>
+    <figure class="screen-figure"><img src="assets/context-universe/interrogation-dashboard.png" alt="Interrogation dashboard"/><figcaption>Interrogation: grounded answers with citation provenance and confidence scoring.</figcaption></figure>
+    <figure class="screen-figure"><img src="assets/context-universe/signal-lineage.png" alt="Signal lineage"/><figcaption>Signal lineage: ingestion feed, extraction in progress, commit-ready nodes.</figcaption></figure>
+    <figure class="screen-figure"><img src="assets/context-universe/provenance-inspector.png" alt="Provenance inspector"/><figcaption>Provenance inspector: full traceability from source to applied rule.</figcaption></figure>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SECTION 5 — SECOND BRAIN
+══════════════════════════════════════════════════════════════ -->
+<section id="second-brain">
+  <span class="section-label">5. What remains after we leave</span>
+  <h2>The second brain — <em>memory in motion</em></h2>
+
+  <p>Most consultants leave a deck. We leave a deployed system. The Context Universe is not a project deliverable — it is an organisational asset that compounds after the engagement ends. This is the structural difference between an intelligence layer and every other AI implementation approach.</p>
+
+  <div class="callout">
+    <p>Two organisations using the same AI models but different Context Universes will produce radically different outputs within six months. <strong>The universe is the moat. Yours keeps compounding while competitors stay generic.</strong></p>
+  </div>
+
+  <h3>How it compounds — the timeline</h3>
+  <div class="ct-track">
+    <div class="ct-event">
+      <div class="ct-phase">Weeks 1–8 — engagement</div>
+      <div class="ct-title">Foundation built and deployed</div>
+      <div class="ct-body">All eight knowledge categories mapped for the first vertical slice. First micro-skill in production. Context Universe deployed in client's cloud environment. Governance model live. Every agent now runs on verified organisational context, not generic training data.</div>
+    </div>
+    <div class="ct-event">
+      <div class="ct-phase">Month 2–3 — early compounding</div>
+      <div class="ct-title">Every use sharpens the foundation</div>
+      <div class="ct-body">AI surfaces candidates — new knowledge nodes, stale content, contradictions, gaps — from every query and correction. Humans in the curation queue approve or reject. The universe is already more accurate than launch day. No manual effort required beyond curation reviews.</div>
+    </div>
+    <div class="ct-event">
+      <div class="ct-phase">Month 4–6 — second slice</div>
+      <div class="ct-title">30–40% faster than the first</div>
+      <div class="ct-body">New micro-skills reuse existing knowledge nodes from the first slice. The Standing Position nodes that powered skill one now contribute to skill two. Deployment cost and time drop with each iteration. The investment in the foundation compounds on every subsequent build.</div>
+    </div>
+    <div class="ct-event">
+      <div class="ct-phase">Month 6–12 — divergence begins</div>
+      <div class="ct-title">The competitive gap widens</div>
+      <div class="ct-body">Competitors using the same models against generic context produce generic outputs. Your agents draw on twelve months of your specific interpretation, decisions, patterns, and constraints. The gap between your AI capability and theirs is now measurable and growing. Conscious decisions can be made about how to widen it further.</div>
+    </div>
+    <div class="ct-event future">
+      <div class="ct-phase">Year 2+ — institutional intelligence</div>
+      <div class="ct-title">The organisation has a second brain</div>
+      <div class="ct-body">New staff onboard through the universe. Departing experts no longer take knowledge with them. Strategic decisions informed by two years of captured institutional reasoning. The organisation is demonstrably smarter than any individual in it — and that intelligence is owned, governed, and portable.</div>
+    </div>
+  </div>
+
+  <h3>Three things that accumulate</h3>
+  <div class="grid-3">
+    <div class="card">
+      <div class="card-num">01</div>
+      <h3>Competitive intelligence</h3>
+      <p>How your firm reads markets, competitors, and regulatory signals accumulates into a proprietary interpretation layer. Your meaning-making across hundreds of decisions becomes a strategic asset no competitor can buy or replicate quickly.</p>
+    </div>
+    <div class="card">
+      <div class="card-num">02</div>
+      <h3>Organisational uniqueness</h3>
+      <p>Real processes, implicit constraints, relationship nuances, patterns your best people recognise — accumulated into a portrait of how your organisation actually works. This is what makes AI output sound like you rather than everyone else.</p>
+    </div>
+    <div class="card">
+      <div class="card-num">03</div>
+      <h3>Institutional memory</h3>
+      <p>Decisions made years ago with reasoning nobody recorded. Experts who left. Constraints never written down. Captured before they disappear, made queryable. The organisation stops losing what it knows every time someone resigns.</p>
+    </div>
+  </div>
+
+  <h3>Human-in-the-loop governance</h3>
+  <p>The compounding loop is not autonomous. AI surfaces candidates — proposed new nodes, suggested updates, flagged contradictions. Humans in the curation queue make the decisions. This is deliberate: the intelligence layer must be trusted, and trust requires human accountability at every step. As governance maturity grows, the organisation can expand the scope of what AI can surface; the approval step remains.</p>
+  <ul class="gov-list">
+    <li><strong>Context owners by domain.</strong> Someone accountable for each knowledge slice. No orphaned domains.</li>
+    <li><strong>Curation cadence.</strong> Weekly: flagged items and corrections. Monthly: coverage gaps. Quarterly: strategic refresh of standing positions.</li>
+    <li><strong>Provenance on every node.</strong> Every rule or judgment shows where it came from and when last updated. Trust via transparency.</li>
+    <li><strong>The system knows what it doesn't know.</strong> When it can't answer confidently it flags the gap rather than guessing — and routes it to the curation queue for resolution.</li>
+  </ul>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SECTION 6 — MARKET POSITIONING
+══════════════════════════════════════════════════════════════ -->
+<section id="market">
+  <span class="section-label">6. Market positioning</span>
+  <h2>Who buys — and <em>why now</em></h2>
+
+  <p>The primary economic buyer is the CEO or Managing Director. They are not buying AI technology — they are buying competitive advantage, pilot recovery, or clarity in a confusing market. The trigger matters because it determines the conversation and the language.</p>
+
+  <h3>Three entry points — one solution</h3>
+  <div class="buyer-grid">
+    <div class="buyer-card" style="border-top-color:var(--red)">
+      <span class="buyer-trigger" style="color:var(--red)">Entry point 01 — the failed pilot</span>
+      <h3>We tried AI. It didn't scale.</h3>
+      <p>The pilot worked for one person. It never reached production. Outputs weren't trusted. The team couldn't explain why the AI behaved the way it did. Investment is now a sunk cost and there's board pressure to show results.</p>
+      <div class="buyer-quote">"We built a pricing workflow end-to-end. Halfway through, the documents led us down the wrong path. We had to restart."</div>
+    </div>
+    <div class="buyer-card" style="border-top-color:#f59e0b">
+      <span class="buyer-trigger" style="color:#f59e0b">Entry point 02 — vendor confusion</span>
+      <h3>Everyone's selling AI. Nobody agrees.</h3>
+      <p>Three vendors are in the room with conflicting frameworks. The internal team doesn't know what to evaluate them against. The organisation wants to move but doesn't know where to start, and is worried about locking into the wrong platform.</p>
+      <div class="buyer-quote">"We've had six vendor presentations. They all sound the same. We don't know what question to ask that would tell them apart."</div>
+    </div>
+    <div class="buyer-card" style="border-top-color:var(--green)">
+      <span class="buyer-trigger" style="color:var(--green)">Entry point 03 — competitive pressure</span>
+      <h3>Competitors are deploying. We need to move.</h3>
+      <p>The organisation is watching competitors announce AI capabilities. Leadership is feeling pressure to act. But they want to build something that compounds, not buy a tool that produces the same output as everyone else using it.</p>
+      <div class="buyer-quote">"We don't want to just buy Copilot and call it transformation. We want something that's actually ours."</div>
+    </div>
+  </div>
+
+  <h3>The buying committee</h3>
+  <div class="doc-table" style="overflow:hidden;border-radius:6px;">
+    <table class="doc-table">
+      <thead><tr><th>Role</th><th>Why they care</th><th>What they need to hear</th></tr></thead>
+      <tbody>
+        <tr><td><strong>CEO / MD</strong><br><span style="font-size:11px;color:var(--text-dim)">Signs the cheque</span></td><td>Competitive advantage, not generic AI. Wants to own something that compounds and can't be bought by competitors.</td><td>"The layer is yours. It lives in your cloud. It gets smarter the longer you run it. Competitors can buy the same model — they can't buy your institutional intelligence."</td></tr>
+        <tr><td><strong>CTO / Head of Engineering</strong><br><span style="font-size:11px;color:var(--text-dim)">Technical sponsor</span></td><td>AI that reaches production and stays there. Tired of demos that don't deploy. Wants governance and explainability.</td><td>"Open stack. Deployable in your environment. Human-in-the-loop governance means nothing changes without approval. Every output is traceable to a source."</td></tr>
+        <tr><td><strong>CDO / Transformation Lead</strong><br><span style="font-size:11px;color:var(--text-dim)">Programme owner</span></td><td>Wants the mandate delivered. Needs measurable outcomes on a timeline that works for board reporting.</td><td>"First micro-skill in production within 6–8 weeks. Measurable outcome attached to each vertical slice. No 18-month programmes before value."</td></tr>
+        <tr><td><strong>Compliance / Risk</strong><br><span style="font-size:11px;color:var(--text-dim)">Veto risk</span></td><td>Worried about AI outputs they can't explain or defend. Needs audit trail and human accountability.</td><td>"Every knowledge node has provenance. Every AI output is traceable. Human sign-off is built into the workflow, not bolted on."</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>What makes this hard to replicate</h3>
+  <p>A competitor can hire a consultant to build a similar knowledge architecture. What they cannot replicate is the combination of: the methodology for capturing all eight categories reliably; the tooling built to extract knowledge in motion rather than at rest; the governance model that keeps the layer trusted; and — most importantly — the two to three years of your specific organisational intelligence already accumulated in the layer.</p>
+  <p>The longer a client runs Mementum, the further ahead of a competitor who starts later. This is the compounding moat, and it is structural, not marketing.</p>
+
+  <h3>Target sectors</h3>
+  <p>Primary focus: <strong>financial services</strong> — wealth management, superannuation, insurance, private equity, banking. High regulatory complexity, high knowledge intensity, significant trust requirements for AI outputs, clear audit trail needs. The eight-category taxonomy maps directly to the problems these organisations face with AI governance and scale.</p>
+  <p>Secondary: <strong>professional services</strong> (law, accounting, advisory) where institutional memory and client relationship intelligence are primary sources of competitive advantage and are almost entirely undocumented.</p>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SECTION 7 — SERVICES ARC
+══════════════════════════════════════════════════════════════ -->
+<section id="services-arc">
+  <span class="section-label">7. The services arc</span>
+  <h2>From engagement to <em>compounding product</em></h2>
+
+  <p>Mementum is not a pure consulting model and not a pure SaaS model. It is a services-led approach that leaves behind a deployable product — and then transitions into an ongoing relationship to compound the value of what was built.</p>
+
+  <div class="arc-steps">
+    <div class="arc-step">
+      <div class="arc-step-num">Phase 01</div>
+      <h3>Educate</h3>
+      <p>Leadership understands the methodology. The eight categories are mapped to their context. The moat is identified.</p>
+      <div class="arc-deliverable">Output: knowledge terrain map + moat identification</div>
+    </div>
+    <div class="arc-step">
+      <div class="arc-step-num">Phase 02</div>
+      <h3>Discover</h3>
+      <p>All eight knowledge categories extracted for the first vertical slice. Automated ingestion + targeted workshops. Validated by subject matter experts.</p>
+      <div class="arc-deliverable">Output: validated knowledge corpus for one decision domain</div>
+    </div>
+    <div class="arc-step">
+      <div class="arc-step-num">Phase 03</div>
+      <h3>Deploy</h3>
+      <p>Context Universe built and deployed in client's cloud environment. First micro-skill in production. Governance model live. Feedback loop active.</p>
+      <div class="arc-deliverable">Output: deployed product + first production skill</div>
+    </div>
+    <div class="arc-step">
+      <div class="arc-step-num">Phase 04+</div>
+      <h3>Compound</h3>
+      <p>Ongoing relationship — retainer, project, or hybrid by client maturity. Curation advisory, new micro-skills, new vertical slices. AI self-surfaces improvements. Humans curate and approve.</p>
+      <div class="arc-deliverable">Output: compounding intelligence layer</div>
+    </div>
+  </div>
+
+  <div class="callout insight">
+    <p>The structural advantage of this model: the engagement builds something real that justifies ongoing fees. The ongoing work improves something the client owns and values. Neither party is locked in — but both have strong reasons to continue. <strong>The intelligence layer is the retention mechanism.</strong></p>
+  </div>
+
+  <h3>The ongoing relationship — variable by maturity</h3>
+  <p>After the initial engagement, the ongoing relationship takes one of three shapes depending on client capability and appetite:</p>
+  <ul class="gov-list">
+    <li><strong>Retainer model.</strong> We curate the knowledge layer on an ongoing basis, build new micro-skills each sprint, and provide strategic curation advisory. Best for organisations without internal AI capability who want the layer to compound without building a team.</li>
+    <li><strong>Hybrid model.</strong> Client team runs day-to-day curation; we provide new vertical slice engagements, governance reviews, and model/tooling evolution. Best for organisations building internal AI capability who want methodological support.</li>
+    <li><strong>Project model.</strong> Client runs curation independently; we are engaged for each new vertical slice or major capability addition. Best for organisations with mature internal AI teams who need the methodology and tooling, not the ongoing advisory.</li>
+  </ul>
+
+  <h3>How the AI self-improves — honest version</h3>
+  <p>The compounding loop is not fully autonomous. The architecture is:</p>
+  <ul class="gov-list">
+    <li><strong>AI surfaces candidates continuously</strong> — proposed new knowledge nodes from ingested sources, flagged contradictions, stale content, gaps identified from low-confidence outputs.</li>
+    <li><strong>Humans approve before anything changes</strong> — every candidate sits in the curation queue until a context owner takes an action: approve, edit, reject, or escalate.</li>
+    <li><strong>The approval threshold decreases with trust.</strong> Early in a deployment, humans review most candidates carefully. As the model of the org improves and context owners develop confidence, routine updates move faster. High-stakes nodes (regulatory positions, approved stances) always require deliberate review.</li>
+  </ul>
+  <p>This is the right model for enterprise AI governance in 2026. Fully autonomous knowledge updates introduce unacceptable risk in regulated environments. Human curation is not a limitation — it is the trust mechanism that makes the layer usable in production.</p>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SECTION 8 — ENGAGEMENT APPROACH
+══════════════════════════════════════════════════════════════ -->
+<section id="engagement">
+  <span class="section-label">8. Engagement approach</span>
+  <h2>What working with us <em>looks like</em></h2>
+
+  <div class="process-steps">
+    <div class="step">
+      <div class="step-left"><span class="step-phase">Free</span><div class="step-num">00</div></div>
+      <div>
+        <h3>Moat discovery session</h3>
+        <span class="step-duration">Half day · No charge · Leadership team</span>
+        <p>We run the organisation through the eight knowledge categories against their specific context. The output is a concrete map of where their competitive advantage actually lives, where it's at risk, and which decision domain has the highest-value first vertical slice. Most organisations learn something specific about their moat in this session that they didn't know before.</p>
+        <div class="step-outputs">
+          <div class="step-output-label">What the CEO walks away with</div>
+          <div class="step-output-item">Named knowledge gaps that explain why current AI isn't working</div>
+          <div class="step-output-item">Ranked vertical slice candidates with indicative ROI</div>
+          <div class="step-output-item">A view of competitive intelligence risk — what walks out the door when people leave</div>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-left"><span class="step-phase">Weeks 1–2</span><div class="step-num">01</div></div>
+      <div>
+        <h3>Micro-skill backlog and context discovery</h3>
+        <span class="step-duration">2 weeks · Fixed scope</span>
+        <p>Automated ingestion of existing artefacts (meetings, Slack, docs, email threads) for the chosen vertical slice domain. Gap identification — where the eight categories are thin. Prioritised micro-skill backlog scoped and sequenced. Governance model drafted.</p>
+        <div class="step-outputs">
+          <div class="step-output-label">Deliverables</div>
+          <div class="step-output-item">Knowledge terrain map across eight categories</div>
+          <div class="step-output-item">Validated knowledge candidates — what we found and what we didn't</div>
+          <div class="step-output-item">Prioritised micro-skill backlog</div>
+          <div class="step-output-item">Governance framework draft</div>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-left"><span class="step-phase">Weeks 3–8</span><div class="step-num">02</div></div>
+      <div>
+        <h3>Context Universe build and first micro-skill</h3>
+        <span class="step-duration">6 weeks · Core engagement</span>
+        <p>Context Universe deployed in client's cloud environment. Governance and access live. First micro-skill shipped into production — instrumented so every execution feeds back into the curation queue. The layer starts compounding immediately.</p>
+        <div class="step-outputs">
+          <div class="step-output-label">Deliverables</div>
+          <div class="step-output-item">Context Universe — deployed, queryable, governed</div>
+          <div class="step-output-item">MCP server and Context Connectors configured</div>
+          <div class="step-output-item">First micro-skill in production with measurable outcome</div>
+          <div class="step-output-item">Curation interface live with context owners assigned</div>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-left"><span class="step-phase">Ongoing</span><div class="step-num">03</div></div>
+      <div>
+        <h3>Curation advisory, new skills, new slices</h3>
+        <span class="step-duration">Variable — retainer, project, or hybrid by maturity</span>
+        <p>Keep the layer current. Build the next micro-skill. Open the next vertical slice. Coach context owners on curation quality. Evolve the tooling as models and capabilities improve. The organisation's intelligence layer deepens with every cycle.</p>
+        <div class="step-outputs">
+          <div class="step-output-label">What changes over time</div>
+          <div class="step-output-item">Each micro-skill 30–40% faster to deploy than the last</div>
+          <div class="step-output-item">Context Universe covers more decision domains</div>
+          <div class="step-output-item">AI output increasingly indistinguishable from the organisation's best people</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════
+     APPENDIX A — ADVISORY EXAMPLE
+══════════════════════════════════════════════════════════════ -->
+<section id="example-advisory">
+  <span class="section-label">Appendix A</span>
+  <h2>Example: wealth management <em>&amp; advisory</em></h2>
+  <p>How Mementum applies to a large Australian wealth management firm (~300 advisers). Illustrates the problem, root cause, the eight categories in context, and the micro-skill output.</p>
+
+  <div class="callout scene">
+    <span class="scene-attr">The problem they already know</span>
+    <p>"Your AI experiments work. They just don't scale."</p>
+  </div>
+
+  <table class="doc-table">
+    <thead><tr><th>What's happening now</th><th>What's possible</th></tr></thead>
+    <tbody>
+      <tr><td>Skills that work for one adviser</td><td>Skills that work for 300</td></tr>
+      <tr><td>Context rebuilt every session</td><td>Context that persists and compounds</td></tr>
+      <tr><td>Outputs that are close but not quite the firm</td><td>Outputs that are distinctively the firm</td></tr>
+      <tr><td>Institutional knowledge in senior advisers' heads</td><td>Institutional knowledge the whole firm can access</td></tr>
+      <tr><td>Knowledge walks out the door when people leave</td><td>Knowledge captured before departure, queryable forever</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>The root cause.</strong> The real knowledge — how the firm's best advisers approach complex situations, what regulatory positions have been taken, what clients of each segment actually need — lives in senior advisers' heads. In tribal expertise that never got written down. In decisions made years ago with reasoning nobody recorded. In constraints embedded in the firm's regulatory history. Build AI without extracting this first and you get generic. Build AI on top of it and you get the firm.</p>
+
+  <h3>The eight categories applied</h3>
+  <table class="doc-table">
+    <thead><tr><th>Category</th><th>What gets captured</th><th>Source today</th><th>Example</th></tr></thead>
+    <tbody>
+      <tr><td><strong style="color:#38bdf8">Interpretation</strong></td><td>What ASIC guidance means for this firm specifically</td><td>Email threads, board papers</td><td>"REP 798 means our current Claude usage has no governance framework — formalise before audit."</td></tr>
+      <tr><td><strong style="color:#a78bfa">Decision + Reasoning</strong></td><td>AI governance decisions and the options not taken</td><td>Board minutes, compliance transcripts</td><td>Board March 2026: restrict AI to adviser-assist only, pending governance framework.</td></tr>
+      <tr><td><strong style="color:#e879f9">Standing Position</strong></td><td>Approved AI oversight model and permitted use cases</td><td>Compliance manual, AFSL policy</td><td>All AI-assisted SOA sections require sign-off by adviser with 5+ years experience.</td></tr>
+      <tr><td><strong style="color:#34d399">Real Process</strong></td><td>How advisers are actually using AI vs what policy says</td><td>Slack #adviser-tips, recordings</td><td>"Using Claude for first-pass SOA risk sections — saves 40 mins." Undocumented. Widespread.</td></tr>
+      <tr><td><strong style="color:#fb923c">Observed Pattern</strong></td><td>Recurring outcomes from current AI use</td><td>IDR logs, debrief recordings</td><td>3 IDR cases H2 2025: AI risk sections not calibrated to client tolerance. Review skipped under time pressure.</td></tr>
+      <tr><td><strong style="color:#f43f5e">Implicit Constraint</strong></td><td>AI limits everyone knows but nobody wrote</td><td>Exception logs, compliance DMs</td><td>Compliance verbally prohibited AI for SMSF establishment advice post-First Guardian. Never in policy.</td></tr>
+      <tr><td><strong style="color:#fbbf24">Relationship Context</strong></td><td>How the firm's ASIC relationship shapes permissibility</td><td>ASIC correspondence, legal advice</td><td>Post-2023 surveillance commitment to enhanced SOA documentation shapes AI drafting limits.</td></tr>
+      <tr><td><strong style="color:#86efac">Assumption</strong></td><td>Untested AI governance beliefs most likely to break first</td><td>Strategy decks, planning docs</td><td>"Adviser review constitutes sufficient human oversight for ASIC." Has not been legally tested.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Micro-skills delivered</h3>
+  <table class="doc-table">
+    <thead><tr><th>Micro-skill</th><th>What it does</th><th>Knowledge categories it draws on</th></tr></thead>
+    <tbody>
+      <tr><td>Compliance Q&amp;A</td><td>Answers adviser regulatory questions grounded in firm's approved positions with full audit trail</td><td>Standing Position, Implicit Constraint, Interpretation</td></tr>
+      <tr><td>SOA Governance Check</td><td>Validates AI-assisted SOA sections against oversight model before adviser submission</td><td>Observed Pattern, Standing Position, Decision + Reasoning</td></tr>
+      <tr><td>AI Audit Trail Capture</td><td>Captures prompt, model version, and adviser sign-off for every AI-assisted output</td><td>Decision + Reasoning, Relationship Context</td></tr>
+      <tr><td>New Adviser AI Guide</td><td>Answers new adviser questions about permitted AI use, grounded in constraints and assumptions</td><td>Implicit Constraint, Assumption, Real Process</td></tr>
+      <tr><td>Pre-meeting Briefing</td><td>Prepares adviser for client review with relevant context and talking points</td><td>Relationship Context, Observed Pattern, Standing Position</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════
+     APPENDIX B — TERMINOLOGY
+══════════════════════════════════════════════════════════════ -->
+<section id="terminology">
+  <span class="section-label">Appendix B</span>
+  <h2>Terminology</h2>
+  <p>Definitions used consistently across engagements and internal documents. All attributable to the Mementum methodology.</p>
+
+  <dl style="margin:24px 0">
+    <dt style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:var(--copper);margin-top:20px;margin-bottom:6px">Mementum</dt>
+    <dd style="font-size:14px;color:var(--text-mid);line-height:1.65;margin-left:0;margin-bottom:4px">The brand and methodology. Memory in motion. The process of mapping, structuring, and activating an organisation's intelligence as a compounding layer. The company and approach.</dd>
+
+    <dt style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:var(--copper);margin-top:20px;margin-bottom:6px">Intelligence Layer</dt>
+    <dd style="font-size:14px;color:var(--text-mid);line-height:1.65;margin-left:0">The proprietary knowledge architecture between commoditised models and your business outcomes. Makes AI output strategically valuable and irreplicable by competitors. The Context Universe implements it.</dd>
+
+    <dt style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:var(--copper);margin-top:20px;margin-bottom:6px">Context Universe</dt>
+    <dd style="font-size:14px;color:var(--text-mid);line-height:1.65;margin-left:0">The living artefact: a queryable graph of organisational knowledge — nodes (all eight categories), edges (relationships), domains — with provenance on every node. Deployed in the client's cloud environment. Exposed via MCP server and optional Context Explorer. The second brain.</dd>
+
+    <dt style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:var(--copper);margin-top:20px;margin-bottom:6px">Eight knowledge categories</dt>
+    <dd style="font-size:14px;color:var(--text-mid);line-height:1.65;margin-left:0">Interpretation · Decision + Reasoning · Standing Position · Real Process · Observed Pattern · Implicit Constraint · Relationship Context · Assumption. Mutually exclusive, collectively exhaustive. Each requires distinct extraction, curation, and refresh cadence.</dd>
+
+    <dt style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:var(--copper);margin-top:20px;margin-bottom:6px">Vertical slice</dt>
+    <dd style="font-size:14px;color:var(--text-mid);line-height:1.65;margin-left:0">Deep mapping of one decision domain — the complete knowledge, workflow, and judgment that governs a specific business outcome. All eight categories, end-to-end, verified, production-grade in 90–120 days. The unit of delivery.</dd>
+
+    <dt style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:var(--copper);margin-top:20px;margin-bottom:6px">Micro-skill</dt>
+    <dd style="font-size:14px;color:var(--text-mid);line-height:1.65;margin-left:0">A small, modular capability deployed in production that queries the Context Universe for its context. Grounded in verified knowledge, on-voice, with governance built in. Deployed one per sprint. Compounds over time into complex workflows.</dd>
+
+    <dt style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:var(--copper);margin-top:20px;margin-bottom:6px">Context Pack</dt>
+    <dd style="font-size:14px;color:var(--text-mid);line-height:1.65;margin-left:0">The queryable corpus — the contents of the Context Universe in a form tools and agents consume. Delivered via MCP, Context Connectors, or API.</dd>
+
+    <dt style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:var(--copper);margin-top:20px;margin-bottom:6px">Compounding loop</dt>
+    <dd style="font-size:14px;color:var(--text-mid);line-height:1.65;margin-left:0">The mechanism by which the Context Universe improves with use. AI surfaces candidates from every query, correction, and guardrail trigger. Humans in the curation queue approve before anything changes. The layer gets more accurate and complete over time without dedicated manual effort.</dd>
+
+    <dt style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:var(--copper);margin-top:20px;margin-bottom:6px">Decision archaeology</dt>
+    <dd style="font-size:14px;color:var(--text-mid);line-height:1.65;margin-left:0">Reconstructing the reasoning behind significant past decisions — from version histories, email threads, alternatives considered and rejected — so the "why" is captured alongside the "what."</dd>
+
+    <dt style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:var(--copper);margin-top:20px;margin-bottom:6px">Provenance</dt>
+    <dd style="font-size:14px;color:var(--text-mid);line-height:1.65;margin-left:0">Metadata on every node: where the intelligence came from, who validated it, when it was last updated. The foundation of trust and auditability.</dd>
+
+    <dt style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:var(--copper);margin-top:20px;margin-bottom:6px">MCP (Model Context Protocol) server</dt>
+    <dd style="font-size:14px;color:var(--text-mid);line-height:1.65;margin-left:0">Standard way to expose the Context Pack to AI tools via slash commands and tool integrations. Users and agents query the same context without each tool rebuilding it.</dd>
+  </dl>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════
+     APPENDIX C — SUPPORTING DETAIL
+══════════════════════════════════════════════════════════════ -->
+<section id="appendix">
+  <span class="section-label">Appendix C</span>
+  <h2>Supporting detail</h2>
+
+  <h3>C1 — Intelligence decay table</h3>
+  <p>Why knowledge architecture cannot be deferred — intelligence decays by type, and the most valuable types decay fastest.</p>
+  <table class="doc-table">
+    <thead><tr><th>Knowledge type</th><th>Where it lives</th><th>Decay rate</th><th>Mementum category</th></tr></thead>
+    <tbody>
+      <tr><td>Expert judgment and heuristics</td><td>People's heads</td><td>Immediate — leaves with the person</td><td>Decision + Reasoning, Observed Pattern</td></tr>
+      <tr><td>Informal constraints and prohibitions</td><td>Verbal, DMs, word of mouth</td><td>Days — survives only while people remember</td><td>Implicit Constraint</td></tr>
+      <tr><td>Relationship nuance</td><td>Account manager's memory</td><td>Weeks — fades without reinforcement</td><td>Relationship Context</td></tr>
+      <tr><td>Meeting decisions and rationale</td><td>Transcripts, never reviewed</td><td>Weeks — searched for and not found</td><td>Decision + Reasoning</td></tr>
+      <tr><td>Interpretation of external signals</td><td>Email threads, Slack</td><td>Months — buried in scrollback</td><td>Interpretation</td></tr>
+      <tr><td>Strategy and positioning</td><td>Decks, read once</td><td>Months — cited but not consulted</td><td>Standing Position</td></tr>
+      <tr><td>Documented process</td><td>Confluence, wikis</td><td>Continuous — outdated on arrival</td><td>Real Process (partial)</td></tr>
+      <tr><td>Untested assumptions</td><td>Nowhere — never written</td><td>Never captured to begin with</td><td>Assumption</td></tr>
+    </tbody>
+  </table>
+
+  <h3>C2 — Five stages in full</h3>
+  <div class="stages-inline"><span>Extract</span><span>→</span><span>Structure</span><span>→</span><span>Deploy</span><span>→</span><span>Operate</span><span>→</span><span>Compound</span></div>
+  <div class="process-steps">
+    <div class="step"><div class="step-left"><span class="step-phase">Extract</span><div class="step-num">01</div></div><div><h3>Intelligence mapping</h3><span class="step-duration">2–3 weeks</span><p>Mine 3–6 months of transcripts and artefacts for the chosen vertical slice, across all eight knowledge categories. Automated extraction first; workshops only to close high-value gaps. You validate.</p><div class="step-outputs"><div class="step-output-label">Deliverables</div><div class="step-output-item">Knowledge terrain map (eight categories)</div><div class="step-output-item">Validated intelligence candidates</div><div class="step-output-item">Gap-targeted interview script</div></div></div></div>
+    <div class="step"><div class="step-left"><span class="step-phase">Structure</span><div class="step-num">02</div></div><div><h3>Context architecture</h3><span class="step-duration">1–2 weeks</span><p>Structure validated knowledge into the Context Universe. Domain taxonomy, provenance, governance and access from day one. MCP server configured.</p><div class="step-outputs"><div class="step-output-label">Deliverables</div><div class="step-output-item">Context Universe — populated and queryable</div><div class="step-output-item">Governance and access framework</div></div></div></div>
+    <div class="step"><div class="step-left"><span class="step-phase">Deploy</span><div class="step-num">03</div></div><div><h3>First micro-skill</h3><span class="step-duration">2–4 weeks</span><p>First production skill deployed on top of the Context Universe. Instrumented — every execution returns a feedback signal. The layer starts learning.</p><div class="step-outputs"><div class="step-output-label">Deliverables</div><div class="step-output-item">Production skill with measurable outcome</div><div class="step-output-item">Signal feedback loop active</div></div></div></div>
+    <div class="step"><div class="step-left"><span class="step-phase">Operate</span><div class="step-num">04</div></div><div><h3>Governance and curation</h3><span class="step-duration">Ongoing</span><p>Context owners assigned. Curation cadence established. Gap resolution process live. The layer stays trusted and current.</p><div class="step-outputs"><div class="step-output-label">Deliverables</div><div class="step-output-item">Curation interface live</div><div class="step-output-item">Context owners active</div></div></div></div>
+    <div class="step"><div class="step-left"><span class="step-phase">Compound</span><div class="step-num">05</div></div><div><h3>Expand</h3><span class="step-duration">Ongoing</span><p>Each new skill reuses existing nodes. Each new vertical slice deepens the layer. Intelligence compounds; deployment cost drops; outputs improve.</p><div class="step-outputs"><div class="step-output-label">What changes</div><div class="step-output-item">Each skill 30–40% faster to deploy than the last</div><div class="step-output-item">Competitive intelligence accumulates</div></div></div></div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════
+     APPENDIX C3 — KNOWLEDGE TYPOLOGY 2×2
+══════════════════════════════════════════════════════════════ -->
+<section id="knowledge-typology">
+  <span class="section-label">Appendix C3</span>
+  <h2>Knowledge typology — <em>where it lives</em></h2>
+
+  <p>Before mapping the eight categories, it helps to understand the underlying structure of knowledge in any organisation. This 2×2 (adapted from Nonaka's SECI model) classifies knowledge by two axes: <strong>how accessible it is</strong> (explicit vs tacit) and <strong>who holds it</strong> (held individually vs shared across the org). The quadrant determines the capture strategy.</p>
+
+  <!-- 2x2 MATRIX -->
+  <div style="margin:32px 0;position:relative;">
+    <!-- Axis labels -->
+    <div style="display:flex;justify-content:center;gap:0;margin-bottom:6px;">
+      <div style="width:120px;"></div>
+      <div style="flex:1;text-align:center;font-family:'JetBrains Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:2px;color:var(--text-dim);">Held individually</div>
+      <div style="flex:1;text-align:center;font-family:'JetBrains Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:2px;color:var(--text-dim);">Shared across org</div>
+    </div>
+    <div style="display:flex;gap:0;align-items:stretch;">
+      <!-- Y-axis labels -->
+      <div style="width:120px;display:flex;flex-direction:column;gap:3px;">
+        <div style="flex:1;display:flex;align-items:center;justify-content:flex-end;padding-right:12px;">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:2px;color:var(--text-dim);writing-mode:horizontal-tb;text-align:right;line-height:1.4;">Explicit<br><span style="opacity:.5">(written down)</span></span>
+        </div>
+        <div style="flex:1;display:flex;align-items:center;justify-content:flex-end;padding-right:12px;">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:2px;color:var(--text-dim);text-align:right;line-height:1.4;">Tacit<br><span style="opacity:.5">(in heads)</span></span>
+        </div>
+      </div>
+      <!-- Grid -->
+      <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:3px;">
+        <!-- Q1: Explicit + Held individually -->
+        <div style="background:rgba(56,189,248,0.06);border:1px solid rgba(56,189,248,0.25);padding:20px 18px;min-height:180px;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:8px;text-transform:uppercase;letter-spacing:2px;color:#38bdf8;margin-bottom:8px;">Q1 — Explicit · Individual</div>
+          <div style="font-size:15px;font-family:'Playfair Display',serif;color:var(--text);margin-bottom:8px;">Personal documentation</div>
+          <div style="font-size:12px;color:var(--text-mid);line-height:1.6;margin-bottom:12px;">Notes, personal templates, individual playbooks, annotated copies. Written by one person, not yet surfaced to the org. High accessibility if you know where to look.</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text-dim);">Examples: adviser's personal prompt library · analyst's private research framework · partner's annotated deal memo</div>
+        </div>
+        <!-- Q2: Explicit + Shared -->
+        <div style="background:rgba(167,139,250,0.06);border:1px solid rgba(167,139,250,0.25);padding:20px 18px;min-height:180px;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:8px;text-transform:uppercase;letter-spacing:2px;color:#a78bfa;margin-bottom:8px;">Q2 — Explicit · Shared</div>
+          <div style="font-size:15px;font-family:'Playfair Display',serif;color:var(--text);margin-bottom:8px;">Organisational documentation</div>
+          <div style="font-size:12px;color:var(--text-mid);line-height:1.6;margin-bottom:12px;">Policies, compliance manuals, strategy decks, board minutes. Available to the org but rarely consulted. The foundation most AI implementations build on — and the part that's most outdated.</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text-dim);">Examples: compliance manual · investment policy statement · onboarding guide · AFSL policy</div>
+        </div>
+        <!-- Q3: Tacit + Held individually -->
+        <div style="background:rgba(251,146,60,0.06);border:1px solid rgba(251,146,60,0.3);padding:20px 18px;min-height:180px;position:relative;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:8px;text-transform:uppercase;letter-spacing:2px;color:#fb923c;margin-bottom:8px;">Q3 — Tacit · Individual</div>
+          <div style="font-size:15px;font-family:'Playfair Display',serif;color:var(--text);margin-bottom:8px;">Expert knowledge &amp; judgment</div>
+          <div style="font-size:12px;color:var(--text-mid);line-height:1.6;margin-bottom:12px;">What your best people know that they can't fully articulate. Pattern recognition, gut feel, tacit heuristics. The highest-value knowledge in most organisations. Almost entirely uncaptured. Leaves when they do.</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text-dim);">Examples: how a senior adviser reads a difficult client · how a deal partner evaluates founder quality · how compliance reads regulatory tone</div>
+          <div style="position:absolute;top:12px;right:12px;background:rgba(251,146,60,0.15);border:1px solid rgba(251,146,60,0.4);border-radius:3px;padding:3px 7px;font-family:'JetBrains Mono',monospace;font-size:8px;color:#fb923c;letter-spacing:1px;">HIGHEST RISK</div>
+        </div>
+        <!-- Q4: Tacit + Shared -->
+        <div style="background:rgba(244,63,94,0.06);border:1px solid rgba(244,63,94,0.25);padding:20px 18px;min-height:180px;position:relative;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:8px;text-transform:uppercase;letter-spacing:2px;color:#f43f5e;margin-bottom:8px;">Q4 — Tacit · Shared</div>
+          <div style="font-size:15px;font-family:'Playfair Display',serif;color:var(--text);margin-bottom:8px;">Culture &amp; implicit norms</div>
+          <div style="font-size:12px;color:var(--text-mid);line-height:1.6;margin-bottom:12px;">How the org behaves, what's acceptable, unwritten rules everyone knows, collective assumptions. The hardest to extract and the most dangerous when AI violates it. Nobody wrote it down; everyone knows it; AI doesn't.</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text-dim);">Examples: informal risk prohibitions · relationship handling conventions · what "we don't do that here" actually means</div>
+          <div style="position:absolute;top:12px;right:12px;background:rgba(244,63,94,0.15);border:1px solid rgba(244,63,94,0.35);border-radius:3px;padding:3px 7px;font-family:'JetBrains Mono',monospace;font-size:8px;color:#f43f5e;letter-spacing:1px;">HARDEST TO CAPTURE</div>
+        </div>
+      </div>
+    </div>
+    <!-- Bottom axis label -->
+    <div style="display:flex;margin-top:8px;">
+      <div style="width:120px;"></div>
+      <div style="flex:1;text-align:center;font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--text-dim);letter-spacing:1px;">← more accessible ·············· more valuable but harder to reach →</div>
+    </div>
+  </div>
+
+  <h3>Mapping the 2×2 to the eight categories</h3>
+  <table class="doc-table">
+    <thead><tr><th>Quadrant</th><th>Eight-category mapping</th><th>AI access without Mementum</th></tr></thead>
+    <tbody>
+      <tr><td><strong style="color:#38bdf8">Q1 — Explicit · Individual</strong></td><td>Real Process (partial), Standing Position (personal interpretation)</td><td>Low — findable only if shared, rarely indexed</td></tr>
+      <tr><td><strong style="color:#a78bfa">Q2 — Explicit · Shared</strong></td><td>Standing Position, Decision + Reasoning (recorded), Interpretation (published)</td><td>Moderate — RAG and search can reach it, but it's outdated</td></tr>
+      <tr><td><strong style="color:#fb923c">Q3 — Tacit · Individual</strong></td><td>Decision + Reasoning (reasoning), Observed Pattern, Implicit Constraint, Assumption</td><td>None — requires extraction; disappears with the person</td></tr>
+      <tr><td><strong style="color:#f43f5e">Q4 — Tacit · Shared</strong></td><td>Implicit Constraint, Relationship Context, Assumption, Real Process (exceptions)</td><td>None — often actively contradicts documents; most dangerous for agents</td></tr>
+    </tbody>
+  </table>
+
+  <h3>The action matrix — what to do with each quadrant</h3>
+  <p>Each quadrant requires a different intervention. The mistake most AI implementations make is only addressing Q2 (the documents already shared) and declaring the knowledge problem solved.</p>
+
+  <table class="doc-table">
+    <thead><tr><th>Quadrant</th><th>Priority</th><th>Action</th><th>Method</th><th>Risk if skipped</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong style="color:#a78bfa">Q2 — Explicit · Shared</strong></td>
+        <td><span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#34d399;">Start here</span></td>
+        <td><strong>Verify, curate, and activate.</strong> Don't just index it — validate it's current, accurate, and not contradicted by tacit reality. Most of this is outdated.</td>
+        <td>Automated ingestion + SME validation pass</td>
+        <td>Moderate: agents give confident answers based on outdated policy. Trust erodes when reality diverges.</td>
+      </tr>
+      <tr>
+        <td><strong style="color:#38bdf8">Q1 — Explicit · Individual</strong></td>
+        <td><span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#38bdf8;">High</span></td>
+        <td><strong>Surface and socialise.</strong> Personal documentation often represents the most current and accurate knowledge in the org. Get it out of personal drives and into the shared layer.</td>
+        <td>Friction logging, expert pulse, personal file ingestion with permission</td>
+        <td>Moderate: best knowledge stays siloed. AI gives generic answers while the expert's version exists somewhere.</td>
+      </tr>
+      <tr>
+        <td><strong style="color:#fb923c">Q3 — Tacit · Individual</strong></td>
+        <td><span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#fb923c;">Critical</span></td>
+        <td><strong>Extract before it's lost.</strong> This is the highest-value knowledge and the most at-risk. Capture reasoning in motion — while decisions are being made, not reconstructed months later.</td>
+        <td>Decision archaeology, expertise pulse, ambient conversation capture, pre-departure extraction</td>
+        <td>Severe: this is your moat. When it leaves it doesn't come back. AI built without it produces outputs that senior people reject on instinct — they can't explain why, but it's wrong.</td>
+      </tr>
+      <tr>
+        <td><strong style="color:#f43f5e">Q4 — Tacit · Shared</strong></td>
+        <td><span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#f43f5e;">Do not skip</span></td>
+        <td><strong>Make implicit explicit — carefully.</strong> This cannot be automated. Requires deliberate elicitation: shadowing, incident review, scenario sessions. What's learned here often contradicts Q2 documents.</td>
+        <td>Shadowing, incident review, tension detection (where docs contradict real behaviour), pre-mortem sessions</td>
+        <td>Catastrophic in regulated environments: agents violate norms nobody wrote down. In advisory/legal/financial contexts this is where AI produces outputs that are technically compliant and operationally unacceptable.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <p>Most AI implementations only address Q2. Mementum's methodology is specifically designed to reach Q3 and Q4 — the quadrants that no search index, RAG pipeline, or document ingestion tool can access. <strong>The competitive moat lives in Q3. The trust failures happen at Q4.</strong></p>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════
+     APPENDIX C4 — GENAI MOAT ATTACK TABLE
+══════════════════════════════════════════════════════════════ -->
+<section id="moat-attack">
+  <span class="section-label">Appendix C4</span>
+  <h2>GenAI and the <em>moat attack table</em></h2>
+
+  <p>Porter's five forces assumed moats were stable over medium-term cycles. GenAI compresses those cycles dramatically. Some traditional moats are being eroded in months, not years. Others are being strengthened. And a new category of moat is emerging — one that didn't exist before. Understanding which is which is the strategic case for acting now.</p>
+
+  <div class="callout warning">
+    <p>The organisations most at risk are not those without AI. They are those who believe their existing moat is safe — and discover too late that GenAI has eroded the basis of their advantage while they were evaluating vendor proposals.</p>
+  </div>
+
+  <h3>The full moat attack table</h3>
+  <table class="doc-table">
+    <thead>
+      <tr>
+        <th>Moat type</th>
+        <th>Traditional basis</th>
+        <th>GenAI attack vector</th>
+        <th>Erosion speed</th>
+        <th>Mementum response</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Knowledge &amp; expertise</strong></td>
+        <td>Years of accumulated domain expertise; takes time to build, hard to replicate</td>
+        <td>LLMs compress expertise acquisition dramatically. A junior with the right prompts and a good model closes the gap fast. Generic knowledge is now commodity.</td>
+        <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#f43f5e;">Fast — 12–24 months</td>
+        <td>Capture the <em>specific</em> expertise — the decisions, patterns, and heuristics that make your seniors irreplaceable. Generic expertise is gone; your specific expertise isn't.</td>
+      </tr>
+      <tr>
+        <td><strong>Institutional memory</strong></td>
+        <td>Historical decisions, relationship history, organisational learning over time</td>
+        <td>Competitors can now ingest and analyse years of public data, competitor filings, case law, and regulatory history fast. The public record is no longer your advantage.</td>
+        <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#fb923c;">Medium — 24–36 months</td>
+        <td>The private record — internal decisions, reasoning, relationship nuance — is what remains. Structure it before it decays. Your institutional memory is only safe if it's captured.</td>
+      </tr>
+      <tr>
+        <td><strong>Relationships &amp; trust</strong></td>
+        <td>Deep client relationships built over years; trust not easily transferred</td>
+        <td>AI-powered personalisation at scale means competitors can simulate relationship depth for new clients. The advantage narrows for acquisition; retention remains human-dependent but is being targeted.</td>
+        <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#fb923c;">Medium — depends on client segment</td>
+        <td>Capture relationship context so the <em>whole firm</em> has the intelligence, not just the account manager. When they leave, the relationship doesn't.</td>
+      </tr>
+      <tr>
+        <td><strong>Regulatory &amp; compliance expertise</strong></td>
+        <td>Deep understanding of regulatory environment; costs time and expertise to build</td>
+        <td>LLMs trained on regulatory text can provide commodity compliance guidance. First-tier regulatory knowledge is being democratised. Junior firms can navigate what previously required expensive expertise.</td>
+        <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#f43f5e;">Fast — 12–18 months</td>
+        <td>The moat shifts from <em>knowing the rules</em> to <em>knowing how your firm has interpreted and applied them</em> — the positions taken, the edge cases resolved, the regulator relationship managed. This is Q3/Q4 knowledge that generic LLMs cannot reach.</td>
+      </tr>
+      <tr>
+        <td><strong>Process efficiency</strong></td>
+        <td>Operational efficiency from refined internal processes; cost advantage</td>
+        <td>AI automates the documented process. If your process advantage lives in documents, competitors who deploy AI on similar documents close the gap quickly.</td>
+        <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#f43f5e;">Fast — 6–18 months</td>
+        <td>The <em>real</em> process — the exceptions, informal consultations, workarounds — is the defensible version. Document it, map it, and build AI on top of that. Competitors building on documented process are building on fiction.</td>
+      </tr>
+      <tr>
+        <td><strong>Brand &amp; reputation</strong></td>
+        <td>Market position and trust built over time; hard to replicate quickly</td>
+        <td>AI lowers the cost of market presence. New entrants can now produce high-quality content, positioning, and client-facing materials that previously required significant investment.</td>
+        <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#86efac;">Slow — 3–5 years</td>
+        <td>Less directly affected. Retain by ensuring AI outputs reinforce brand voice rather than dilute it — which requires the firm's communication context in the intelligence layer.</td>
+      </tr>
+      <tr>
+        <td><strong>Network effects</strong></td>
+        <td>Value increases as more participants join; platform dynamics</td>
+        <td>Limited direct attack. AI can accelerate building competing networks but doesn't fundamentally change network effect dynamics.</td>
+        <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#86efac;">Slow — structural</td>
+        <td>Less directly affected. Where relevant: use AI to deepen network value rather than defend against erosion.</td>
+      </tr>
+      <tr>
+        <td><strong style="color:#34d399;">Intelligence layer</strong> <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#34d399;">NEW</span></td>
+        <td>Did not exist as a distinct moat category before 2024</td>
+        <td>This is not a moat being attacked — it is a moat being created. Organisations that structure their specific intelligence first will compound an advantage that is impossible to replicate quickly regardless of model capability.</td>
+        <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#34d399;">Growing — starts now</td>
+        <td>This is what Mementum builds. The intelligence layer is the only moat that <em>strengthens</em> as AI capability increases — because the more powerful the model, the more the quality of context differentiates outputs.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>The strategic implication</h3>
+  <p>The organisations with the strongest traditional moats — deep expertise, long institutional memory, strong regulatory knowledge — are paradoxically the ones most at risk from GenAI, because those moats are exactly what AI is attacking first. The organisations that survive and extend their advantage will be those that convert their traditional moat into an intelligence layer before the generic AI capability closes the gap.</p>
+
+  <div class="callout insight">
+    <p>The intelligence layer moat is the only one that gets stronger as AI gets more capable. <strong>Better models make better use of better context. The organisation with the richest intelligence layer benefits most from every model improvement — including the ones their competitors are also buying.</strong></p>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════
+     APPENDIX C5 — PROTOTYPE INTERFACE REFERENCE
+══════════════════════════════════════════════════════════════ -->
+<section id="screenshots">
+  <span class="section-label">Appendix C5</span>
+  <h2>Prototype interface — <em>reference screenshots</em></h2>
+
+  <div class="proto-banner">
+    <div class="proto-dot"></div>
+    <span><strong>Brand note:</strong> These screenshots show an earlier prototype iteration under different brand names (Context Universe / The Living Mind). They are included as interface reference only. The production Mementum interface will be fully rebranded. Use for internal discussion of UX and capability — not for client-facing materials.</span>
+  </div>
+
+  <h3>The Living Map — overview</h3>
+  <p>Three-stage pipeline: the living record (continuous ingestion), institutional memory (rules of judgment as graph nodes), and AI execution (agents acting on the institutional intelligence). Shows the end-to-end flow from input to impact.</p>
+  <div class="screen-gallery" style="grid-template-columns:1fr;max-width:640px;">
+    <figure class="screen-figure">
+      <img src="/mnt/user-data/uploads/living-map-overview.png" alt="Living Map overview — three-stage pipeline"/>
+      <figcaption>Three-stage pipeline: Living Record (ingestion) → Institutional Memory (graph nodes) → AI Execution (agents). The core product flow.</figcaption>
+    </figure>
+  </div>
+
+  <h3>Interrogation dashboard</h3>
+  <p>Natural language querying of the knowledge graph. Grounded answers with citation provenance, trust index, and confidence scoring. Live knowledge stream showing real-time ingestion in the sidebar.</p>
+  <div class="screen-gallery" style="grid-template-columns:1fr;max-width:640px;">
+    <figure class="screen-figure">
+      <img src="/mnt/user-data/uploads/interrogation-dashboard.png" alt="Context interrogation dashboard"/>
+      <figcaption>Interrogation view: query returns grounded answer with citations (2023 Q4 Partner Strategy Meeting + Compliance Memo #882-ESG), trust index 0.982, and identified gaps for resolution.</figcaption>
+    </figure>
+  </div>
+
+  <h3>Curation &amp; governance</h3>
+  <p>The human-in-the-loop interface. Curation queue with prioritised items: partner edits detected, low-confidence flags, new knowledge node candidates. Coverage health metrics by domain. Governance log.</p>
+  <div class="screen-gallery" style="grid-template-columns:1fr;max-width:640px;">
+    <figure class="screen-figure">
+      <img src="/mnt/user-data/uploads/curation-governance.png" alt="Curation and governance dashboard"/>
+      <figcaption>Curation queue: partner edit detected (approve or dismiss), low confidence flag at 42% (manual curate or escalate to legal), new knowledge node candidate from meeting transcript (add to graph or discard). Org coverage 94%, portfolio 88%, customer 91%.</figcaption>
+    </figure>
+  </div>
+
+  <h3>Signal lineage — data sources</h3>
+  <p>Real-time ingestion feed with source type, timestamp, and intensity. Extraction in progress panel shows raw reasoning being converted to structured knowledge nodes with contextual linkage confidence.</p>
+  <div class="screen-gallery" style="grid-template-columns:1fr;max-width:640px;">
+    <figure class="screen-figure">
+      <img src="/mnt/user-data/uploads/signal-lineage.png" alt="Data sources and signal lineage"/>
+      <figcaption>Signal ingestion feed: meeting transcript (intensity 85), screen recording (92), email thread (64), analyst note (78). Extraction in progress: raw meeting reasoning → Decision Threshold node (Class: Asset Allocation Constraint). Contextual linkage confidence: 98.4%.</figcaption>
+    </figure>
+  </div>
+
+  <h3>Resolution workspace</h3>
+  <p>Gap resolution for AI-flagged inconsistencies. Shows the conflict, the knowledge owner, and a workspace for creating expert heuristics to resolve it. Links resolution to effective date and review cycle.</p>
+  <div class="screen-gallery" style="grid-template-columns:1fr;max-width:640px;">
+    <figure class="screen-figure">
+      <img src="/mnt/user-data/uploads/resolution-workspace.png" alt="Resolution workspace"/>
+      <figcaption>Pending gap: logical conflict between ESG_Policy_V4 and Tax_Efficiency_Model_B. AI analysis surfaces the conflict; knowledge owner (Strategy & Compliance Board) creates an expert heuristic to resolve it. Review cycle: quarterly.</figcaption>
+    </figure>
+  </div>
+
+  <h3>Provenance inspector</h3>
+  <p>Full lineage waterfall for any active rule. Shows every source that contributed — voice recording, Slack thread, annotated PDF — ranked by signal strength, with supporting visual context.</p>
+  <div class="screen-gallery" style="grid-template-columns:1fr;max-width:640px;">
+    <figure class="screen-figure">
+      <img src="/mnt/user-data/uploads/provenance-inspector.png" alt="Provenance and signal inspector"/>
+      <figcaption>Lineage waterfall for Risk Threshold V3: morning strategy call transcript (highest signal), #wealth-strategy-group Slack (medium), annotated investment policy memo (human annotated). Confidence score: 98.4%. SOC2 compliant.</figcaption>
+    </figure>
+  </div>
+
+  <h3>Core intelligence deployment — micro-skill activation</h3>
+  <p>A distilled judgment node published as an active micro-skill. Shows the inbound streams (partner transcripts, annotated memos), the core intelligence distillation, and the deployment to multiple agents (compliance bot, relationship manager, strategy drafter).</p>
+  <div class="screen-gallery" style="grid-template-columns:1fr;max-width:640px;">
+    <figure class="screen-figure">
+      <img src="/mnt/user-data/uploads/core-intelligence-deployment.png" alt="Core intelligence deployment"/>
+      <figcaption>UHNW Strategic Onboarding micro-skill: derived from partner's judgment (partner transcripts + annotated memos → distilled core intelligence → published to mesh). Active on: Compliance Bot, Relationship Manager, Strategy Drafter. Density: 94%, Experience: 12y, Latency: 0.02s.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════
+     APPENDIX D — TODO
+══════════════════════════════════════════════════════════════ -->
+<section id="todo">
+  <span class="section-label">Appendix D</span>
+  <h2>Document <em>TODO</em></h2>
+  <p>Tracked across versions. Items requiring Dan's input flagged separately from content gaps.</p>
+
+  <div class="todo-box">
+    <div class="todo-title" style="margin-top:20px;">Completed in v0.4</div>
+    <ul class="todo-list">
+      <li class="done"><strong>Knowledge typology 2×2 matrix</strong> (Appendix C3) — explicit/tacit × individual/shared, eight-category mapping, action matrix.</li>
+      <li class="done"><strong>GenAI moat attack table</strong> (Appendix C4) — seven traditional moats + intelligence layer moat, erosion speed, Mementum response.</li>
+      <li class="done"><strong>Prototype screenshot gallery</strong> (Appendix C5) — all seven screenshots with captions and brand-mismatch caveat.</li>
+    </ul>
+
+    <div class="todo-title" style="margin-top:20px;">Completed in v0.3</div>
+    <ul class="todo-list">
+      <li class="done"><strong>Brand name locked.</strong> Mementum / Memory in motion applied throughout.</li>
+      <li class="done"><strong>Client scene added.</strong> Failed pricing workflow story in Section 1 and exec summary.</li>
+      <li class="done"><strong>Eight knowledge categories</strong> replace six-layer taxonomy. Consistent with Viridian app.</li>
+      <li class="done"><strong>Before/after graph embedded</strong> in Section 1.</li>
+      <li class="done"><strong>Market positioning section</strong> — three buyer triggers, buying committee, sectors.</li>
+      <li class="done"><strong>Services arc section</strong> — four-phase model, ongoing relationship options, honest compounding loop.</li>
+      <li class="done"><strong>Second brain section</strong> — compounding timeline, three accumulation types, governance.</li>
+      <li class="done"><strong>Scorecard added</strong> and updated to v0.3 status.</li>
+      <li class="done"><strong>Prototype status</strong> declared honestly in Section 4.</li>
+      <li class="done"><strong>Intelligence decay table</strong> added to Appendix C.</li>
+    </ul>
+
+    <div class="todo-cat">Needs Dan's input — content decisions</div>
+    <ul class="todo-list">
+      <li><strong>Lock the one-sentence version.</strong> Current candidate: "Your organisation's competitive advantage lives in people's heads — Mementum maps it, structures it as an intelligence layer your AI can actually use, and leaves it behind as a compounding asset that gets smarter every day you run it." Confirm or rewrite.</li>
+      <li><strong>Pricing signal.</strong> No pricing mentioned anywhere. Even a rough range or framing ("first engagement typically scopes at X–Y") would help the buying committee section. Add when ready to disclose.</li>
+      <li><strong>Second vertical worked example.</strong> Financial services (insurance, super, PE) as the second sector. One concrete example application to add to Appendix A.</li>
+      <li><strong>Competitive positioning.</strong> Who are the closest competitors? How does Mementum differ from: Notion AI, Microsoft Copilot + SharePoint, enterprise RAG vendors, boutique AI consultants? A comparison table would sharpen the differentiation argument.</li>
+      <li><strong>Engagement size / typical deal.</strong> Variable by client maturity — but what's the floor? What does a first engagement typically cost? Needed before this document is used in a live sales conversation.</li>
+    </ul>
+
+    <div class="todo-cat">Assets and infrastructure</div>
+    <ul class="todo-list">
+      <li><strong>Screenshot paths.</strong> <code>assets/context-universe/*.png</code> — five images referenced. Confirm hosted.</li>
+      <li><strong>CTA email.</strong> Confirm <code>dan@contextmoat.com</code> is live and monitored, or update to correct address.</li>
+      <li><strong>Domain / brand.</strong> contextmoat.com vs mementum.com — which is the go-forward web presence?</li>
+      <li><strong>Mobile check.</strong> Before/after graph panels tight on narrow screens. Test below 600px.</li>
+    </ul>
+
+    <div class="todo-cat">Methodology — open questions to tighten</div>
+    <ul class="todo-list">
+      <li><strong>Vertical slice scoping.</strong> How do you define the boundary of a decision domain? What makes one too large, too small? A simple decision rule (e.g. "can be described in one sentence + fits in one team's work") would help clients understand scope.</li>
+      <li><strong>The trust test operationalised.</strong> The document says pilots fail the trust test — what does passing look like? A specific definition of "trusted output" (e.g. adviser uses it without checking, manager doesn't override it) would strengthen the argument.</li>
+      <li><strong>Micro-skill vs agent.</strong> The distinction between a micro-skill (small, modular, runs on context) and a full agent (autonomous, multi-step) could be sharpened. Where does one end and the other begin?</li>
+    </ul>
+  </div>
+</section>
+
+<section id="next">
+  <div class="next-steps">
+    <strong>Next steps.</strong> We start with a half-day moat discovery session — no charge, leadership team, concrete output. Most organisations learn something specific about their competitive advantage that they didn't know before. To schedule: <a href="mailto:dan@contextmoat.com">dan@contextmoat.com</a>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-brand">Mementum<span>Memory in motion</span></div>
+  <div class="footer-meta">Internal use only · v0.3 · March 2026</div>
+</footer>
+
+<!-- ══ D3 GRAPHS ══ -->
+<script>
+function buildBefore() {
+  const el=document.getElementById('svg-before');
+  if(!el)return;
+  const w=el.clientWidth||360,h=el.clientHeight||320;
+  const svg=d3.select('#svg-before').attr('viewBox',`0 0 ${w} ${h}`);
+  svg.selectAll('*').remove();
+  const defs=svg.append('defs');
+  const pat=defs.append('pattern').attr('id','gb').attr('width',28).attr('height',28).attr('patternUnits','userSpaceOnUse');
+  pat.append('path').attr('d','M 28 0 L 0 0 0 28').attr('fill','none').attr('stroke','rgba(255,255,255,0.022)').attr('stroke-width','0.5');
+  svg.append('rect').attr('width',w).attr('height',h).attr('fill','url(#gb)');
+  const srcPos=[{x:w*.10,y:h*.12},{x:w*.22,y:h*.40},{x:w*.08,y:h*.65},{x:w*.32,y:h*.22},{x:w*.18,y:h*.78},{x:w*.38,y:h*.55},{x:w*.48,y:h*.16},{x:w*.44,y:h*.82}];
+  const srcLbl=['ASIC REP 798',"Dave's files",'Compliance doc','Email thread','Meeting rec.','Slack #tips','Board min.','CFS Edge'];
+  srcPos.forEach((s,i)=>{
+    const g=svg.append('g').attr('transform',`translate(${s.x},${s.y})`).attr('opacity',.28+i*.03);
+    const sz=10;
+    g.append('rect').attr('width',sz).attr('height',sz).attr('x',-sz/2).attr('y',-sz/2).attr('rx',2).attr('transform','rotate(45)').attr('fill','rgba(244,63,94,0.07)').attr('stroke','#f43f5e').attr('stroke-width',.8).attr('stroke-dasharray','2 2');
+    g.append('text').attr('y',sz+7).attr('text-anchor','middle').attr('font-family','IBM Plex Mono,monospace').attr('font-size',6).attr('fill','rgba(244,63,94,0.5)').text(srcLbl[i]);
+  });
+  [{x:w*.30,y:h*.38},{x:w*.48,y:h*.55},{x:w*.22,y:h*.55},{x:w*.58,y:h*.30},{x:w*.42,y:h*.70}].forEach(n=>{
+    const g=svg.append('g').attr('transform',`translate(${n.x},${n.y})`).attr('opacity',.1);
+    g.append('circle').attr('r',13).attr('fill','none').attr('stroke','rgba(255,255,255,0.18)').attr('stroke-dasharray','2 4');
+    g.append('circle').attr('r',9).attr('fill','rgba(255,255,255,0.02)').attr('stroke','rgba(255,255,255,0.14)').attr('stroke-dasharray','2 3');
+  });
+  function pent(r){return d3.range(5).map(i=>{const a=(Math.PI/180)*(72*i-90);return[r*Math.cos(a),r*Math.sin(a)]}).map(p=>p.join(',')).join(' ')}
+  [{x:w*.70,y:h*.25},{x:w*.76,y:h*.56},{x:w*.66,y:h*.78}].forEach(s=>{
+    const g=svg.append('g').attr('transform',`translate(${s.x},${s.y})`).attr('opacity',.11);
+    g.append('polygon').attr('points',pent(12)).attr('fill','rgba(245,158,11,0.04)').attr('stroke','rgba(245,158,11,0.4)').attr('stroke-width',.9).attr('stroke-dasharray','2 4');
+  });
+  [{x:w*.84,y:h*.22,l:'Agent'},{x:w*.88,y:h*.70,l:'Adviser'}].forEach(a=>{
+    [[w*.3,h*.35],[w*.5,h*.5],[w*.4,h*.65]].forEach(([tx,ty])=>{
+      svg.append('line').attr('x1',a.x).attr('y1',a.y).attr('x2',tx).attr('y2',ty).attr('stroke','rgba(129,140,248,0.13)').attr('stroke-width',.6).attr('stroke-dasharray','3 5');
+    });
+    const g=svg.append('g').attr('transform',`translate(${a.x},${a.y})`);
+    g.append('circle').attr('r',11).attr('fill','rgba(129,140,248,0.1)').attr('stroke','#818cf8').attr('stroke-width',1.2);
+    g.append('text').attr('text-anchor','middle').attr('dominant-baseline','central').attr('font-size',8).attr('fill','#818cf8').text('A');
+    g.append('text').attr('x',13).attr('y',-12).attr('font-size',11).attr('fill','rgba(244,63,94,0.6)').text('?');
+    g.append('text').attr('y',18).attr('text-anchor','middle').attr('font-family','IBM Plex Mono,monospace').attr('font-size',7).attr('fill','rgba(129,140,248,0.45)').text(a.l);
+  });
+  svg.append('text').attr('x',w/2).attr('y',h/2).attr('text-anchor','middle').attr('font-family','IBM Plex Mono,monospace').attr('font-size',9).attr('fill','rgba(244,63,94,0.09)').attr('letter-spacing','0.15em').text('NO VERIFIED CONTEXT');
+}
+
+function buildAfter() {
+  const el=document.getElementById('svg-after');
+  if(!el)return;
+  const w=el.clientWidth||360,h=el.clientHeight||320;
+  const svg=d3.select('#svg-after').attr('viewBox',`0 0 ${w} ${h}`);
+  svg.selectAll('*').remove();
+  const defs=svg.append('defs');
+  const pat=defs.append('pattern').attr('id','ga').attr('width',28).attr('height',28).attr('patternUnits','userSpaceOnUse');
+  pat.append('path').attr('d','M 28 0 L 0 0 0 28').attr('fill','none').attr('stroke','rgba(255,255,255,0.022)').attr('stroke-width','0.5');
+  svg.append('rect').attr('width',w).attr('height',h).attr('fill','url(#ga)');
+  [['as','#6b7db3'],['ak','#a78bfa'],['ask','#f59e0b'],['afb','rgba(56,189,248,0.8)']].forEach(([id,c])=>{
+    defs.append('marker').attr('id',id).attr('viewBox','0 -3 7 6').attr('refX',13).attr('refY',0).attr('markerWidth',4).attr('markerHeight',4).attr('orient','auto').append('path').attr('d','M0,-3L7,0L0,3').attr('fill',c).attr('opacity',.7);
+  });
+  const xS=w*.09,xK=w*.35,xSk=w*.62,xA=w*.87;
+  [{x:xS,l:'SOURCES',c:'rgba(107,125,179,0.4)'},{x:xK,l:'KNOWLEDGE',c:'rgba(167,139,250,0.4)'},{x:xSk,l:'SKILLS',c:'rgba(245,158,11,0.38)'},{x:xA,l:'DEPLOY',c:'rgba(129,140,248,0.38)'}].forEach(l=>{
+    svg.append('text').attr('x',l.x).attr('y',15).attr('text-anchor','middle').attr('font-family','IBM Plex Mono,monospace').attr('font-size',7).attr('letter-spacing','0.1em').attr('fill',l.c).text(l.l);
+  });
+  [xS+(xK-xS)/2,xK+(xSk-xK)/2,xSk+(xA-xSk)/2].forEach(x=>{
+    svg.append('line').attr('x1',x).attr('y1',22).attr('x2',x).attr('y2',h-8).attr('stroke','rgba(255,255,255,0.04)').attr('stroke-dasharray','3 6');
+  });
+  const srcC=['#6b7db3','#38bdf8','#6b7db3','#818cf8','#34d399','#fb923c','#6b7db3','#818cf8'];
+  const srcI=['📄','✉','📄','💬','🎙','⚙','📄','💬'];
+  const sPos={};
+  d3.range(8).forEach(i=>{
+    const y=h*(.10+i*.105);
+    sPos[i]={x:xS,y};
+    const g=svg.append('g').attr('transform',`translate(${xS},${y})`);
+    const sz=8;
+    g.append('rect').attr('width',sz).attr('height',sz).attr('x',-sz/2).attr('y',-sz/2).attr('rx',1.5).attr('transform','rotate(45)').attr('fill',srcC[i]+'1a').attr('stroke',srcC[i]).attr('stroke-width',1);
+    g.append('text').attr('text-anchor','middle').attr('dominant-baseline','central').attr('font-size',5.5).text(srcI[i]);
+  });
+  const knC=['#38bdf8','#a78bfa','#e879f9','#34d399','#fb923c','#f43f5e','#fbbf24','#86efac'];
+  const kPos={};
+  d3.range(8).forEach(i=>{
+    const y=h*(.10+i*.105);
+    kPos[i]={x:xK,y};
+    const g=svg.append('g').attr('transform',`translate(${xK},${y})`);
+    const r=7+(i%3)*2;
+    g.append('circle').attr('r',r+4).attr('fill','none').attr('stroke',knC[i]).attr('stroke-width',.3).attr('opacity',.25);
+    g.append('circle').attr('r',r).attr('fill',knC[i]+'16').attr('stroke',knC[i]).attr('stroke-width',1.2);
+    g.append('circle').attr('r',r*.3).attr('fill',knC[i]).attr('opacity',.9);
+  });
+  function pent(r){return d3.range(5).map(i=>{const a=(Math.PI/180)*(72*i-90);return[r*Math.cos(a),r*Math.sin(a)]}).map(p=>p.join(',')).join(' ')}
+  const skPos={};
+  d3.range(4).forEach(i=>{
+    const y=h*(.18+i*.21);
+    skPos[i]={x:xSk,y};
+    const g=svg.append('g').attr('transform',`translate(${xSk},${y})`);
+    g.append('polygon').attr('points',pent(9)).attr('fill','rgba(245,158,11,0.12)').attr('stroke','#f59e0b').attr('stroke-width',1.4);
+    g.append('circle').attr('r',2.8).attr('fill','#f59e0b').attr('opacity',.9);
+  });
+  const agI=['⚡','👤','⚡'];
+  const aPos={};
+  [h*.25,h*.52,h*.76].forEach((y,i)=>{
+    aPos[i]={x:xA,y};
+    const g=svg.append('g').attr('transform',`translate(${xA},${y})`);
+    g.append('circle').attr('r',10).attr('fill','rgba(129,140,248,0.12)').attr('stroke','#818cf8').attr('stroke-width',1.3);
+    g.append('text').attr('text-anchor','middle').attr('dominant-baseline','central').attr('font-size',8).text(agI[i]);
+  });
+  const el2=svg.insert('g','g');
+  const s2k={0:[0,1],1:[1,6],2:[1,2],3:[3],4:[4],5:[5],6:[2],7:[0,3]};
+  Object.entries(s2k).forEach(([si,kis])=>kis.forEach(ki=>{
+    const s=sPos[+si],t=kPos[ki];
+    el2.append('line').attr('x1',s.x).attr('y1',s.y).attr('x2',t.x).attr('y2',t.y).attr('stroke','rgba(107,125,179,0.28)').attr('stroke-width',.65).attr('marker-end','url(#as)');
+  }));
+  const k2sk={0:[0],2:[0,2],4:[1],5:[0,3],1:[2],6:[2],3:[3],7:[3]};
+  Object.entries(k2sk).forEach(([ki,sis])=>sis.forEach(si=>{
+    const s=kPos[+ki],t=skPos[si];
+    el2.append('line').attr('x1',s.x).attr('y1',s.y).attr('x2',t.x).attr('y2',t.y).attr('stroke',knC[+ki]+'50').attr('stroke-width',.75).attr('marker-end','url(#ak)');
+  }));
+  const sk2ag={0:[0,1],1:[1],2:[0,2],3:[1,2]};
+  Object.entries(sk2ag).forEach(([si,ais])=>ais.forEach(ai=>{
+    const s=skPos[+si],t=aPos[ai];
+    el2.append('line').attr('x1',s.x).attr('y1',s.y).attr('x2',t.x).attr('y2',t.y).attr('stroke','rgba(245,158,11,0.42)').attr('stroke-width',.85).attr('marker-end','url(#ask)');
+  }));
+  [{from:skPos[0],to:kPos[2]},{from:skPos[1],to:kPos[4]}].forEach(fb=>{
+    const mx=(fb.from.x+fb.to.x)/2,my=Math.min(fb.from.y,fb.to.y)-26;
+    el2.append('path').attr('d',`M${fb.from.x},${fb.from.y} Q${mx},${my} ${fb.to.x},${fb.to.y}`).attr('fill','none').attr('stroke','rgba(56,189,248,0.42)').attr('stroke-width',.95).attr('stroke-dasharray','4 3').attr('marker-end','url(#afb)');
+  });
+}
+
+mermaid.initialize({startOnLoad:true,theme:'dark',themeVariables:{primaryColor:'#B87333',primaryTextColor:'#F5F5F5',primaryBorderColor:'#D4A574',lineColor:'#555',secondaryColor:'#1A1A1A',tertiaryColor:'#141414'}});
+window.addEventListener('load',()=>{buildBefore();buildAfter();});
+window.addEventListener('resize',()=>{buildBefore();buildAfter();});
+</script>
+</body>
+</html>

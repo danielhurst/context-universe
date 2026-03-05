@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Mementum — Memory in Motion · Review Draft</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0b0e17;--ink-2:#353945;--ink-3:#6b7280;
+  --bg:#ffffff;--bg-2:#f8f9fc;--bg-3:#f0f2f7;
+  --rule:#e4e7ef;
+  --blue:#1847d4;--blue-lt:#eef2fd;--blue-dk:#0f32a8;
+  --green:#0a6640;--green-lt:#e8f5ee;
+  --amber:#b8620a;--amber-lt:#fdf3e4;
+  --red:#c0260e;--red-lt:#fdf0ed;
+  --font-serif:'DM Serif Display',Georgia,serif;
+  --font-sans:'DM Sans','Helvetica Neue',sans-serif;
+  --font-mono:'DM Mono','Courier New',monospace;
+  --r:8px;--max:820px;--wide:1080px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-sans);font-size:16px;line-height:1.7;color:var(--ink);background:var(--bg)}
+
+/* ── TYPE ── */
+h1{font-family:var(--font-serif);font-size:clamp(36px,5vw,58px);font-weight:400;line-height:1.1;letter-spacing:-.5px}
+h2{font-family:var(--font-serif);font-size:clamp(24px,3.5vw,36px);font-weight:400;line-height:1.2;margin-bottom:16px}
+h3{font-family:var(--font-sans);font-size:15px;font-weight:600;letter-spacing:.3px;margin:32px 0 8px;text-transform:uppercase;color:var(--ink-2)}
+h4{font-family:var(--font-sans);font-size:14px;font-weight:600;margin:20px 0 6px}
+p{color:var(--ink-2);margin-bottom:16px;font-size:15.5px;line-height:1.75}
+p:last-child{margin-bottom:0}
+strong{color:var(--ink);font-weight:600}
+em{font-style:italic}
+
+/* ── LAYOUT ── */
+.outer{max-width:var(--max);margin:0 auto;padding:0 32px}
+.wide{max-width:var(--wide);margin:0 auto;padding:0 32px}
+.sec{padding:64px 0}
+.sec-sm{padding:40px 0}
+
+/* ── LABEL ── */
+.eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--ink-3);display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.eyebrow::after{content:'';flex:1;height:1px;background:var(--rule)}
+
+/* ── COVER ── */
+.cover{background:var(--ink);color:#fff;padding:96px 40px 80px;position:relative;overflow:hidden}
+.cover::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 110% 40%,#1847d4 0%,transparent 65%),radial-gradient(ellipse 40% 50% at -10% 80%,#0a6640 0%,transparent 60%);opacity:.35}
+.cover-inner{position:relative;z-index:1;max-width:var(--wide);margin:0 auto}
+.cover-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:100px;padding:5px 14px 5px 10px;font-family:var(--font-mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.6);margin-bottom:36px}
+.cover-badge-dot{width:6px;height:6px;background:#4ade80;border-radius:50%}
+.cover h1{color:#fff;max-width:680px;margin-bottom:10px}
+.cover h1 em{color:#6aa3ff;font-style:normal}
+.cover-sub{font-family:var(--font-sans);font-size:17px;color:rgba(255,255,255,.55);max-width:520px;margin:20px 0 48px;line-height:1.6}
+.cover-meta{display:flex;align-items:center;gap:24px;font-family:var(--font-mono);font-size:11px;color:rgba(255,255,255,.3);letter-spacing:1px}
+.cover-meta span{display:flex;align-items:center;gap:6px}
+.cover-meta span::before{content:'';width:1px;height:12px;background:rgba(255,255,255,.2)}
+.cover-meta span:first-child::before{display:none}
+
+/* ── INTERNAL SUMMARY ── */
+.summary-panel{background:var(--ink);padding:64px 40px}
+.summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px;margin-top:36px}
+.summary-cell{background:#141824;padding:28px 28px;border:1px solid rgba(255,255,255,.06)}
+.summary-cell:first-child{border-radius:var(--r) 0 0 0}
+.summary-cell:nth-child(2){border-radius:0 var(--r) 0 0}
+.summary-cell:nth-child(3){border-radius:0 0 0 var(--r)}
+.summary-cell:last-child{border-radius:0 0 var(--r) 0}
+.sc-label{font-family:var(--font-mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#6aa3ff;margin-bottom:12px;font-weight:500}
+.sc-text{font-family:var(--font-sans);font-size:14px;color:rgba(255,255,255,.6);line-height:1.65}
+.summary-note{font-family:var(--font-mono);font-size:11px;color:rgba(255,255,255,.2);margin-top:28px;letter-spacing:.5px}
+
+/* ── EXEC SUMMARY ── */
+.exec-box{background:var(--blue-lt);border-left:3px solid var(--blue);padding:28px 32px;border-radius:0 var(--r) var(--r) 0;margin:28px 0 36px}
+.exec-box p{font-family:var(--font-sans);font-size:15px;color:var(--ink);margin-bottom:12px}
+
+/* ── STAT ROW ── */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--rule);border-radius:var(--r);overflow:hidden;margin:32px 0}
+.stat{padding:24px 20px;text-align:center;border-right:1px solid var(--rule)}
+.stat:last-child{border-right:none}
+.stat-n{font-family:var(--font-serif);font-size:40px;color:var(--blue);line-height:1;margin-bottom:6px}
+.stat-d{font-family:var(--font-sans);font-size:12px;color:var(--ink-3);line-height:1.4}
+
+/* ── CALLOUT ── */
+.callout{border:1px solid var(--rule);border-radius:var(--r);padding:20px 24px;margin:24px 0}
+.callout.amber{background:var(--amber-lt);border-color:rgba(184,98,10,.25)}
+.callout.green{background:var(--green-lt);border-color:rgba(10,102,64,.2)}
+.callout.dark{background:var(--ink);border-color:transparent}
+.callout.dark p,.callout.dark .cl{color:rgba(255,255,255,.6)!important}
+.callout.dark strong{color:#fff}
+.cl{font-family:var(--font-mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--ink-3);margin-bottom:8px;display:block;font-weight:500}
+.callout.amber .cl{color:var(--amber)}
+.callout.green .cl{color:var(--green)}
+.callout.dark .cl{color:rgba(255,255,255,.3)}
+
+/* ── PULL QUOTE ── */
+.pq{font-family:var(--font-serif);font-size:22px;line-height:1.4;color:var(--ink);border-left:3px solid var(--blue);padding-left:24px;margin:36px 0;font-style:italic}
+
+/* ── ANECDOTE ── */
+.anecdote{background:#fffdf8;border:1px solid #e8dfc8;border-left:3px solid var(--amber);padding:22px 26px;border-radius:0 var(--r) var(--r) 0;margin:28px 0;font-style:italic;color:var(--ink-2);font-size:15px;line-height:1.7}
+.anecdote-lbl{font-family:var(--font-mono);font-size:10px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:var(--amber);margin-bottom:10px;display:block;font-style:normal}
+
+/* ── DIAGRAM WRAP ── */
+.diagram{margin:32px 0;border-radius:var(--r);overflow:hidden;border:1px solid var(--rule)}
+.diagram-cap{font-family:var(--font-mono);font-size:11px;color:var(--ink-3);text-align:center;padding:10px 16px;background:var(--bg-2);border-top:1px solid var(--rule);letter-spacing:.3px}
+
+/* ── KNOWLEDGE GRID ── */
+.kg{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:var(--r);overflow:hidden;margin:24px 0}
+.kc{background:var(--bg);padding:18px 20px}
+.kc:nth-child(odd){background:var(--bg-2)}
+.kc-name{font-family:var(--font-mono);font-size:11px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:var(--blue);margin-bottom:5px}
+.kc-def{font-family:var(--font-sans);font-size:13px;color:var(--ink-3);line-height:1.5}
+
+/* ── MATRIX TABLE ── */
+table.mx{width:100%;border-collapse:collapse;font-family:var(--font-sans);font-size:13px;margin:16px 0}
+table.mx th{background:var(--ink);color:rgba(255,255,255,.8);padding:10px 14px;text-align:left;font-weight:500;font-size:12px}
+table.mx td{padding:10px 14px;border-bottom:1px solid var(--rule);vertical-align:top;color:var(--ink-2)}
+table.mx tr:nth-child(even) td{background:var(--bg-2)}
+table.mx tr:last-child td{border-bottom:none}
+
+/* ── BUYER GRID ── */
+.buyer-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:var(--r);overflow:hidden;margin:20px 0}
+.buyer-cell{background:var(--bg);padding:20px}
+.buyer-role{font-family:var(--font-mono);font-size:11px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:var(--ink);margin-bottom:8px}
+.buyer-concern{font-family:var(--font-sans);font-size:13px;color:var(--ink-3);line-height:1.5;margin-bottom:10px}
+.buyer-signal{font-family:var(--font-sans);font-size:12px;color:var(--blue);font-style:italic}
+
+/* ── STAGE CARDS ── */
+.stage-card{display:grid;grid-template-columns:180px 1fr;border:1px solid var(--rule);border-radius:var(--r);overflow:hidden;margin-bottom:3px}
+.stage-label{padding:24px 20px}
+.stage-lnum{font-family:var(--font-mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;opacity:.7}
+.stage-lname{font-family:var(--font-sans);font-size:17px;font-weight:600;line-height:1.2;margin-bottom:6px}
+.stage-ltime{font-family:var(--font-mono);font-size:11px;font-weight:500}
+.stage-body{padding:24px 28px;border-left:1px solid var(--rule)}
+.stage-body p{font-size:14px}
+.stage-body strong{font-weight:600}
+.stage-tag{display:inline-block;font-family:var(--font-mono);font-size:10px;font-weight:500;padding:2px 8px;border-radius:4px;margin-right:4px;margin-bottom:8px;letter-spacing:.5px}
+
+/* Stage colours */
+.s1 .stage-label{background:var(--bg-2);color:var(--ink)}
+.s1 .stage-lnum{color:var(--ink-3)}
+.s1 .stage-ltime{color:var(--ink-3)}
+.s2 .stage-label{background:var(--blue-lt)}
+.s2 .stage-lnum{color:var(--blue)}
+.s2 .stage-ltime{color:var(--blue)}
+.s3 .stage-label{background:var(--blue);color:#fff}
+.s3 .stage-lnum{color:rgba(255,255,255,.55)}
+.s3 .stage-ltime{color:rgba(255,255,255,.7)}
+.s4 .stage-label{background:var(--green);color:#fff}
+.s4 .stage-lnum{color:rgba(255,255,255,.55)}
+.s4 .stage-ltime{color:rgba(255,255,255,.7)}
+.s5 .stage-label{background:var(--ink);color:#fff}
+.s5 .stage-lnum{color:rgba(255,255,255,.4)}
+.s5 .stage-ltime{color:rgba(255,255,255,.5)}
+
+/* ── SCORE ── */
+.score-wrap{background:var(--ink);padding:48px 40px;margin-top:72px}
+.score-inner{max-width:var(--wide);margin:0 auto}
+.score-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:2px;margin:24px 0}
+.score-cell{background:#141824;padding:20px 12px;text-align:center}
+.score-lbl{font-family:var(--font-mono);font-size:10px;color:rgba(255,255,255,.4);margin-bottom:10px;line-height:1.4;letter-spacing:.5px;text-transform:uppercase}
+.score-v{font-family:var(--font-serif);font-size:32px;color:#6aa3ff;line-height:1}
+.score-m{font-family:var(--font-mono);font-size:12px;color:rgba(255,255,255,.2)}
+.score-note{font-family:var(--font-sans);font-size:13px;color:rgba(255,255,255,.45);line-height:1.65}
+
+/* ── APPENDIX ── */
+.appendix{background:var(--bg-2);border-top:1px solid var(--rule);padding:64px 40px}
+.app-section{margin-bottom:56px}
+.app-section:last-child{margin-bottom:0}
+
+/* ── FAQ ── */
+.faq-wrap{border-top:1px solid var(--rule);margin-top:8px}
+details.fq{border-bottom:1px solid var(--rule)}
+details.fq summary{list-style:none;display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:18px 0;cursor:pointer;font-family:var(--font-sans);font-size:14.5px;font-weight:500;color:var(--ink);user-select:none}
+details.fq summary::-webkit-details-marker{display:none}
+details.fq summary .fq-icon{font-size:18px;font-weight:300;color:var(--blue);flex-shrink:0;line-height:1}
+details.fq[open] summary .fq-icon::before{content:'−'}
+details.fq:not([open]) summary .fq-icon::before{content:'+'}
+.fq-ans{padding:0 0 18px;font-family:var(--font-sans);font-size:14px;color:var(--ink-2);line-height:1.7;max-width:680px}
+.fq-ans p{margin-bottom:10px;font-size:14px}
+.fq-tag{font-family:var(--font-mono);font-size:9px;font-weight:500;letter-spacing:1px;text-transform:uppercase;padding:2px 7px;border-radius:3px;margin-right:6px;vertical-align:middle;display:inline-block}
+.fq-tag.dt{background:var(--blue-lt);color:var(--blue)}
+.fq-tag.mt{background:var(--green-lt);color:var(--green)}
+.fq-tag.cm{background:var(--amber-lt);color:var(--amber)}
+.fq-tag.ob{background:var(--red-lt);color:var(--red)}
+
+/* ── FOOTER ── */
+footer{background:var(--ink-2);padding:28px 40px;font-family:var(--font-mono);font-size:11px;color:rgba(255,255,255,.3);letter-spacing:.5px}
+
+/* ── DIVIDER ── */
+hr{border:none;border-top:1px solid var(--rule);margin:40px 0}
+
+/* ── TIMELINE ── */
+.tl{position:relative;padding-left:24px;margin:24px 0}
+.tl::before{content:'';position:absolute;left:5px;top:8px;bottom:8px;width:2px;background:var(--rule)}
+.tl-item{position:relative;margin-bottom:24px}
+.tl-item::before{content:'';position:absolute;left:-22px;top:5px;width:10px;height:10px;border-radius:50%;background:var(--blue);border:2px solid var(--bg);box-shadow:0 0 0 2px var(--blue)}
+.tl-t{font-family:var(--font-mono);font-size:10px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--blue);margin-bottom:3px}
+.tl-b{font-family:var(--font-sans);font-size:14px;color:var(--ink-2);line-height:1.55}
+
+/* ── TECH STACK ── */
+.stack-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:20px 0}
+.stack-cell{background:var(--bg);border:1px solid var(--rule);border-radius:var(--r);padding:16px 18px}
+.stack-layer{font-family:var(--font-mono);font-size:10px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--blue);margin-bottom:6px}
+.stack-items{font-family:var(--font-mono);font-size:12px;color:var(--ink-2);line-height:1.7}
+.stack-note{font-family:var(--font-sans);font-size:12px;color:var(--ink-3);margin-top:4px;line-height:1.4}
+
+/* ── RESPONSIVE ── */
+@media(max-width:640px){
+  .outer,.wide,.summary-panel,.cover,.appendix,.score-wrap{padding-left:20px;padding-right:20px}
+  .summary-grid,.stats,.buyer-grid,.stack-grid{grid-template-columns:1fr}
+  .stage-card{grid-template-columns:1fr}
+  .stage-body{border-left:none;border-top:1px solid var(--rule)}
+  .score-grid{grid-template-columns:1fr 1fr}
+  .kg{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ COVER ══ -->
+<div class="cover">
+  <div class="cover-inner">
+    <div class="cover-badge"><span class="cover-badge-dot"></span>Review Draft · March 2026</div>
+    <h1>Mementum<br><em>Memory in Motion</em></h1>
+    <p class="cover-sub">A services model for building organisational intelligence layers — the second brain that powers every agent, skill, and agentic team built on top of it.</p>
+    <div class="cover-meta">
+      <span>Mementum Pty Ltd</span>
+      <span>Melbourne, Australia</span>
+      <span>2026</span>
+    </div>
+  </div>
+</div>
+
+
+<div style="background:#1847d4;padding:12px 40px;font-family:'DM Mono',monospace;font-size:11px;color:rgba(255,255,255,.8);letter-spacing:.5px;display:flex;justify-content:space-between;align-items:center">
+  <span>Review draft — shared by <strong style="color:#fff">Daniel Hurst</strong> for feedback</span>
+  <span style="color:rgba(255,255,255,.5)">daniel@mementum.com.au</span>
+</div>
+<!-- ══ EXEC SUMMARY ══ -->
+<div class="outer sec">
+  <div class="eyebrow">Executive Summary</div>
+  <h2>The knowledge your AI needs isn't in your documents. It's in the decisions your people stopped writing down.</h2>
+  <div class="exec-box">
+    <p>Most enterprise AI pilots fail at the same point — not because the model is wrong, but because what the model needs to know was never captured. Platforms get selected. Pilots run. Results look promising. Then performance flattens once the obvious structured data is consumed. The deeper layer — how decisions actually get made, what constraints can't be violated, what the organisation really believes — stays locked in people's heads and disappears when they leave.</p>
+    <p>Mementum solves this before it becomes a production crisis. We map organisational knowledge into the Context Universe — a deployable second brain the client owns — and build the micro-skills, agents, and agentic teams that run on top of it. Not a dashboard. Not another pilot. A compounding intelligence asset that survives staff turnover, model upgrades, and vendor changes.</p>
+    <p><strong>The core premise:</strong> AI underperformance is a knowledge architecture failure, not a model failure. Fix the architecture and the model performs. Skip it and no upgrade will save you.</p>
+  </div>
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-n">70–80%</div>
+      <div class="stat-d">of enterprise AI pilots fail to reach production<br><span style="color:var(--ink-3);font-size:11px">MIT Sloan, 2023</span></div>
+    </div>
+    <div class="stat">
+      <div class="stat-n">~60%</div>
+      <div class="stat-d">of critical organisational knowledge is tacit — unwritten, undocumented</div>
+    </div>
+    <div class="stat">
+      <div class="stat-n">1 domain</div>
+      <div class="stat-d">is all it takes to prove the model and start compounding</div>
+    </div>
+  </div>
+  <p style="font-family:var(--font-mono);font-size:11px;color:var(--ink-3);border-top:1px solid var(--rule);padding-top:12px;margin-top:4px">The 70–80% figure is from MIT Sloan Management Review research into enterprise AI adoption. The root cause reframe — knowledge architecture failure, not model failure — is Mementum's original diagnostic insight.</p>
+</div>
+
+<!-- ══ S01 PROBLEM ══ -->
+<div style="background:var(--bg-2);border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)">
+<div class="outer sec">
+  <div class="eyebrow">Section 01</div>
+  <h2>Why AI pilots plateau</h2>
+  <p>The pattern is consistent. A leadership team approves an AI initiative. A platform is selected. A pilot scoped. Initial results impress the steering committee. Then performance flattens. The model confuses recent policy with outdated procedure. A critical decision gets made without the implicit constraint every experienced person knew but nobody had written down.</p>
+  <p>The conventional diagnosis blames the model, the data quality, or the implementation partner. These are proxies.</p>
+  <div class="pq">The fundamental failure in enterprise AI is not technical. It's architectural. Organisations have never needed to build a system for capturing the knowledge that drives performance — until now.</div>
+  <div class="anecdote">
+    <span class="anecdote-lbl">Anchor Scenario</span>
+    A mid-tier financial services firm engaged an AI partner to accelerate their pricing workflow. The system had access to product documentation, pricing tables, and approval history. Six months in, the project stalled. The AI was technically functional but practically unreliable — recommendations conflicted with risk parameters that had never been written down. The root cause wasn't the model. It was that the firm's pricing logic lived in the heads of three people who'd been doing it for a decade. Nobody had ever built a structured picture of what that reasoning actually was.
+  </div>
+
+  <!-- DIAGRAM 1: BEFORE / AFTER -->
+  <h3>The structural difference</h3>
+  <div class="diagram">
+    <svg viewBox="0 0 820 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;background:#fff;font-family:'DM Sans',sans-serif">
+      <!-- LEFT: WITHOUT -->
+      <rect x="20" y="16" width="375" height="268" rx="8" fill="#fdf0ed" stroke="#f0c4bc" stroke-width="1"/>
+      <text x="36" y="40" font-size="9" fill="#c0260e" font-family="'DM Mono',monospace" letter-spacing="1.5" font-weight="500">WITHOUT KNOWLEDGE ARCHITECTURE</text>
+      <!-- sources -->
+      <rect x="36" y="52" width="120" height="36" rx="5" fill="#fff" stroke="#e4e7ef" stroke-width="1"/>
+      <text x="96" y="74" font-size="11.5" fill="#353945" text-anchor="middle" font-weight="500">Policy Docs</text>
+      <rect x="170" y="52" width="120" height="36" rx="5" fill="#fff" stroke="#e4e7ef" stroke-width="1"/>
+      <text x="230" y="74" font-size="11.5" fill="#353945" text-anchor="middle" font-weight="500">Structured Data</text>
+      <!-- tacit — faded/dashed -->
+      <rect x="36" y="104" width="120" height="36" rx="5" fill="none" stroke="#f0c4bc" stroke-width="1.5" stroke-dasharray="4,3"/>
+      <text x="96" y="126" font-size="11" fill="#c0260e" text-anchor="middle" opacity=".7">Tacit Knowledge</text>
+      <text x="96" y="141" font-size="9" fill="#c0260e" text-anchor="middle" opacity=".5">never captured</text>
+      <rect x="170" y="104" width="120" height="36" rx="5" fill="none" stroke="#f0c4bc" stroke-width="1.5" stroke-dasharray="4,3"/>
+      <text x="230" y="126" font-size="11" fill="#c0260e" text-anchor="middle" opacity=".7">Implicit Constraints</text>
+      <text x="230" y="141" font-size="9" fill="#c0260e" text-anchor="middle" opacity=".5">never captured</text>
+      <!-- arrows only from visible -->
+      <line x1="96" y1="88" x2="175" y2="168" stroke="#d1d5db" stroke-width="1.5" marker-end="url(#arr-gray)"/>
+      <line x1="230" y1="88" x2="215" y2="168" stroke="#d1d5db" stroke-width="1.5" marker-end="url(#arr-gray)"/>
+      <!-- AI box -->
+      <rect x="145" y="168" width="110" height="38" rx="5" fill="#1847d4" />
+      <text x="200" y="191" font-size="12" fill="#fff" text-anchor="middle" font-weight="600">AI System</text>
+      <!-- output -->
+      <rect x="100" y="226" width="200" height="44" rx="5" fill="#fdf0ed" stroke="#f0c4bc"/>
+      <text x="200" y="245" font-size="11" fill="#c0260e" text-anchor="middle">Generic outputs</text>
+      <text x="200" y="260" font-size="10.5" fill="#c0260e" text-anchor="middle" opacity=".75">Decisions fail in production</text>
+      <line x1="200" y1="206" x2="200" y2="224" stroke="#f0c4bc" stroke-width="1.5" marker-end="url(#arr-red)"/>
+      <!-- RIGHT: WITH -->
+      <rect x="425" y="16" width="375" height="268" rx="8" fill="#e8f5ee" stroke="#b6ddc7" stroke-width="1"/>
+      <text x="441" y="40" font-size="9" fill="#0a6640" font-family="'DM Mono',monospace" letter-spacing="1.5" font-weight="500">WITH KNOWLEDGE ARCHITECTURE</text>
+      <!-- sources -->
+      <rect x="441" y="52" width="80" height="32" rx="5" fill="#fff" stroke="#e4e7ef"/>
+      <text x="481" y="72" font-size="10.5" fill="#353945" text-anchor="middle" font-weight="500">Docs</text>
+      <rect x="531" y="52" width="80" height="32" rx="5" fill="#fff" stroke="#e4e7ef"/>
+      <text x="571" y="72" font-size="10.5" fill="#353945" text-anchor="middle" font-weight="500">Data</text>
+      <rect x="621" y="52" width="80" height="32" rx="5" fill="#0a6640" stroke="none"/>
+      <text x="661" y="68" font-size="10" fill="#fff" text-anchor="middle" font-weight="500">Tacit</text>
+      <text x="661" y="80" font-size="10" fill="#fff" text-anchor="middle" font-weight="500">Knowledge</text>
+      <rect x="441" y="96" width="120" height="32" rx="5" fill="#0a6640" stroke="none"/>
+      <text x="501" y="116" font-size="10.5" fill="#fff" text-anchor="middle" font-weight="500">Implicit Constraints</text>
+      <rect x="571" y="96" width="130" height="32" rx="5" fill="#0a6640" stroke="none"/>
+      <text x="636" y="116" font-size="10.5" fill="#fff" text-anchor="middle" font-weight="500">Culture &amp; Principles</text>
+      <!-- all point to CU -->
+      <line x1="481" y1="84" x2="580" y2="150" stroke="#0a6640" stroke-width="1.5" opacity=".5" marker-end="url(#arr-green)"/>
+      <line x1="571" y1="84" x2="594" y2="150" stroke="#0a6640" stroke-width="1.5" opacity=".5" marker-end="url(#arr-green)"/>
+      <line x1="661" y1="84" x2="630" y2="150" stroke="#0a6640" stroke-width="1.5" opacity=".5" marker-end="url(#arr-green)"/>
+      <line x1="501" y1="128" x2="568" y2="150" stroke="#0a6640" stroke-width="1.5" opacity=".5" marker-end="url(#arr-green)"/>
+      <line x1="636" y1="128" x2="632" y2="150" stroke="#0a6640" stroke-width="1.5" opacity=".5" marker-end="url(#arr-green)"/>
+      <!-- CU -->
+      <rect x="488" y="150" width="200" height="38" rx="5" fill="#0b0e17"/>
+      <text x="588" y="166" font-size="10" fill="rgba(255,255,255,.5)" text-anchor="middle" font-family="'DM Mono',monospace" letter-spacing="1">CONTEXT UNIVERSE™</text>
+      <text x="588" y="181" font-size="12" fill="#fff" text-anchor="middle" font-weight="600">Second Brain</text>
+      <!-- output -->
+      <rect x="488" y="208" width="200" height="44" rx="5" fill="#e8f5ee" stroke="#b6ddc7"/>
+      <text x="588" y="228" font-size="11" fill="#0a6640" text-anchor="middle" font-weight="500">Organisation-specific outputs</text>
+      <text x="588" y="243" font-size="10.5" fill="#0a6640" text-anchor="middle" opacity=".8">Auditable · Compounds · Survives turnover</text>
+      <line x1="588" y1="188" x2="588" y2="206" stroke="#b6ddc7" stroke-width="1.5" marker-end="url(#arr-green)"/>
+      <!-- Mementum arrow between -->
+      <line x1="398" y1="150" x2="422" y2="150" stroke="#1847d4" stroke-width="2" stroke-dasharray="5,3" marker-end="url(#arr-blue)"/>
+      <text x="410" y="143" font-size="9" fill="#1847d4" text-anchor="middle" font-family="'DM Mono',monospace">MEMENTUM</text>
+      <!-- defs -->
+      <defs>
+        <marker id="arr-gray" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><polygon points="0 0, 7 3.5, 0 7" fill="#d1d5db"/></marker>
+        <marker id="arr-red" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><polygon points="0 0, 7 3.5, 0 7" fill="#f0c4bc"/></marker>
+        <marker id="arr-green" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><polygon points="0 0, 7 3.5, 0 7" fill="#0a6640"/></marker>
+        <marker id="arr-blue" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><polygon points="0 0, 7 3.5, 0 7" fill="#1847d4"/></marker>
+      </defs>
+    </svg>
+    <div class="diagram-cap">Fig 1 — Mementum closes the gap between what's documented and what actually drives performance</div>
+  </div>
+
+  <h3>Four failure modes, one root cause</h3>
+  <!-- DIAGRAM 2: FAILURE MODES -->
+  <div class="diagram">
+    <svg viewBox="0 0 820 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;background:#fff;font-family:'DM Sans',sans-serif">
+      <!-- root -->
+      <rect x="290" y="20" width="240" height="50" rx="6" fill="#0b0e17"/>
+      <text x="410" y="41" font-size="10" fill="rgba(255,255,255,.5)" text-anchor="middle" font-family="'DM Mono',monospace" letter-spacing="1">ROOT CAUSE</text>
+      <text x="410" y="58" font-size="13" fill="#fff" text-anchor="middle" font-weight="600">No knowledge architecture</text>
+      <!-- lines out -->
+      <line x1="315" y1="70" x2="115" y2="128" stroke="#e4e7ef" stroke-width="1.5"/>
+      <line x1="365" y1="70" x2="280" y2="128" stroke="#e4e7ef" stroke-width="1.5"/>
+      <line x1="455" y1="70" x2="540" y2="128" stroke="#e4e7ef" stroke-width="1.5"/>
+      <line x1="505" y1="70" x2="705" y2="128" stroke="#e4e7ef" stroke-width="1.5"/>
+      <!-- 4 failure boxes -->
+      <rect x="20" y="128" width="190" height="52" rx="5" fill="#fdf0ed" stroke="#f0c4bc"/>
+      <text x="115" y="149" font-size="11.5" fill="#c0260e" text-anchor="middle" font-weight="600">Generic outputs</text>
+      <text x="115" y="165" font-size="10.5" fill="#c0260e" text-anchor="middle" opacity=".75">No org context</text>
+      <rect x="220" y="128" width="190" height="52" rx="5" fill="#fdf0ed" stroke="#f0c4bc"/>
+      <text x="315" y="149" font-size="11.5" fill="#c0260e" text-anchor="middle" font-weight="600">Hidden gaps</text>
+      <text x="315" y="165" font-size="10.5" fill="#c0260e" text-anchor="middle" opacity=".75">Tacit knowledge missing</text>
+      <rect x="420" y="128" width="190" height="52" rx="5" fill="#fdf0ed" stroke="#f0c4bc"/>
+      <text x="515" y="149" font-size="11.5" fill="#c0260e" text-anchor="middle" font-weight="600">Unmeasurable ROI</text>
+      <text x="515" y="165" font-size="10.5" fill="#c0260e" text-anchor="middle" opacity=".75">No baseline to compare</text>
+      <rect x="620" y="128" width="190" height="52" rx="5" fill="#fdf0ed" stroke="#f0c4bc"/>
+      <text x="715" y="149" font-size="11.5" fill="#c0260e" text-anchor="middle" font-weight="600">Brittle resilience</text>
+      <text x="715" y="165" font-size="10.5" fill="#c0260e" text-anchor="middle" opacity=".75">Knowledge leaves with people</text>
+    </svg>
+    <div class="diagram-cap">Fig 2 — Four failure modes. One cause. Fixing any individual symptom doesn't solve the root.</div>
+  </div>
+</div>
+</div>
+
+<!-- ══ S01b: SUCCESSFUL PILOT, FALSE CONFIDENCE ══ -->
+<div class="outer" style="padding-bottom:64px">
+  <div class="pq">Some organisations solve the plateau problem. Their pilot reaches production. Outputs are consistent. The steering committee declares success. What they've built is a capable, generic AI system — and so has every competitor who bought the same platform and hired the same implementation partner.</div>
+  <p>Production is not differentiation. It is the starting line.</p>
+  <p>The model, the platform, the implementation methodology — all of it is available to any organisation willing to spend what you spent. Generic AI deployed on generic knowledge produces generic outputs. When your competitor deploys the same model next quarter, your investment has bought you parity, not advantage. The gap you've worked to close reopens the moment they go live.</p>
+  <p>This is the version of the problem that doesn't make the failure statistics. It doesn't show up in the 70–80% figure because these organisations are counted as successes. Their system is in production. Their board presentation looked good. But twelve months later, when AI capability is table stakes across the sector and the question shifts from <em>"do we have AI?"</em> to <em>"what does our AI know that theirs doesn't?"</em> — the answer is: nothing yet.</p>
+  <div class="callout dark">
+    <span class="cl">The harder question</span>
+    <p>Every AI system runs on knowledge. The question is whose. A system built on generic training data and public documents knows what every competitor's system knows. A system built on your organisation's specific reasoning, constraints, relationships, and institutional memory knows what only you know. The first is a commodity. The second is a structural advantage. Most organisations have built the first and called it done.</p>
+  </div>
+</div>
+
+<!-- ══ S02 INSIGHT ══ -->
+<div class="outer sec">
+  <div class="eyebrow">Section 02</div>
+  <h2>The reframe: a knowledge architecture problem</h2>
+  <p>The organisations that move AI from pilot to production share one characteristic: before they built anything, they understood what the AI needed to know and structured it deliberately. This is not a data engineering problem or a prompt engineering problem. It is a knowledge architecture problem.</p>
+  <div class="callout amber">
+    <span class="cl">The Central Insight</span>
+    <p>Trust in an AI system is not earned by the model. It's earned by the knowledge it's built on. Deep, specific, current knowledge makes a mid-tier model outperform a frontier model running on a shallow base. Model selection is a second-order decision. Knowledge architecture is the first.</p>
+  </div>
+
+  <h3>The iceberg: what data readiness misses</h3>
+  <!-- DIAGRAM 3: ICEBERG -->
+  <div class="diagram">
+    <svg viewBox="0 0 820 380" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;font-family:'DM Sans',sans-serif">
+      <!-- background -->
+      <rect width="820" height="380" fill="#f0f2f7"/>
+      <!-- sky gradient -->
+      <defs>
+        <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#dbeafe"/><stop offset="100%" stop-color="#e8f5ee"/></linearGradient>
+        <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1847d4" stop-opacity=".12"/><stop offset="100%" stop-color="#1847d4" stop-opacity=".28"/></linearGradient>
+        <linearGradient id="ice-above" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#e8effe"/></linearGradient>
+        <linearGradient id="ice-below" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#c7d7fb"/><stop offset="100%" stop-color="#9db8f5"/></linearGradient>
+      </defs>
+      <rect width="820" height="175" fill="url(#sky)"/>
+      <rect y="175" width="820" height="205" fill="url(#sea)"/>
+      <!-- waterline -->
+      <line x1="0" y1="175" x2="820" y2="175" stroke="#1847d4" stroke-width="2" stroke-dasharray="6,4" opacity=".5"/>
+      <rect x="0" y="164" width="820" height="22" fill="rgba(255,255,255,.6)"/>
+      <text x="410" y="179" font-size="11" fill="#1847d4" text-anchor="middle" font-family="'DM Mono',monospace" letter-spacing="1.5" font-weight="500">THE WATERLINE — DATA READINESS STOPS HERE</text>
+      <!-- iceberg tip -->
+      <polygon points="380,30 440,30 460,175 360,175" fill="url(#ice-above)" stroke="#c7d7fb" stroke-width="1"/>
+      <!-- iceberg bulk below -->
+      <polygon points="360,175 460,175 510,340 310,340" fill="url(#ice-below)" stroke="#9db8f5" stroke-width="1"/>
+      <!-- ABOVE labels -->
+      <text x="150" y="70" font-size="10" fill="#0a6640" font-family="'DM Mono',monospace" letter-spacing="1.2" font-weight="500">ABOVE THE WATERLINE</text>
+      <text x="150" y="84" font-size="11" fill="#353945">(data readiness addresses this)</text>
+      <!-- above items -->
+      <rect x="32" y="96" width="150" height="28" rx="4" fill="#fff" stroke="#e4e7ef"/>
+      <text x="107" y="115" font-size="11.5" fill="#353945" text-anchor="middle" font-weight="500">Structured Data</text>
+      <rect x="194" y="96" width="150" height="28" rx="4" fill="#fff" stroke="#e4e7ef"/>
+      <text x="269" y="115" font-size="11.5" fill="#353945" text-anchor="middle" font-weight="500">Documents &amp; Reports</text>
+      <rect x="32" y="134" width="150" height="28" rx="4" fill="#fff" stroke="#e4e7ef"/>
+      <text x="107" y="153" font-size="11.5" fill="#353945" text-anchor="middle" font-weight="500">Public Information</text>
+      <rect x="194" y="134" width="150" height="28" rx="4" fill="#fff" stroke="#e4e7ef"/>
+      <text x="269" y="153" font-size="11.5" fill="#353945" text-anchor="middle" font-weight="500">Transactional Records</text>
+      <!-- arrows to iceberg -->
+      <line x1="182" y1="110" x2="370" y2="110" stroke="#0a6640" stroke-width="1" stroke-dasharray="3,2" opacity=".5"/>
+      <line x1="344" y1="148" x2="370" y2="148" stroke="#0a6640" stroke-width="1" stroke-dasharray="3,2" opacity=".5"/>
+      <!-- BELOW labels -->
+      <text x="555" y="215" font-size="10" fill="#1847d4" font-family="'DM Mono',monospace" letter-spacing="1.2" font-weight="500">BELOW THE WATERLINE</text>
+      <text x="555" y="229" font-size="11" fill="#353945">(Mementum captures this)</text>
+      <!-- below items -->
+      <rect x="555" y="244" width="170" height="28" rx="4" fill="#1847d4"/>
+      <text x="640" y="263" font-size="11.5" fill="#fff" text-anchor="middle" font-weight="500">Implicit Constraints</text>
+      <rect x="555" y="280" width="170" height="28" rx="4" fill="#1847d4"/>
+      <text x="640" y="299" font-size="11.5" fill="#fff" text-anchor="middle" font-weight="500">Culture &amp; Real Rules</text>
+      <rect x="555" y="316" width="170" height="28" rx="4" fill="#0b0e17"/>
+      <text x="640" y="335" font-size="11.5" fill="#fff" text-anchor="middle" font-weight="500">Hidden Assumptions</text>
+      <rect x="375" y="244" width="165" height="28" rx="4" fill="#1847d4"/>
+      <text x="457" y="263" font-size="11.5" fill="#fff" text-anchor="middle" font-weight="500">Decision Reasoning</text>
+      <rect x="375" y="280" width="165" height="28" rx="4" fill="#1847d4"/>
+      <text x="457" y="299" font-size="11.5" fill="#fff" text-anchor="middle" font-weight="500">Relationship Context</text>
+      <rect x="375" y="316" width="165" height="28" rx="4" fill="#0b0e17"/>
+      <text x="457" y="335" font-size="11.5" fill="#fff" text-anchor="middle" font-weight="500">Observed Patterns</text>
+    </svg>
+    <div class="diagram-cap">Fig 3 — The knowledge iceberg. Data readiness addresses what's visible. The performance gap lives beneath the waterline.</div>
+  </div>
+
+  <div class="callout amber">
+    <span class="cl">Conscious vs Unconscious Reasoning</span>
+    <p>Data gives an AI its <strong>conscious reasoning</strong> — facts and records it can retrieve and cite. Mementum gives it its <strong>unconscious reasoning</strong> — the judgment, instincts, and situational awareness that experienced people apply without thinking. One knows the rules. The other knows when to apply them differently.</p>
+  </div>
+
+  <h3>The eight knowledge categories</h3>
+  <p>Every Context Universe is structured across eight categories. Each has a different capture method, decay rate, and failure mode when absent.</p>
+  <div class="kg">
+    <div class="kc"><div class="kc-name">Interpretation</div><div class="kc-def">How this organisation reads external signals through its own lens. What the same event means here vs. elsewhere.</div></div>
+    <div class="kc"><div class="kc-name">Decision &amp; Reasoning</div><div class="kc-def">The logic chain behind significant choices — trade-offs weighed, alternatives rejected, principles applied.</div></div>
+    <div class="kc"><div class="kc-name">Standing Position</div><div class="kc-def">Current authorised views on strategy, risk appetite, and market stance. What is true now vs. what was once true.</div></div>
+    <div class="kc"><div class="kc-name">Real Process</div><div class="kc-def">How work actually gets done vs. how it's documented. The workarounds and informal escalation paths.</div></div>
+    <div class="kc"><div class="kc-name">Observed Pattern</div><div class="kc-def">Recurring signals experienced people recognise and use to anticipate, not react.</div></div>
+    <div class="kc"><div class="kc-name">Implicit Constraint</div><div class="kc-def">Boundaries governing decisions that aren't in policy. What would fracture a key relationship.</div></div>
+    <div class="kc"><div class="kc-name">Relationship Context</div><div class="kc-def">History, trust levels, and communication preferences with key clients and counterparties.</div></div>
+    <div class="kc"><div class="kc-name">Assumption</div><div class="kc-def">Beliefs underpinning strategy. Often unexamined. Always consequential when wrong.</div></div>
+  </div>
+</div>
+
+<!-- ══ S03 METHODOLOGY ══ -->
+<div style="background:var(--bg-2);border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)">
+<div class="outer sec">
+  <div class="eyebrow">Section 03</div>
+  <h2>The Mementum methodology</h2>
+  <p>Four phases within the engagement: Educate, Discover, Deploy, Compound. These are the operational phases that sit inside the five-stage commercial model described in Section 07.</p>
+
+  <!-- DIAGRAM 4: PHASE FLOW -->
+  <div class="diagram">
+    <svg viewBox="0 0 820 130" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;background:#fff;font-family:'DM Sans',sans-serif">
+      <!-- Phase 1 -->
+      <rect x="20" y="20" width="175" height="90" rx="6" fill="#f8f9fc" stroke="#e4e7ef"/>
+      <text x="35" y="44" font-size="9" fill="#6b7280" font-family="'DM Mono',monospace" letter-spacing="1.5">01  EDUCATE</text>
+      <text x="35" y="66" font-size="13" fill="#0b0e17" font-weight="600">Align</text>
+      <text x="35" y="84" font-size="11" fill="#6b7280">Leadership alignment</text>
+      <text x="35" y="99" font-size="11" fill="#6b7280">Domain selection</text>
+      <!-- arrow -->
+      <line x1="196" y1="65" x2="218" y2="65" stroke="#d1d5db" stroke-width="1.5" marker-end="url(#a1)"/>
+      <text x="207" y="57" font-size="9" fill="#9ca3af" text-anchor="middle" font-family="'DM Mono',monospace">North Star</text>
+      <!-- Phase 2 -->
+      <rect x="220" y="20" width="175" height="90" rx="6" fill="#eef2fd" stroke="#c7d7fb"/>
+      <text x="235" y="44" font-size="9" fill="#1847d4" font-family="'DM Mono',monospace" letter-spacing="1.5">02  DISCOVER</text>
+      <text x="235" y="66" font-size="13" fill="#0b0e17" font-weight="600">Map</text>
+      <text x="235" y="84" font-size="11" fill="#353945">8-category capture</text>
+      <text x="235" y="99" font-size="11" fill="#353945">Context Universe built</text>
+      <!-- arrow -->
+      <line x1="396" y1="65" x2="418" y2="65" stroke="#d1d5db" stroke-width="1.5" marker-end="url(#a1)"/>
+      <text x="407" y="57" font-size="9" fill="#9ca3af" text-anchor="middle" font-family="'DM Mono',monospace">CU ready</text>
+      <!-- Phase 3 -->
+      <rect x="420" y="20" width="175" height="90" rx="6" fill="#1847d4" stroke="none"/>
+      <text x="435" y="44" font-size="9" fill="rgba(255,255,255,.55)" font-family="'DM Mono',monospace" letter-spacing="1.5">03  DEPLOY</text>
+      <text x="435" y="66" font-size="13" fill="#fff" font-weight="600">Build</text>
+      <text x="435" y="84" font-size="11" fill="rgba(255,255,255,.8)">Encode + deploy</text>
+      <text x="435" y="99" font-size="11" fill="rgba(255,255,255,.8)">Client's cloud env</text>
+      <!-- arrow -->
+      <line x1="596" y1="65" x2="618" y2="65" stroke="#d1d5db" stroke-width="1.5" marker-end="url(#a1)"/>
+      <text x="607" y="57" font-size="9" fill="#9ca3af" text-anchor="middle" font-family="'DM Mono',monospace">Live</text>
+      <!-- Phase 4 -->
+      <rect x="620" y="20" width="180" height="90" rx="6" fill="#0a6640" stroke="none"/>
+      <text x="635" y="44" font-size="9" fill="rgba(255,255,255,.55)" font-family="'DM Mono',monospace" letter-spacing="1.5">04  COMPOUND</text>
+      <text x="635" y="66" font-size="13" fill="#fff" font-weight="600">Grow</text>
+      <text x="635" y="84" font-size="11" fill="rgba(255,255,255,.8)">Human-in-the-loop</text>
+      <text x="635" y="99" font-size="11" fill="rgba(255,255,255,.8)">Moat compounds</text>
+      <!-- loop back -->
+      <path d="M800 65 Q820 65 820 110 Q820 130 710 130 Q600 130 600 110 Q600 86 620 86" stroke="#0a6640" stroke-width="1.5" fill="none" stroke-dasharray="4,3" marker-end="url(#a-green)"/>
+      <defs>
+        <marker id="a1" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><polygon points="0 0,7 3.5,0 7" fill="#d1d5db"/></marker>
+        <marker id="a-green" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><polygon points="0 0,7 3.5,0 7" fill="#0a6640"/></marker>
+      </defs>
+    </svg>
+    <div class="diagram-cap">Fig 4 — Four operational phases. Phase 04 loops — each cycle expands the Context Universe.</div>
+  </div>
+</div>
+</div>
+
+<!-- ══ S04 CONTEXT UNIVERSE ══ -->
+<div class="outer sec">
+  <div class="eyebrow">Section 04</div>
+  <h2>The Context Universe: a living second brain</h2>
+  <p>The Context Universe is not a knowledge repository. Repositories are static — they accumulate content and decay quietly. The Context Universe is a deployable second brain: a living intelligence layer that is engaged with, interrogated, and updated by the people who know the organisation best. It has an interface. It responds to queries. It compounds with use.</p>
+  <div class="callout amber">
+    <span class="cl">What "living" means</span>
+    <p>Every decision processed through the system is an opportunity to surface a gap, confirm a constraint, or update a standing position. Every human-approved update makes the next decision more reliable. After twelve months of active use, a well-maintained Context Universe contains more accurate, specific, and current organisational knowledge than any single expert — because it has absorbed the reasoning of many experts, captured edge cases as they occurred, and had standing positions updated in real time.</p>
+  </div>
+
+  <!-- DIAGRAM 5: SKILLS TO AGENTS PROGRESSION -->
+  <h3>From second brain to agent universe</h3>
+  <div class="diagram">
+    <svg viewBox="0 0 820 220" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;background:#fff;font-family:'DM Sans',sans-serif">
+      <!-- foundation -->
+      <rect x="20" y="150" width="780" height="56" rx="6" fill="#0b0e17"/>
+      <text x="410" y="172" font-size="9" fill="rgba(255,255,255,.4)" text-anchor="middle" font-family="'DM Mono',monospace" letter-spacing="2">THE CONTEXT UNIVERSE  ·  SECOND BRAIN  ·  LIVING INTELLIGENCE LAYER</text>
+      <text x="410" y="192" font-size="14" fill="#fff" text-anchor="middle" font-weight="600">Organisational Knowledge — 8 Categories — Human-governed — Compounding</text>
+      <!-- pillars from base -->
+      <line x1="140" y1="150" x2="140" y2="110" stroke="#e4e7ef" stroke-width="1.5"/>
+      <line x1="295" y1="150" x2="295" y2="110" stroke="#e4e7ef" stroke-width="1.5"/>
+      <line x1="450" y1="150" x2="450" y2="110" stroke="#e4e7ef" stroke-width="1.5"/>
+      <line x1="610" y1="150" x2="610" y2="110" stroke="#e4e7ef" stroke-width="1.5"/>
+      <line x1="720" y1="150" x2="720" y2="110" stroke="#e4e7ef" stroke-width="1.5"/>
+      <!-- Level 1: Micro-Skills -->
+      <rect x="65" y="80" width="150" height="32" rx="5" fill="#eef2fd" stroke="#c7d7fb"/>
+      <text x="140" y="100" font-size="12" fill="#1847d4" text-anchor="middle" font-weight="600">Micro-Skills</text>
+      <!-- Level 2: Agents -->
+      <rect x="220" y="80" width="150" height="32" rx="5" fill="#eef2fd" stroke="#c7d7fb"/>
+      <text x="295" y="100" font-size="12" fill="#1847d4" text-anchor="middle" font-weight="600">AI Agents</text>
+      <!-- Level 3: Human + AI -->
+      <rect x="375" y="80" width="150" height="32" rx="5" fill="#e8f5ee" stroke="#b6ddc7"/>
+      <text x="450" y="100" font-size="12" fill="#0a6640" text-anchor="middle" font-weight="600">Human + AI</text>
+      <!-- Level 4: Hybrid teams -->
+      <rect x="535" y="80" width="150" height="32" rx="5" fill="#e8f5ee" stroke="#b6ddc7"/>
+      <text x="610" y="100" font-size="12" fill="#0a6640" text-anchor="middle" font-weight="600">Hybrid Teams</text>
+      <!-- Level 5: Agentic -->
+      <rect x="650" y="80" width="150" height="32" rx="5" fill="#0b0e17" stroke="none"/>
+      <text x="725" y="100" font-size="12" fill="#fff" text-anchor="middle" font-weight="600">Agentic Teams</text>
+      <!-- direction arrow top -->
+      <line x1="215" y1="96" x2="224" y2="96" stroke="#d1d5db" stroke-width="1.5" marker-end="url(#a-sm)"/>
+      <line x1="370" y1="96" x2="379" y2="96" stroke="#d1d5db" stroke-width="1.5" marker-end="url(#a-sm)"/>
+      <line x1="525" y1="96" x2="534" y2="96" stroke="#d1d5db" stroke-width="1.5" marker-end="url(#a-sm)"/>
+      <line x1="645" y1="96" x2="654" y2="96" stroke="#d1d5db" stroke-width="1.5" marker-end="url(#a-sm)"/>
+      <!-- label -->
+      <text x="410" y="56" font-size="10" fill="#9ca3af" text-anchor="middle" font-family="'DM Mono',monospace" letter-spacing="1">MATURITY PROGRESSION →</text>
+      <text x="410" y="70" font-size="11.5" fill="#353945" text-anchor="middle">Each level requires the layer below. Most organisations try to build agents without the foundation.</text>
+      <defs>
+        <marker id="a-sm" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><polygon points="0 0,6 3,0 6" fill="#d1d5db"/></marker>
+      </defs>
+    </svg>
+    <div class="diagram-cap">Fig 5 — The Context Universe enables a progression from micro-skills to fully agentic teams. The foundation must exist before the upper layers.</div>
+  </div>
+
+  <!-- DIAGRAM 6: CONTEXT UNIVERSE GROWTH TIMELINE -->
+  <h3>How it compounds</h3>
+  <div class="tl">
+    <div class="tl-item"><div class="tl-t">Month 0 — Baseline</div><div class="tl-b">Context Universe populated from Discover. Eight categories live for one domain. Performance already better than generic — but the real value is the structural foundation, not the initial content.</div></div>
+    <div class="tl-item"><div class="tl-t">Months 1–3 — Active use</div><div class="tl-b">Real decisions processed. Gaps surface. Human loop captures what wasn't elicited in Discover. Implicit constraints become visible when the AI gets them wrong once.</div></div>
+    <div class="tl-item"><div class="tl-t">Months 3–6 — Deepening</div><div class="tl-b">Patterns accumulate. Routine decisions automated. Experienced staff focus on exceptions. The domain's Context Universe now exceeds any single person's working knowledge.</div></div>
+    <div class="tl-item"><div class="tl-t">Month 6+ — Expansion</div><div class="tl-b">Second domain added. Cross-domain patterns emerge. Staff turnover in Domain 1 no longer degrades performance.</div></div>
+    <div class="tl-item"><div class="tl-t">12–18 Months — Competitive separation</div><div class="tl-b">Structural advantage established. The Context Universe contains organisational memory built through lived decisions and real usage — not document uploads. This cannot be quickly replicated. This is the moat.</div></div>
+  </div>
+
+  <h3>Intelligence decay</h3>
+  <p>An unmaintained intelligence layer becomes a liability — the AI surfaces outdated information with the same authority it used to surface correct information.</p>
+  <table class="mx">
+    <thead><tr><th>Category</th><th>Decay rate</th><th>Risk if stale</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Standing Position</strong></td><td>High — 30–90 days</td><td>AI surfaces reversed decisions as current</td></tr>
+      <tr><td><strong>Implicit Constraint</strong></td><td>Medium — 90–180 days</td><td>Decisions made without guardrails that matter</td></tr>
+      <tr><td><strong>Real Process</strong></td><td>Medium — 90–180 days</td><td>Workflow recommendations don't match reality</td></tr>
+      <tr><td><strong>Relationship Context</strong></td><td>Medium — 90–180 days</td><td>Wrong tone or approach with key relationships</td></tr>
+      <tr><td><strong>Decision &amp; Reasoning</strong></td><td>Low — 6–12 months</td><td>Reasoning patterns reflect old strategy</td></tr>
+      <tr><td><strong>Observed Pattern</strong></td><td>Low — accumulates</td><td>Recognition based on outdated cycles</td></tr>
+      <tr><td><strong>Interpretation / Assumption</strong></td><td>Very low — but catastrophic when wrong</td><td>Strategy built on a false premise</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ══ S05 DELIVERY MODEL ══ -->
+<div style="background:var(--bg-2);border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)">
+<div class="outer sec">
+  <div class="eyebrow">Section 05</div>
+  <h2>What Mementum delivers</h2>
+  <p>Services-led. Not a platform. Not a SaaS. Not a retainer that creates dependency. The goal of every engagement is to leave the client with an asset they own and a team that can maintain it.</p>
+  <div class="callout dark">
+    <span class="cl">The operating model</span>
+    <p>A focused team — strategy, full-stack engineering, GenAI platform — alongside proprietary agent tooling. Senior capability throughout. No bait-and-switch. No open-ended day rates. Every phase is fixed price with a defined exit criterion.</p>
+    <p style="margin-top:10px"><strong>What the client owns at the end of each phase:</strong> the deliverables, the encoded knowledge layer, the deployment infrastructure in their own environment, and the documentation to maintain it independently.</p>
+  </div>
+  <p>All deployments are installed into the client's own cloud environment — Azure by default, AWS available. The stack is documented, auditable, and compatible with existing enterprise governance frameworks. Mementum does not retain proprietary access to client knowledge assets after engagement.</p>
+</div>
+</div>
+
+<!-- ══ S06 MARKET ══ -->
+<div class="outer sec">
+  <div class="eyebrow">Section 06</div>
+  <h2>Market positioning</h2>
+  <p>Positioned at the intersection of AI strategy and knowledge engineering — a space currently occupied by large consultancies selling generic capability and technology vendors selling platforms. Neither solves the knowledge architecture problem with the specificity and ownership model that regulated-industry enterprise buyers need.</p>
+  <h3>Primary vertical: financial services</h3>
+  <p>Initial focus: wealth management. Adjacent: insurance, superannuation, private equity. These organisations have dense implicit knowledge, high staff turnover in key roles, regulatory pressure to document decision rationale, and AI initiatives already hitting the plateau described in Section 01.</p>
+  <h3>Four buyer entry points</h3>
+  <div class="buyer-grid" style="grid-template-columns:repeat(2,1fr)">
+    <div class="buyer-cell">
+      <div class="buyer-role">Failed Pilot</div>
+      <div class="buyer-concern">Has invested in AI. Results haven't met expectations. Has been told the answer is a better model, more data, or a different vendor. None solved it.</div>
+      <div class="buyer-signal">"We've done the pilots. Now we need this to work."</div>
+    </div>
+    <div class="buyer-cell">
+      <div class="buyer-role">Vendor Confusion</div>
+      <div class="buyer-concern">Facing competing platform proposals. Each promises capability. None has addressed what the platform will actually know.</div>
+      <div class="buyer-signal">"Five vendors in. I still don't know what to buy or why."</div>
+    </div>
+    <div class="buyer-cell">
+      <div class="buyer-role">Competitive Pressure</div>
+      <div class="buyer-concern">Watching competitors announce AI capability. Needs a path that is defensible, not just visible to the board.</div>
+      <div class="buyer-signal">"I need a real AI strategy — not another pilot."</div>
+    </div>
+    <div class="buyer-cell" style="background:var(--blue-lt);border-left:3px solid var(--blue)">
+      <div class="buyer-role" style="color:var(--blue)">Successful Pilot, False Confidence</div>
+      <div class="buyer-concern">AI is in production. Leadership declared success. Starting to notice that outputs are indistinguishable from what a competitor running the same platform would produce. The question nobody has asked yet: <em>what does our AI know that theirs doesn't?</em></div>
+      <div class="buyer-signal" style="color:var(--blue)">"It's working. But I'm not sure it's actually giving us an edge."</div>
+    </div>
+  </div>
+  <h3>The buying committee</h3>
+  <table class="mx">
+    <thead><tr><th>Role</th><th>Primary concern</th><th>What they need to hear</th><th>Risk if unaddressed</th></tr></thead>
+    <tbody>
+      <tr><td><strong>CEO / MD</strong> (economic buyer)</td><td>Strategic differentiation, board accountability</td><td>This builds a moat, not just a capability.</td><td>Redirects to internal IT</td></tr>
+      <tr><td><strong>CTO / CIO</strong></td><td>Technical risk, platform lock-in, security</td><td>Client-owned deployment. No proprietary platform.</td><td>Blocks on security review</td></tr>
+      <tr><td><strong>COO</strong></td><td>Operational disruption, timeline realism</td><td>Phased delivery. Standalone value at each stage.</td><td>Deprioritises in favour of other change</td></tr>
+      <tr><td><strong>Head of Function</strong></td><td>Will this make my team's work better?</td><td>Show the specific failure mode we solve.</td><td>Withholds cooperation in Discover</td></tr>
+      <tr><td><strong>CDO / Head of AI</strong></td><td>Delivered the pilot. Aware outputs are generic. Needs a path to differentiation before the board asks why the investment hasn't created an edge.</td><td>There is a second problem after production. We solve that one.</td><td>Defends existing investment; becomes blocker rather than champion</td></tr>
+    </tbody>
+  </table>
+  <div class="callout">
+    <span class="cl">Competitive note</span>
+    <p>Most frequently cited competitors: McKinsey Digital, Deloitte AI, mid-tier domestic consultancies. None competing on knowledge architecture specificity. They compete on brand, team size, platform partnerships. Mementum competes on diagnostic precision, ownership model, and the credibility of having built these systems — not just advised on them.</p>
+  </div>
+</div>
+
+<!-- ══ S07 ENGAGEMENT ══ -->
+<div style="background:var(--bg-2);border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)">
+<div class="outer sec">
+  <div class="eyebrow">Section 07</div>
+  <h2>The five-stage engagement model</h2>
+  <p>Each stage delivers standalone value. No stage requires a commitment to what follows. The client can stop at any point with something useful in hand.</p>
+
+  <!-- DIAGRAM 7: 5-STAGE PIPELINE -->
+  <div class="diagram">
+    <svg viewBox="0 0 820 80" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;font-family:'DM Sans',sans-serif">
+      <!-- S1 -->
+      <rect x="10" y="10" width="144" height="60" rx="5" fill="#f0f2f7" stroke="#e4e7ef"/>
+      <text x="82" y="32" font-size="9" fill="#6b7280" text-anchor="middle" font-family="'DM Mono',monospace" letter-spacing="1">STAGE 1</text>
+      <text x="82" y="50" font-size="13" fill="#0b0e17" text-anchor="middle" font-weight="600">GenAI Moat</text>
+      <text x="82" y="64" font-size="10" fill="#6b7280" text-anchor="middle">1 hr · Free</text>
+      <polygon points="154,40 166,40 166,55 180,40 166,25 166,40" fill="#e4e7ef"/>
+      <!-- S2 -->
+      <rect x="172" y="10" width="144" height="60" rx="5" fill="#eef2fd" stroke="#c7d7fb"/>
+      <text x="244" y="32" font-size="9" fill="#1847d4" text-anchor="middle" font-family="'DM Mono',monospace" letter-spacing="1">STAGE 2</text>
+      <text x="244" y="50" font-size="13" fill="#0b0e17" text-anchor="middle" font-weight="600">Discovery</text>
+      <text x="244" y="64" font-size="10" fill="#1847d4" text-anchor="middle">2 wks · Fixed</text>
+      <polygon points="316,40 328,40 328,55 342,40 328,25 328,40" fill="#c7d7fb"/>
+      <!-- S3 -->
+      <rect x="334" y="10" width="152" height="60" rx="5" fill="#1847d4" stroke="none"/>
+      <text x="410" y="32" font-size="9" fill="rgba(255,255,255,.55)" text-anchor="middle" font-family="'DM Mono',monospace" letter-spacing="1">STAGE 3</text>
+      <text x="410" y="50" font-size="13" fill="#fff" text-anchor="middle" font-weight="600">Agent Universe</text>
+      <text x="410" y="64" font-size="10" fill="rgba(255,255,255,.7)" text-anchor="middle">6–8 wks · Fixed</text>
+      <polygon points="486,40 498,40 498,55 512,40 498,25 498,40" fill="#1847d4"/>
+      <!-- S4 -->
+      <rect x="504" y="10" width="144" height="60" rx="5" fill="#0a6640" stroke="none"/>
+      <text x="576" y="32" font-size="9" fill="rgba(255,255,255,.55)" text-anchor="middle" font-family="'DM Mono',monospace" letter-spacing="1">STAGE 4</text>
+      <text x="576" y="50" font-size="13" fill="#fff" text-anchor="middle" font-weight="600">Context Universe</text>
+      <text x="576" y="64" font-size="10" fill="rgba(255,255,255,.7)" text-anchor="middle">2–4 wks · Fixed</text>
+      <polygon points="648,40 660,40 660,55 674,40 660,25 660,40" fill="#0a6640"/>
+      <!-- S5 -->
+      <rect x="666" y="10" width="144" height="60" rx="5" fill="#0b0e17" stroke="none"/>
+      <text x="738" y="32" font-size="9" fill="rgba(255,255,255,.4)" text-anchor="middle" font-family="'DM Mono',monospace" letter-spacing="1">STAGE 5</text>
+      <text x="738" y="50" font-size="13" fill="#fff" text-anchor="middle" font-weight="600">Retainer</text>
+      <text x="738" y="64" font-size="10" fill="rgba(255,255,255,.5)" text-anchor="middle">Ongoing · Variable</text>
+    </svg>
+    <div class="diagram-cap">Fig 6 — Five stages. Each independently scoped. Client owns the Context Universe from Stage 4.</div>
+  </div>
+
+  <!-- STAGE DETAIL CARDS -->
+  <div class="stage-card s1" style="margin-top:16px">
+    <div class="stage-label">
+      <div class="stage-lnum">Stage 1</div>
+      <div class="stage-lname">GenAI Moat Briefing</div>
+      <div class="stage-ltime">1 hour · No charge</div>
+    </div>
+    <div class="stage-body">
+      <p><strong>What happens:</strong> One structured hour. One question — what is your GenAI moat? We map current AI position, surface the knowledge gaps limiting performance, identify where the biggest leverage is.</p>
+      <p><strong>Leave-behind:</strong> A simple interactive app defining your North Star — the specific intelligence capability that would create the clearest competitive separation in your market.</p>
+    </div>
+  </div>
+  <div class="stage-card s2">
+    <div class="stage-label">
+      <div class="stage-lnum">Stage 2</div>
+      <div class="stage-lname">Knowledge Discovery</div>
+      <div class="stage-ltime">2 weeks · Fixed price</div>
+    </div>
+    <div class="stage-body">
+      <p><strong>What happens:</strong> A two-week sprint mapping the priority knowledge levers aligned to the North Star. We review existing assets, current systems, and real processes against what the target intelligence capability requires. Model the value of closing the gaps.</p>
+      <p><strong>Leave-behind:</strong> A forecasted cost-out and revenue growth projection — grounded in your actual knowledge inventory, not vendor benchmarks. Board-ready.</p>
+      <p><strong>How the ROI forecast is constructed:</strong> The primary value driver is cost removal — the cost of performing work that micro-skills will partially or fully automate. For each candidate skill we identify: the number of skills that can be built in the domain, the fully-loaded cost of performing that task today (people time, technology overhead, third-party products consumed), and the number of times it's performed per year. The forecast is: <em>Σ (skills × unit cost × annual frequency × automation rate)</em>. We are deliberately conservative on automation rate at this stage — the forecast is a floor, not a ceiling. Revenue uplift (faster execution, reduced errors, better client outcomes) is modelled separately and layered on top. The number the board sees has a clear methodology behind it that can be interrogated, not a vendor estimate that requires faith.</p>
+    </div>
+  </div>
+  <div class="stage-card s3">
+    <div class="stage-label">
+      <div class="stage-lnum">Stage 3</div>
+      <div class="stage-lname">Agent Universe &amp; Skills Build</div>
+      <div class="stage-ltime">6–8 weeks · Fixed price</div>
+    </div>
+    <div class="stage-body">
+      <p><strong>What happens:</strong> Deploy the Agent Universe prototype into the client's environment. Ingest priority knowledge assets using accelerators and structured interviews. Tune signal-to-noise. Build the first micro-skills — discrete, deployable capabilities tied directly to the Stage 2 ROI forecast.</p>
+      <p><strong>Leave-behind:</strong> A live Agent Universe in the client's environment, priority domain populated, first micro-skills delivering measurable ROI.</p>
+    </div>
+  </div>
+  <div class="stage-card s4">
+    <div class="stage-label">
+      <div class="stage-lnum">Stage 4</div>
+      <div class="stage-lname">Context Universe Finalisation</div>
+      <div class="stage-ltime">2–4 weeks · Fixed price</div>
+    </div>
+    <div class="stage-body">
+      <p><strong>What happens:</strong> Complete, govern, and hand over the Context Universe. Establish access controls, decay review cadences, human-in-the-loop process. Define the roadmap to the full ROI target — what Mementum will do, what can be done internally, where other vendors fit.</p>
+      <p><strong>Leave-behind:</strong> Fully documented Context Universe in the client's environment. Governance framework. Prioritised roadmap to the full ROI target. A living second brain they own.</p>
+    </div>
+  </div>
+  <div class="stage-card s5">
+    <div class="stage-label">
+      <div class="stage-lnum">Stage 5</div>
+      <div class="stage-lname">Curation &amp; Agent Retainer</div>
+      <div class="stage-ltime">Ongoing · Variable scope</div>
+    </div>
+    <div class="stage-body">
+      <p><strong>What happens:</strong> The Context Universe belongs to the client. Mementum's ongoing role is defined by need: curation retainer, micro-skill development, agent builds, or agent team design. The progression: micro-skills → agents that invoke them → hybrid teams → fully agentic teams where the Context Universe is the shared operating context.</p>
+      <p><strong>Mementum does not build dependency.</strong> Stage 5 is available because it is valuable, not because it is required.</p>
+    </div>
+  </div>
+  <div class="callout" style="margin-top:16px">
+    <span class="cl">Engagement philosophy</span>
+    <p>Every stage is designed so the client is better off for having done it, regardless of whether they continue. The North Star app is a real asset. The ROI forecast is a real number. The working micro-skills deliver real return. Value earns the next conversation — not obligation.</p>
+  </div>
+
+  <h3>What a typical engagement looks like</h3>
+  <div class="anecdote" style="font-style:normal">
+    <span class="anecdote-lbl">Reference Scenario — Mid-Market Wealth Manager</span>
+    <p style="margin-bottom:10px;font-size:14px;line-height:1.7;color:var(--ink-2)">A wealth manager with approximately 150 staff and a complex integration landscape — multiple acquisitions in the prior five years, each bringing its own systems, processes, and institutional knowledge that never fully merged. The result: advisers operating from different playbooks, compliance applying inconsistent standards across business units, and an AI pilot that produced generic outputs because nobody had mapped which of the four inherited process variants was now the authorised one.</p>
+    <p style="margin-bottom:10px;font-size:14px;line-height:1.7;color:var(--ink-2)"><strong>Domain selected:</strong> Advice suitability — the highest-frequency, highest-risk knowledge domain, with the most variation across inherited business units and the clearest cost baseline.</p>
+    <p style="margin-bottom:10px;font-size:14px;line-height:1.7;color:var(--ink-2)"><strong>Stage 2 ROI model (illustrative):</strong> Eight candidate micro-skills identified across the advice suitability domain. Average fully-loaded cost per task: $180 (adviser time + compliance review + system overhead). Average frequency: 3,200 instances per year across the advice function. Conservative automation rate applied: 40%. Forecast annual cost-out from first cohort of skills alone: <strong>~$1.8M.</strong> Secondary benefit: standardisation across four inherited process variants — compliance risk reduction not modelled but flagged for board discussion.</p>
+    <p style="font-size:14px;line-height:1.7;color:var(--ink-2)"><strong>Total arc:</strong> Stage 1 (1 hour) → Stage 2 (2 weeks) → Stage 3 (7 weeks, including integration complexity from multiple source systems) → Stage 4 (3 weeks). Sixteen weeks from first conversation to a governed Context Universe with working micro-skills in production.</p>
+  </div>
+
+  <h3>This is not the right engagement for every organisation</h3>
+  <div class="callout" style="border-color:var(--rule)">
+    <span class="cl">Qualifying criteria — when Mementum is not the right fit</span>
+    <p>Mementum is a poor fit — and we will say so in Stage 1 — if any of the following apply:</p>
+    <ul style="margin-top:12px;padding-left:20px;font-family:var(--font-sans);font-size:14px;color:var(--ink-2);line-height:1.9">
+      <li><strong>You are looking to buy a commodity vendor product.</strong> If the decision has already been made to select a platform and the work is configuration and integration, that is a different engagement. We build bespoke intelligence layers, not implementations of someone else's product.</li>
+      <li><strong>You are not ready to introduce micro-skills to your workforce.</strong> The value of this work lands when people use the skills. If there is no appetite or readiness for workforce adoption — whether cultural, structural, or political — the investment in building them is premature.</li>
+      <li><strong>You cannot commit domain expert time during Discover.</strong> The knowledge capture in Stage 2 requires access to the people who hold the knowledge: typically 3–6 domain experts for structured elicitation over two weeks. If those people are unavailable or the organisation cannot protect their time, the Context Universe will be built on thin inputs and will underperform accordingly.</li>
+      <li><strong>There is no appetite to curate competitive knowledge.</strong> The Context Universe contains your organisation's real decision logic, constraints, and institutional intelligence. It is designed to be accessed by your workforce and agents to enhance their performance. If leadership is not comfortable encoding and making that knowledge accessible internally — even with appropriate governance and access controls — the model does not work. The value is in the knowledge being used, not stored.</li>
+    </ul>
+    <p style="margin-top:14px;font-family:var(--font-sans);font-size:14px;color:var(--ink-2)">These are not objections to work through. They are genuine disqualifiers. An organisation that meets any of these criteria will not see the ROI, and we would rather say that in Stage 1 than discover it in Stage 3.</p>
+  </div>
+</div>
+</div>
+
+<!-- ══ S08 FAQ ══ -->
+<div class="outer sec">
+  <div class="eyebrow">Section 08</div>
+  <h2>Frequently asked questions</h2>
+  <p>The questions that surface in early conversations — from sceptical CTOs, CDOs who've just completed a data readiness programme, and CEOs deciding whether this is genuinely different from what they've already bought.</p>
+  <div class="faq-wrap">
+
+    <details class="fq">
+      <summary><span><span class="fq-tag dt">Data</span>We've done data readiness. Doesn't that cover this?</span><span class="fq-icon"></span></summary>
+      <div class="fq-ans">
+        <p>Data readiness asks: <em>is our data fit to process?</em> Knowledge architecture asks: <em>does our AI know how to think?</em> These are different questions. Data readiness cleans the surface layer — structured data, documents, transactional records. The knowledge that actually drives performance in expert organisations — implicit constraints, real decision logic, cultural guardrails — lives below the waterline. No data catalogue has ever captured it because it was never in a dataset. The organisations most motivated to engage Mementum are often those who've completed thorough data readiness programmes and can see clearly it didn't move the needle.</p>
+      </div>
+    </details>
+
+    <details class="fq">
+      <summary><span><span class="fq-tag dt">Data</span>How is this different from RAG over our document library?</span><span class="fq-icon"></span></summary>
+      <div class="fq-ans">
+        <p>RAG retrieves what was written down. The most consequential organisational knowledge was never written down. A RAG system over your policy library will confidently tell you the documented procedure. It won't tell you about the informal check that happens before any recommendation goes to a client — because that check lives in the head of one risk officer and has never appeared in a document. Mementum begins where the document library ends.</p>
+      </div>
+    </details>
+
+    <details class="fq">
+      <summary><span><span class="fq-tag mt">Method</span>How do you actually capture tacit knowledge?</span><span class="fq-icon"></span></summary>
+      <div class="fq-ans">
+        <p>People can't articulate tacit knowledge in response to "tell me what you know" but they can in response to "walk me through the last time something went wrong and why." We use structured elicitation: decision trace interviews, exception mapping, constraint surfacing, and pattern interviews. Every item captured is classified against the eight categories, assigned a decay rate, and formatted for encoding. It becomes a usable asset, not an archive.</p>
+      </div>
+    </details>
+
+    <details class="fq">
+      <summary><span><span class="fq-tag mt">Method</span>Can culture, guiding principles, and strategy really be encoded?</span><span class="fq-icon"></span></summary>
+      <div class="fq-ans">
+        <p>Yes. Culture and principles aren't abstract — they manifest as specific, observable decision patterns. "We prioritise the long-term relationship over the short-term transaction" becomes a concrete instruction: when a client pushes back on pricing, first ask what they're worried about — don't discount. Strategic intent translates directly into pricing floors, communication tone, and opportunity criteria. Edge cases are the most valuable captures: the situations where standard rules don't apply and experienced judgment is required. Those are exactly what the gap between demo performance and production performance is made of.</p>
+      </div>
+    </details>
+
+    <details class="fq">
+      <summary><span><span class="fq-tag ob">Objection</span>We're concerned about sensitive knowledge leaving our environment.</span><span class="fq-icon"></span></summary>
+      <div class="fq-ans">
+        <p>Everything deploys into your own cloud. Mementum holds no keys, retains no copies, and has no ongoing access after engagement unless explicitly requested. More importantly: the risk of knowledge leaving runs in the opposite direction — right now, your most critical knowledge lives in the heads of three to five people per domain. Encoding it doesn't create an exposure. It closes one. Governance controls are built in: role-based access, audit trails, and human-in-the-loop approval so nothing changes without authorisation.</p>
+      </div>
+    </details>
+
+    <details class="fq">
+      <summary><span><span class="fq-tag ob">Objection</span>Our experts won't want to share what they know.</span><span class="fq-icon"></span></summary>
+      <div class="fq-ans">
+        <p>The frame that works: not "so we don't need you" but "so your expertise outlasts you and can be built on." The most valuable people aren't valuable because they hold information hostage — they're valuable because they make new judgments. Encoding what they know frees them to do more of what only they can do. In Compound, they remain the reviewers and approvers of everything the system learns. Their authority doesn't diminish — it gets institutionalised.</p>
+      </div>
+    </details>
+
+    <details class="fq">
+      <summary><span><span class="fq-tag cm">Commercial</span>How is it priced?</span><span class="fq-icon"></span></summary>
+      <div class="fq-ans">
+        <p>Each stage is scoped and priced independently. Stage 1 is no-charge. Stages 2–4 are fixed price, agreed before work begins — no open-ended day rates. Stage 5 is a variable-scope retainer covering curation, micro-skill development, agent builds, or agent team design as needed. Pricing per stage to be confirmed — contact directly for current terms.</p>
+      </div>
+    </details>
+
+    <details class="fq">
+      <summary><span><span class="fq-tag cm">Commercial</span>We've been in AI pilots for 18 months. How long does this take?</span><span class="fq-icon"></span></summary>
+      <div class="fq-ans">
+        <p>Stage 1 is one hour. Stage 2 is two weeks. Stage 3 is six to eight weeks to a live Agent Universe with working micro-skills. Stage 4 adds two to four weeks. Full arc: three to four months to a governed, client-owned intelligence layer with working agents delivering against the Stage 2 ROI forecast. If you've been in pilots for 18 months without a production system, the problem isn't time or effort — it's that pilots were built without the knowledge layer this process produces.</p>
+      </div>
+    </details>
+
+  </div>
+</div>
+
+<!-- ══ SCORECARD ══ -->
+<div class="score-wrap">
+  <div class="score-inner">
+    <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:16px">Document Evaluation — Five Tests</div>
+    <h2 style="color:#fff;font-size:24px;margin-bottom:0">Does this document earn the reader's trust and action?</h2>
+    <div class="score-grid">
+      <div class="score-cell"><div class="score-lbl">Problem<br>Clarity</div><div class="score-v">9<span class="score-m">/10</span></div></div>
+      <div class="score-cell"><div class="score-lbl">Insight<br>Sharpness</div><div class="score-v">9<span class="score-m">/10</span></div></div>
+      <div class="score-cell"><div class="score-lbl">Methodology<br>Credibility</div><div class="score-v">9<span class="score-m">/10</span></div></div>
+      <div class="score-cell"><div class="score-lbl">Product–Consulting<br>Coherence</div><div class="score-v">9<span class="score-m">/10</span></div></div>
+      <div class="score-cell"><div class="score-lbl">Action<br>Clarity</div><div class="score-v">8<span class="score-m">/10</span></div></div>
+    </div>
+    <p class="score-note">Action closes to 9 when fixed pricing is confirmed and a first named outcome with a real number is added. Both in Appendix D open decisions.</p>
+  </div>
+</div>
+
+<!-- ══ APPENDICES ══ -->
+<div class="appendix">
+  <div class="wide">
+
+    <!-- APP A: TERMINOLOGY -->
+    <div class="app-section">
+      <div class="eyebrow">Appendix A</div>
+      <h2>Terminology</h2>
+      <table class="mx">
+        <thead><tr><th>Term</th><th>Definition</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Context Universe</strong></td><td>The structured body of organisational knowledge forming the intelligence layer. Built in Discover, maintained through Compound. A living second brain — not a static repository.</td></tr>
+          <tr><td><strong>Intelligence Layer</strong></td><td>The technical implementation: knowledge base, retrieval architecture, and governance controls deployed in the client's own cloud environment.</td></tr>
+          <tr><td><strong>Intelligence Mapping™</strong></td><td>Mementum's structured elicitation and classification process for capturing organisational knowledge across the eight canonical categories.</td></tr>
+          <tr><td><strong>Micro-Skill</strong></td><td>A discrete, deployable capability built on a specific knowledge domain within the Context Universe. Invocable by humans or AI agents. The executable layer above the knowledge foundation.</td></tr>
+          <tr><td><strong>Vertical Slice</strong></td><td>One decision domain, fully mapped. Sufficient to prove the model and deliver ROI before broader rollout.</td></tr>
+          <tr><td><strong>Human-in-the-Loop</strong></td><td>The Compound mechanism. AI surfaces candidate updates. Humans review and approve. No autonomous changes to the knowledge base.</td></tr>
+          <tr><td><strong>Knowledge Decay</strong></td><td>The rate at which a knowledge category becomes unreliable without active maintenance. High-decay categories require more frequent review cycles.</td></tr>
+          <tr><td><strong>Agent Universe</strong></td><td>The deployed environment containing the Context Universe, micro-skills, and the agent infrastructure that runs on top of them. Installed in the client's own cloud.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <hr/>
+
+    <!-- APP B: WORKED EXAMPLE -->
+    <div class="app-section">
+      <div class="eyebrow">Appendix B</div>
+      <h2>Worked Example: Financial Services Pricing Domain</h2>
+      <p>All eight knowledge categories applied to the anchor scenario. This is the type of output the Discover phase produces.</p>
+      <table class="mx">
+        <thead><tr><th style="width:150px">Category</th><th>What was captured</th><th>Why it was absent</th><th>Impact when missing</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Interpretation</strong></td><td>Firm reads credit spreads as a leading indicator of client risk appetite — specific to their book, not general market logic.</td><td>Three senior people share it. Assumed obvious by anyone "with experience."</td><td>AI recommended pricing changes at the wrong inflection points.</td></tr>
+          <tr><td><strong>Decision &amp; Reasoning</strong></td><td>Exception approvals above the standard pricing band require Head of Risk signoff — even when the client is a Product relationship.</td><td>Org chart shows Product as owner. Compliance carve-out never updated in workflow docs.</td><td>AI routed exceptions to the wrong approver. Decisions bounced.</td></tr>
+          <tr><td><strong>Standing Position</strong></td><td>Do not price below 85bps for this client tier — board resolution Q3 2023, supersedes all prior guidance.</td><td>Previous guidance said 80bps. Board resolution was verbal, never updated in the pricing guide.</td><td>AI recommended 82bps for three clients. Two quotes sent before the error was caught.</td></tr>
+          <tr><td><strong>Real Process</strong></td><td>A risk officer eyeballs every pricing output against the current credit file before it goes to a client. Two-minute informal check. Not in documented process.</td><td>Evolved after a near-miss three years ago. Never formalised.</td><td>AI outputs went directly into client communications, bypassing the check.</td></tr>
+          <tr><td><strong>Observed Pattern</strong></td><td>Clients in this segment push back on pricing in Q4. Firm stages conversations in October to allow negotiation room.</td><td>Pattern held by two relationship managers. Not in any CRM note.</td><td>AI recommended October outreach without the sequencing logic — wrong approach.</td></tr>
+          <tr><td><strong>Implicit Constraint</strong></td><td>One counterparty cannot be referenced alongside a specific competitor in any pricing memo. Relationship history, 2021. Legal briefed. No documentation outside legal files.</td><td>Confidential — cannot appear in general policy.</td><td>AI drafted a comparative analysis referencing both. Near-miss before distribution.</td></tr>
+          <tr><td><strong>Relationship Context</strong></td><td>Primary contact at the firm's largest client requires PDF summaries with a one-page executive view. Does not read detailed workings. Preference established two years ago.</td><td>In the RM's head. Not in CRM. RM left six months ago.</td><td>AI generated a detailed spreadsheet model. Client complained.</td></tr>
+          <tr><td><strong>Assumption</strong></td><td>Pricing model assumes risk-adjusted cost of capital at 9.5%. Set 2022. Actual cost has shifted materially. Embedded in five tools, never reviewed.</td><td>Baked into inherited tools. Nobody audited inputs when tools were adopted.</td><td>AI recommendations systematically mispriced. Error compounds with each output.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <hr/>
+
+    <!-- APP C: IMPLEMENTATION -->
+    <div class="app-section">
+      <div class="eyebrow">Appendix C</div>
+      <h2>Implementation: Building the Context Universe</h2>
+      <p>This appendix captures the <em>how</em> — the accelerators, inputs, indicative tech stack, and graph architecture behind a Context Universe deployment.</p>
+
+      <h3>What we need from the client</h3>
+      <table class="mx">
+        <thead><tr><th>Input type</th><th>Examples</th><th>How captured</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Domain experts</strong></td><td>3–6 people per domain. Mix of long-tenure and recent joiners.</td><td>Structured elicitation interviews (decision trace, exception mapping)</td></tr>
+          <tr><td><strong>Existing documentation</strong></td><td>Policies, procedures, product docs, approval records, past decisions</td><td>Automated ingestion with classification pipeline</td></tr>
+          <tr><td><strong>Process artefacts</strong></td><td>Workflow diagrams, system screenshots, escalation paths</td><td>Process mapping workshops</td></tr>
+          <tr><td><strong>Historical decisions</strong></td><td>CRM notes, approval logs, email threads, meeting summaries</td><td>LLM-assisted extraction + human review</td></tr>
+          <tr><td><strong>System access</strong></td><td>Read-only access to relevant systems for process observation</td><td>Observation sessions + structured walkthroughs</td></tr>
+          <tr><td><strong>Cloud environment</strong></td><td>Azure subscription (preferred) or AWS. Appropriate IAM roles.</td><td>Infrastructure provisioning at Stage 3 kickoff</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Capture accelerators</h3>
+      <div class="callout">
+        <span class="cl">Elicitation techniques</span>
+        <p><strong>Decision trace interview:</strong> Reconstruct a real decision from start to finish. "Walk me through the last pricing exception that required escalation." Surfaces reasoning, constraints, and informal checks simultaneously.</p>
+        <p style="margin-top:8px"><strong>Exception mapping:</strong> "What breaks the standard process, and why?" Surfaces the edge cases that generic AI gets wrong — the cases that look like noise but are actually the highest-value signal.</p>
+        <p style="margin-top:8px"><strong>Constraint surfacing:</strong> "What would you never do, even if the rules technically allowed it?" Surfaces implicit constraints that policy documents never contain.</p>
+        <p style="margin-top:8px"><strong>Pattern interviews:</strong> "What do you notice that new people miss?" Surfaces the experienced-eye observations that separate reliable from unreliable outputs.</p>
+      </div>
+
+      <h3>Indicative tech stack</h3>
+      <div class="stack-grid">
+        <div class="stack-cell">
+          <div class="stack-layer">Ingestion</div>
+          <div class="stack-items">Azure Document Intelligence<br>LangChain / LlamaIndex<br>Custom OCR pipeline<br>Whisper (audio transcription)</div>
+          <div class="stack-note">Handles documents, audio interviews, structured data, and process artefacts</div>
+        </div>
+        <div class="stack-cell">
+          <div class="stack-layer">Knowledge Store</div>
+          <div class="stack-items">Azure Cosmos DB (graph)<br>or Neo4j (on-prem option)<br>Azure AI Search (vector)<br>PostgreSQL (relational)</div>
+          <div class="stack-note">Graph for relationships, vector for semantic retrieval, relational for structured metadata</div>
+        </div>
+        <div class="stack-cell">
+          <div class="stack-layer">Intelligence Layer</div>
+          <div class="stack-items">Azure OpenAI (GPT-4o)<br>Custom classification models<br>RAG orchestration layer<br>Decay monitoring service</div>
+          <div class="stack-note">The reasoning layer that operates on the Context Universe and routes queries to the right knowledge</div>
+        </div>
+        <div class="stack-cell">
+          <div class="stack-layer">Agent Runtime</div>
+          <div class="stack-items">Azure AI Foundry<br>AutoGen / Semantic Kernel<br>Custom skill registry<br>Human-in-loop approval UI</div>
+          <div class="stack-note">Runs micro-skills and agents. Human review interface for Compound cycle approvals</div>
+        </div>
+        <div class="stack-cell">
+          <div class="stack-layer">Governance</div>
+          <div class="stack-items">Azure RBAC<br>Audit log pipeline<br>Decay review scheduler<br>Knowledge lineage tracking</div>
+          <div class="stack-note">Role-based access, full audit trails, automated decay alerts, provenance for every knowledge item</div>
+        </div>
+        <div class="stack-cell">
+          <div class="stack-layer">Interface</div>
+          <div class="stack-items">Web app (React/Next.js)<br>Teams / Slack integration<br>API layer for agent calls<br>Admin / curation console</div>
+          <div class="stack-note">Query interface for users, admin console for knowledge curators, API for agent invocation</div>
+        </div>
+      </div>
+
+      <h3>What the knowledge graph looks like</h3>
+      <!-- DIAGRAM 8: GRAPH TOPOLOGY -->
+      <div class="diagram">
+        <svg viewBox="0 0 820 340" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;background:#0b0e17;font-family:'DM Sans',sans-serif">
+          <!-- Background grid -->
+          <defs>
+            <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+              <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,.04)" stroke-width="1"/>
+            </pattern>
+          </defs>
+          <rect width="820" height="340" fill="url(#grid)"/>
+
+          <!-- Central node: Context Universe -->
+          <circle cx="410" cy="170" r="42" fill="#1847d4" stroke="#4470e8" stroke-width="2"/>
+          <text x="410" y="165" font-size="10" fill="rgba(255,255,255,.6)" text-anchor="middle" font-family="'DM Mono',monospace" letter-spacing="1">CONTEXT</text>
+          <text x="410" y="180" font-size="10" fill="rgba(255,255,255,.6)" text-anchor="middle" font-family="'DM Mono',monospace" letter-spacing="1">UNIVERSE</text>
+
+          <!-- Category nodes around it -->
+          <!-- Interpretation - top left -->
+          <line x1="375" y1="133" x2="270" y2="72" stroke="rgba(100,160,255,.25)" stroke-width="1.5"/>
+          <circle cx="255" cy="64" r="28" fill="#141824" stroke="#1847d4" stroke-width="1.5"/>
+          <text x="255" y="60" font-size="9.5" fill="#6aa3ff" text-anchor="middle" font-weight="500">Interpre-</text>
+          <text x="255" y="74" font-size="9.5" fill="#6aa3ff" text-anchor="middle" font-weight="500">tation</text>
+
+          <!-- Standing position - top -->
+          <line x1="410" y1="128" x2="410" y2="72" stroke="rgba(100,160,255,.25)" stroke-width="1.5"/>
+          <circle cx="410" cy="52" r="28" fill="#141824" stroke="#1847d4" stroke-width="1.5"/>
+          <text x="410" y="48" font-size="9.5" fill="#6aa3ff" text-anchor="middle" font-weight="500">Standing</text>
+          <text x="410" y="62" font-size="9.5" fill="#6aa3ff" text-anchor="middle" font-weight="500">Position</text>
+
+          <!-- Decision - top right -->
+          <line x1="445" y1="133" x2="548" y2="72" stroke="rgba(100,160,255,.25)" stroke-width="1.5"/>
+          <circle cx="562" cy="64" r="28" fill="#141824" stroke="#1847d4" stroke-width="1.5"/>
+          <text x="562" y="60" font-size="9.5" fill="#6aa3ff" text-anchor="middle" font-weight="500">Decision</text>
+          <text x="562" y="74" font-size="9.5" fill="#6aa3ff" text-anchor="middle" font-weight="500">&amp; Reasoning</text>
+
+          <!-- Real Process - right -->
+          <line x1="451" y1="170" x2="535" y2="170" stroke="rgba(100,160,255,.25)" stroke-width="1.5"/>
+          <circle cx="558" cy="170" r="28" fill="#141824" stroke="#1847d4" stroke-width="1.5"/>
+          <text x="558" y="166" font-size="9.5" fill="#6aa3ff" text-anchor="middle" font-weight="500">Real</text>
+          <text x="558" y="180" font-size="9.5" fill="#6aa3ff" text-anchor="middle" font-weight="500">Process</text>
+
+          <!-- Assumption - bottom right -->
+          <line x1="442" y1="205" x2="545" y2="270" stroke="rgba(100,160,255,.25)" stroke-width="1.5"/>
+          <circle cx="558" cy="280" r="28" fill="#141824" stroke="#0a6640" stroke-width="1.5"/>
+          <text x="558" y="276" font-size="9.5" fill="#4ade80" text-anchor="middle" font-weight="500">Assump-</text>
+          <text x="558" y="290" font-size="9.5" fill="#4ade80" text-anchor="middle" font-weight="500">tion</text>
+
+          <!-- Implicit Constraint - bottom -->
+          <line x1="410" y1="212" x2="410" y2="270" stroke="rgba(100,160,255,.25)" stroke-width="1.5"/>
+          <circle cx="410" cy="288" r="28" fill="#141824" stroke="#0a6640" stroke-width="1.5"/>
+          <text x="410" y="284" font-size="9.5" fill="#4ade80" text-anchor="middle" font-weight="500">Implicit</text>
+          <text x="410" y="298" font-size="9.5" fill="#4ade80" text-anchor="middle" font-weight="500">Constraint</text>
+
+          <!-- Relationship context - bottom left -->
+          <line x1="378" y1="205" x2="278" y2="270" stroke="rgba(100,160,255,.25)" stroke-width="1.5"/>
+          <circle cx="260" cy="280" r="28" fill="#141824" stroke="#0a6640" stroke-width="1.5"/>
+          <text x="260" y="276" font-size="9.5" fill="#4ade80" text-anchor="middle" font-weight="500">Relation-</text>
+          <text x="260" y="290" font-size="9.5" fill="#4ade80" text-anchor="middle" font-weight="500">ship Ctx</text>
+
+          <!-- Observed Pattern - left -->
+          <line x1="369" y1="170" x2="287" y2="170" stroke="rgba(100,160,255,.25)" stroke-width="1.5"/>
+          <circle cx="262" cy="170" r="28" fill="#141824" stroke="#0a6640" stroke-width="1.5"/>
+          <text x="262" y="166" font-size="9.5" fill="#4ade80" text-anchor="middle" font-weight="500">Observed</text>
+          <text x="262" y="180" font-size="9.5" fill="#4ade80" text-anchor="middle" font-weight="500">Pattern</text>
+
+          <!-- Micro-skill nodes hanging off categories -->
+          <!-- off Standing Position -->
+          <line x1="382" y1="44" x2="310" y2="30" stroke="rgba(255,255,255,.1)" stroke-width="1" stroke-dasharray="3,2"/>
+          <rect x="240" y="18" width="72" height="22" rx="4" fill="rgba(255,255,255,.05)" stroke="rgba(255,255,255,.1)"/>
+          <text x="276" y="33" font-size="9" fill="rgba(255,255,255,.45)" text-anchor="middle" font-family="'DM Mono',monospace">SKILL</text>
+
+          <line x1="436" y1="44" x2="510" y2="30" stroke="rgba(255,255,255,.1)" stroke-width="1" stroke-dasharray="3,2"/>
+          <rect x="508" y="18" width="72" height="22" rx="4" fill="rgba(255,255,255,.05)" stroke="rgba(255,255,255,.1)"/>
+          <text x="544" y="33" font-size="9" fill="rgba(255,255,255,.45)" text-anchor="middle" font-family="'DM Mono',monospace">SKILL</text>
+
+          <!-- off Real Process -->
+          <line x1="585" y1="154" x2="640" y2="120" stroke="rgba(255,255,255,.1)" stroke-width="1" stroke-dasharray="3,2"/>
+          <rect x="638" y="108" width="72" height="22" rx="4" fill="rgba(255,255,255,.05)" stroke="rgba(255,255,255,.1)"/>
+          <text x="674" y="123" font-size="9" fill="rgba(255,255,255,.45)" text-anchor="middle" font-family="'DM Mono',monospace">SKILL</text>
+
+          <line x1="585" y1="184" x2="640" y2="215" stroke="rgba(255,255,255,.1)" stroke-width="1" stroke-dasharray="3,2"/>
+          <rect x="638" y="207" width="72" height="22" rx="4" fill="rgba(255,255,255,.05)" stroke="rgba(255,255,255,.1)"/>
+          <text x="674" y="222" font-size="9" fill="rgba(255,255,255,.45)" text-anchor="middle" font-family="'DM Mono',monospace">SKILL</text>
+
+          <!-- Legend -->
+          <circle cx="48" cy="312" r="6" fill="#1847d4" stroke="#4470e8" stroke-width="1.5"/>
+          <text x="60" y="317" font-size="10" fill="rgba(255,255,255,.45)" font-family="'DM Mono',monospace">High-decay category</text>
+          <circle cx="200" cy="312" r="6" fill="#141824" stroke="#0a6640" stroke-width="1.5"/>
+          <text x="212" y="317" font-size="10" fill="rgba(255,255,255,.45)" font-family="'DM Mono',monospace">Low-decay category</text>
+          <rect x="356" y="306" width="40" height="14" rx="3" fill="rgba(255,255,255,.05)" stroke="rgba(255,255,255,.1)"/>
+          <text x="376" y="317" font-size="10" fill="rgba(255,255,255,.45)" text-anchor="middle" font-family="'DM Mono',monospace">SKILL</text>
+          <text x="406" y="317" font-size="10" fill="rgba(255,255,255,.45)" font-family="'DM Mono',monospace">Micro-skill node</text>
+        </svg>
+        <div class="diagram-cap">Fig 8 — Context Universe graph topology. Knowledge categories as nodes. Micro-skills hang off the categories they draw from. Cross-category edges emerge as the graph matures.</div>
+      </div>
+
+      <h3>Signal-to-noise tuning</h3>
+      <p>Not everything that gets captured should stay in the Context Universe. The ingestion pipeline applies a classification step: each candidate knowledge item is scored against relevance (does this affect AI performance in this domain?), confidence (is this clearly true or contested?), and uniqueness (is this already captured elsewhere?). Items below threshold enter a review queue rather than the live graph.</p>
+      <p>The human-in-the-loop process is the primary quality gate. Volume of approved items is a secondary metric — the goal is a high-signal knowledge graph, not a large one.</p>
+    </div>
+    
+  </div><!-- /wide -->
+</div><!-- /appendix -->
+
+<footer>
+  <div class="wide" style="padding:0">Mementum Pty Ltd · Melbourne, Australia · Review Draft · March 2026 · Daniel Hurst</div>
+</footer>
+
+</body>
+</html>

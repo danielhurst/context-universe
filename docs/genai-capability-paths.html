@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GenAI Capability Paths — Applied AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1a18;
+    --warm-white: #faf8f4;
+    --warm-mid: #f2ede4;
+    --accent: #c8692a;
+    --accent-light: #e8845040;
+    --muted: #6b6860;
+    --border: #e0d9ce;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--warm-white);
+    color: var(--ink);
+    font-size: 17px;
+    line-height: 1.65;
+    padding-top: 4rem;
+  }
+
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 1.25rem 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(250,248,244,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo {
+    font-family: 'Fraunces', serif;
+    font-size: 1.2rem;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .logo span { color: var(--accent); }
+
+  .back-link {
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px solid var(--accent);
+    padding-bottom: 1px;
+  }
+
+  .back-link:hover { opacity: 0.75; }
+
+  main { padding: 3rem 10vw 6rem; max-width: 1100px; margin: 0 auto; }
+
+  .page-label {
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1rem;
+  }
+
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(2rem, 3.5vw, 2.8rem);
+    font-weight: 300;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.5rem;
+  }
+
+  .page-intro {
+    font-size: 1.05rem;
+    color: var(--muted);
+    line-height: 1.8;
+    margin-bottom: 3rem;
+  }
+
+  h2 {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(1.5rem, 2.5vw, 2rem);
+    font-weight: 400;
+    margin-top: 3.5rem;
+    margin-bottom: 1.25rem;
+    padding-top: 0.5rem;
+    scroll-margin-top: 5rem;
+  }
+
+  h2:first-of-type { margin-top: 2rem; }
+
+  h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+    color: var(--ink);
+  }
+
+  p { margin-bottom: 1rem; color: var(--ink); }
+
+  .table-wrap {
+    overflow-x: auto;
+    margin-bottom: 2rem;
+  }
+
+  .framework-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    min-width: 600px;
+  }
+
+  .framework-table thead {
+    background: var(--warm-mid);
+    border-bottom: 2px solid var(--border);
+  }
+
+  .framework-table th {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    text-align: left;
+    padding: 0.85rem 1rem;
+    color: var(--ink);
+  }
+
+  .framework-table td {
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+
+  .framework-table tbody tr:hover { background: var(--warm-mid); }
+
+  .framework-table tbody tr[id] { scroll-margin-top: 5rem; }
+
+  .framework-table th:nth-child(1),
+  .framework-table td:nth-child(1) { min-width: 10rem; }
+
+  .key-takeaway {
+    background: var(--warm-mid);
+    border-left: 3px solid var(--accent);
+    padding: 1.5rem 2rem;
+    margin-top: 2.5rem;
+    font-size: 1rem;
+    line-height: 1.75;
+  }
+
+  .key-takeaway strong { color: var(--ink); }
+
+  .flow-box {
+    background: var(--warm-mid);
+    border: 1px solid var(--border);
+    padding: 1.5rem 2rem;
+    margin: 1.5rem 0 2rem;
+    font-size: 0.95rem;
+    line-height: 1.7;
+  }
+
+  .flow-box p { margin-bottom: 0.5rem; }
+  .flow-box p:last-child { margin-bottom: 0; }
+
+  @media (max-width: 900px) {
+    .framework-table { font-size: 0.8rem; }
+    .framework-table th,
+    .framework-table td { padding: 0.6rem 0.5rem; }
+    main { padding: 2rem 6vw 4rem; }
+    nav { padding: 1rem 6vw; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="applied-ai-landing.html" class="logo">Applied<span>.</span>AI</a>
+  <a href="applied-ai-landing.html#insights" class="back-link">← Back to Insights</a>
+</nav>
+
+<main>
+  <p class="page-label">Framework</p>
+  <h1>GenAI Capability Paths</h1>
+  <p class="page-intro">A strategic guide to AI implementation. This framework moves from strategic foundations (economic model and positioning) to capability design and execution. Organisations should establish their strategic foundation before designing their capability approach.</p>
+
+  <h2 id="paths">1. GenAI Capability Paths</h2>
+  <p>Based on strategic foundation work, there are four distinct paths for capability and operating model design:</p>
+
+  <div class="table-wrap">
+  <table class="framework-table">
+    <thead>
+      <tr>
+        <th>Path</th>
+        <th>Description</th>
+        <th>Strategic Signal</th>
+        <th>Capability Approach</th>
+        <th>Operating Model</th>
+        <th>Typical Client</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr id="platform-play">
+        <td><strong>Platform Play</strong></td>
+        <td>Build AI as a shared enterprise capability that scales across the organisation</td>
+        <td>Proprietary data assets, multiple BUs, economics support shared infrastructure</td>
+        <td>Centralised GenAI platform: shared models, prompt libraries, governance, data pipelines</td>
+        <td>Central AI platform team + embedded AI engineers in BUs. Federated model.</td>
+        <td>Large enterprises, financial services, insurers with diverse product lines</td>
+      </tr>
+      <tr id="process-integration">
+        <td><strong>Process Integration Play</strong></td>
+        <td>Embed AI deeply into existing workflows and systems to drive operational efficiency</td>
+        <td>Moat is operational excellence, not unique data. Advantage from deep workflow embedding</td>
+        <td>Orchestrate best-of-breed AI tools integrated into core systems (CRM, ERP, workflows)</td>
+        <td>Process owners become AI orchestrators. Heavy change management. Upskill existing roles</td>
+        <td>Operations-heavy businesses, BPO, logistics, back-office intensive orgs</td>
+      </tr>
+      <tr id="domain-moat">
+        <td><strong>Domain Moat Play</strong></td>
+        <td>Encode proprietary expertise and institutional knowledge into AI for defensible differentiation</td>
+        <td>Deep domain expertise that is hard to replicate. Encode proprietary knowledge into AI</td>
+        <td>Domain-specific fine-tuning, RAG over proprietary knowledge bases, expert-in-the-loop systems</td>
+        <td>Domain experts paired with AI engineers. Knowledge capture as core process</td>
+        <td>Professional services, specialised consultancies, niche B2B, regulated industries</td>
+      </tr>
+      <tr id="speed-to-market">
+        <td><strong>Speed-to-Market Play</strong></td>
+        <td>Move fast, prove value, and build organisational AI muscle before worrying about long-term architecture</td>
+        <td>No structural moat yet. Imperative is learning fast, proving value, building muscle</td>
+        <td>Minimal platform. Managed services, API-first, low-code AI. Lightweight governance</td>
+        <td>Small cross-functional AI squads. Centralised governance and vendor management only</td>
+        <td>Mid-market, digitally immature but motivated, resource-constrained orgs</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h2>2. Execution Paths by Strategic Path</h2>
+
+  <h3>2.1 Platform Play — Execution Options</h3>
+  <div class="table-wrap">
+  <table class="framework-table">
+    <thead>
+      <tr>
+        <th>Execution Path</th>
+        <th>Description</th>
+        <th>Key Investments</th>
+        <th>Timeline</th>
+        <th>Risk Profile</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Cloud-Native AI Platform</strong></td>
+        <td>Build on hyperscaler AI stack (Azure OpenAI, AWS Bedrock, GCP Vertex). Standardise on one ecosystem.</td>
+        <td>Cloud architecture, MLOps, API management, centralised prompt engineering</td>
+        <td>6–12 months to MVP</td>
+        <td>Medium. Vendor dependency but faster time to value</td>
+      </tr>
+      <tr>
+        <td><strong>Multi-Model Orchestration Layer</strong></td>
+        <td>Abstract across multiple LLM providers. Build routing, evaluation, and fallback logic. Avoid lock-in.</td>
+        <td>Model gateway, evaluation framework, cost optimisation layer, semantic routing</td>
+        <td>9–18 months</td>
+        <td>Higher complexity but strategic flexibility</td>
+      </tr>
+      <tr>
+        <td><strong>Data Platform First</strong></td>
+        <td>Prioritise data infrastructure before AI layer. Build unified data estate, then add GenAI capabilities on top.</td>
+        <td>Data lakehouse, vector databases, data governance, retrieval infrastructure</td>
+        <td>12–24 months</td>
+        <td>Lower AI risk, higher foundational value. Slower to visible wins</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>2.2 Process Integration Play — Execution Options</h3>
+  <div class="table-wrap">
+  <table class="framework-table">
+    <thead>
+      <tr>
+        <th>Execution Path</th>
+        <th>Description</th>
+        <th>Key Investments</th>
+        <th>Timeline</th>
+        <th>Risk Profile</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Workflow Automation Stack</strong></td>
+        <td>Deploy AI-augmented automation across core workflows. Integrate Copilots into existing tools (M365, Salesforce, ServiceNow)</td>
+        <td>Copilot licensing, workflow redesign, integration development, change management</td>
+        <td>3–6 months per workflow</td>
+        <td>Low technical risk. High change management effort</td>
+      </tr>
+      <tr>
+        <td><strong>Intelligent Document Processing</strong></td>
+        <td>Focus on document-heavy processes: intake, extraction, classification, routing. High-volume, measurable ROI.</td>
+        <td>IDP platform, OCR/NLP integration, exception handling workflows, human review loops</td>
+        <td>4–9 months</td>
+        <td>Proven pattern. ROI clear. Limited to document use cases</td>
+      </tr>
+      <tr>
+        <td><strong>AI-Augmented Decision Points</strong></td>
+        <td>Embed AI recommendations at key human decision points in processes. Keep human in loop but accelerate decisions.</td>
+        <td>Decision support UIs, recommendation engines, audit trails, feedback loops</td>
+        <td>6–12 months</td>
+        <td>Balances automation with control. Requires trust-building</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>2.3 Domain Moat Play — Execution Options</h3>
+  <div class="table-wrap">
+  <table class="framework-table">
+    <thead>
+      <tr>
+        <th>Execution Path</th>
+        <th>Description</th>
+        <th>Key Investments</th>
+        <th>Timeline</th>
+        <th>Risk Profile</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Knowledge Graph + RAG</strong></td>
+        <td>Build structured knowledge graph from institutional expertise. Layer RAG for retrieval-augmented responses.</td>
+        <td>Knowledge engineering, graph database, embedding pipelines, retrieval tuning</td>
+        <td>9–15 months</td>
+        <td>High value if knowledge is codifiable. Requires expert involvement</td>
+      </tr>
+      <tr>
+        <td><strong>Domain Fine-Tuned Models</strong></td>
+        <td>Fine-tune foundation models on proprietary data and domain-specific tasks. Build defensible model assets.</td>
+        <td>Training data curation, fine-tuning infrastructure, evaluation frameworks, versioning</td>
+        <td>6–12 months per model</td>
+        <td>Higher investment but creates genuine IP. Needs quality data</td>
+      </tr>
+      <tr>
+        <td><strong>Expert-in-the-Loop Systems</strong></td>
+        <td>Design systems where AI handles volume, experts handle exceptions and validation. Capture expert feedback to improve AI.</td>
+        <td>Triage workflows, expert review interfaces, feedback capture, continuous learning loops</td>
+        <td>6–9 months</td>
+        <td>Lower AI autonomy but higher trust. Sustainable path to full automation</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>2.4 Speed-to-Market Play — Execution Options</h3>
+  <div class="table-wrap">
+  <table class="framework-table">
+    <thead>
+      <tr>
+        <th>Execution Path</th>
+        <th>Description</th>
+        <th>Key Investments</th>
+        <th>Timeline</th>
+        <th>Risk Profile</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Use Case Sprints</strong></td>
+        <td>Run time-boxed sprints attacking 2–3 high-value use cases. Prove value fast. Build momentum and learning.</td>
+        <td>Cross-functional squad, rapid prototyping tools, lightweight governance, executive sponsorship</td>
+        <td>4–8 weeks per use case</td>
+        <td>Fast learning. Risk of scattered efforts without consolidation</td>
+      </tr>
+      <tr>
+        <td><strong>Managed AI Services</strong></td>
+        <td>Outsource AI capability to managed service providers. Focus internal effort on business integration and adoption.</td>
+        <td>Vendor selection, SLAs, integration layer, internal change management</td>
+        <td>2–4 months to operational</td>
+        <td>Fastest path. Limited differentiation. Dependency on vendor</td>
+      </tr>
+      <tr>
+        <td><strong>AI Centre of Excellence (Lite)</strong></td>
+        <td>Stand up small CoE focused on governance, vendor management, and enablement. Let BUs experiment within guardrails.</td>
+        <td>CoE team (2–4 people), governance framework, approved tool list, use case intake process</td>
+        <td>3–6 months to operational</td>
+        <td>Balances speed with control. Scales organisational learning</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h2>3. Foundational Layer (Common to All Paths)</h2>
+  <p>Before any of the four paths can succeed, a common foundation layer must be in place:</p>
+
+  <div class="table-wrap">
+  <table class="framework-table">
+    <thead>
+      <tr>
+        <th>Foundation Area</th>
+        <th>Description</th>
+        <th>Why It Is Non-Negotiable</th>
+        <th>Minimum Viable State</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Data Accessibility</strong></td>
+        <td>Core business data is accessible, discoverable, and usable by AI systems</td>
+        <td>Every path requires AI to access relevant data. No data access = no AI value.</td>
+        <td>Key data sources identified, basic APIs or extraction available, data owners known</td>
+      </tr>
+      <tr>
+        <td><strong>Identity & Access Management</strong></td>
+        <td>Clear controls over who (human and AI) can access what data and systems</td>
+        <td>AI systems inherit access permissions. Without IAM clarity, you either block AI or create security/compliance risk.</td>
+        <td>SSO in place, role-based access defined, service account governance established</td>
+      </tr>
+      <tr>
+        <td><strong>Security & Privacy Baseline</strong></td>
+        <td>Policies and controls for how AI interacts with sensitive data, PII, and regulated information</td>
+        <td>Regulatory exposure applies regardless of path. AI amplifies data risk.</td>
+        <td>Data classification framework, DLP basics, AI-specific acceptable use policy</td>
+      </tr>
+      <tr>
+        <td><strong>Governance & Accountability</strong></td>
+        <td>Clear ownership of AI initiatives, decisions, and outcomes</td>
+        <td>Without governance, AI projects stall in committee or run wild without oversight.</td>
+        <td>Executive sponsor identified, AI steering group defined, escalation path clear</td>
+      </tr>
+      <tr>
+        <td><strong>Responsible AI Principles</strong></td>
+        <td>Articulated position on fairness, transparency, human oversight, and AI ethics</td>
+        <td>Builds trust internally and externally. Prevents reactive scrambling when issues arise.</td>
+        <td>Principles documented, high-risk use case criteria defined, review process established</td>
+      </tr>
+      <tr>
+        <td><strong>Change Readiness</strong></td>
+        <td>Baseline organisational capacity to absorb new ways of working and human-AI collaboration</td>
+        <td>AI fails more often from adoption failure than technical failure.</td>
+        <td>Change impact assessment done, communication plan drafted, early adopters identified</td>
+      </tr>
+      <tr>
+        <td><strong>Cost Visibility & Control</strong></td>
+        <td>Ability to track, allocate, and manage AI-related costs (API calls, compute, licensing)</td>
+        <td>AI costs can spiral quickly. Without visibility, you cannot optimise or make informed decisions.</td>
+        <td>Cost tracking mechanism in place, budget ownership clear, thresholds and alerts defined</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>3.1 Foundation Maturity Levels</h3>
+  <div class="table-wrap">
+  <table class="framework-table">
+    <thead>
+      <tr>
+        <th>Level</th>
+        <th>Description</th>
+        <th>Path Readiness</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Level 0: Absent</strong></td>
+        <td>Foundation not addressed. Ad hoc or undefined.</td>
+        <td>Not ready for any path. High risk of failure or stall.</td>
+      </tr>
+      <tr>
+        <td><strong>Level 1: Emerging</strong></td>
+        <td>Foundation recognised. Initial policies or capabilities in place but inconsistent.</td>
+        <td>Can attempt Speed-to-Market Play with guardrails. Other paths risky.</td>
+      </tr>
+      <tr>
+        <td><strong>Level 2: Established</strong></td>
+        <td>Foundation codified and operational. Consistent application across most areas.</td>
+        <td>Ready for Process Integration or Domain Moat plays. Platform Play possible with investment.</td>
+      </tr>
+      <tr>
+        <td><strong>Level 3: Optimised</strong></td>
+        <td>Foundation mature, automated where possible, continuously improved. Enables scale.</td>
+        <td>Ready for full Platform Play. Can run multiple paths concurrently.</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>3.2 Foundation Assessment Questions</h3>
+  <div class="table-wrap">
+  <table class="framework-table">
+    <thead>
+      <tr>
+        <th>Foundation Area</th>
+        <th>Diagnostic Questions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Data Accessibility</td>
+        <td>Can we list our top 10 data sources for AI? Can an AI system query them today? Do we know data quality issues?</td>
+      </tr>
+      <tr>
+        <td>Identity & Access Management</td>
+        <td>Do we have service accounts for AI systems? Can we audit what AI accessed? Is access scoped appropriately?</td>
+      </tr>
+      <tr>
+        <td>Security & Privacy Baseline</td>
+        <td>Do we know where PII lives? Do we have a policy on AI + sensitive data? Has legal/compliance reviewed AI use?</td>
+      </tr>
+      <tr>
+        <td>Governance & Accountability</td>
+        <td>Who owns AI strategy? Who approves new AI use cases? Who is accountable if an AI system causes harm?</td>
+      </tr>
+      <tr>
+        <td>Responsible AI Principles</td>
+        <td>Do we have documented AI principles? Do teams know what high-risk AI means here? Is there a review process?</td>
+      </tr>
+      <tr>
+        <td>Change Readiness</td>
+        <td>Have we assessed workforce AI sentiment? Do we have change management capacity? Are leaders modelling AI use?</td>
+      </tr>
+      <tr>
+        <td>Cost Visibility & Control</td>
+        <td>Can we track AI spend by project/team? Do we have budget thresholds? Do we understand unit economics?</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h2>4. Framework Overview</h2>
+  <p>The framework follows a logical progression from foundation to strategy to execution:</p>
+  <div class="flow-box">
+    <p><strong>FOUNDATIONAL LAYER</strong></p>
+    <p>Data | IAM | Security | Governance | RAI | Change | Cost</p>
+    <p><strong>▼</strong></p>
+    <p><strong>STRATEGIC PATH SELECTION</strong></p>
+    <p>Platform | Process Integration | Domain Moat | Speed-to-Market</p>
+    <p><strong>▼</strong></p>
+    <p><strong>EXECUTION OPTIONS</strong></p>
+    <p>(3 execution paths per strategic path selected)</p>
+  </div>
+
+  <div class="key-takeaway">
+    <p><strong>Key takeaway:</strong> Sequencing matters. Start with strategic foundations (Economic Model + Strategic Positioning) to answer what is defensible and where the economics work. Then design capability and operating model based on those answers. This prevents the common mistake of starting with platform or use cases without understanding what the organisation is actually trying to become.</p>
+  </div>
+
+  <p style="margin-top: 2.5rem;"><a href="applied-ai-landing.html#insights" class="back-link">← Back to Insights</a></p>
+</main>
+
+</body>
+</html>
